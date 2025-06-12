@@ -1,0 +1,98 @@
+# Workflow derived from https://github.com/r-lib/actions/tree/v2/examples
+# Need help debugging build failures? Start at https://github.com/r-lib/actions#where-to-find-help
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+name: R-CMD-check.yaml
+
+permissions: read-all
+
+jobs:
+  R-CMD-check:
+    runs-on: ${{ matrix.config.os }}
+
+    name: ${{ matrix.config.os }} (${{ matrix.config.r }})
+
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - {os: macos-latest,   r: 'release'}
+          - {os: windows-latest, r: 'release'}
+          - {os: ubuntu-latest,   r: 'devel', http-user-agent: 'release'}
+          - {os: ubuntu-latest,   r: 'release'}
+          - {os: ubuntu-latest,   r: 'oldrel-1'}
+
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      R_KEEP_PKG_SOURCE: yes
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: r-lib/actions/setup-pandoc@v2
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: ${{ matrix.config.r }}
+          http-user-agent: ${{ matrix.config.http-user-agent }}
+          use-public-rspm: true
+
+      - name: Install JAGS on ubuntu
+        if: runner.os == 'linux'
+        run: sudo apt-get update && sudo apt-get install -y jags 
+        
+      - name: Install JAGS on macOS
+        if: runner.os == 'macOS'
+        run: |
+          brew update
+          brew install jags
+
+      - name: Install JAGS 4.3.x for Windows
+        if: runner.os == 'windows'
+        shell: powershell
+        run: |
+          $url  = "https://downloads.sourceforge.net/project/mcmc-jags/JAGS/4.x/Windows/JAGS-4.3.1.exe"
+          curl.exe -L -o jags-installer.exe $url
+          Start-Process -FilePath .\jags-installer.exe -ArgumentList "/S" -Wait    # /S = silent
+          Remove-Item .\jags-installer.exe
+
+      - name: Add JAGS to PATH
+        if: runner.os == 'windows'  
+        shell: powershell
+        run: |
+          $jagsPath = "C:\Program Files\JAGS\JAGS-4.3.1\bin"
+          echo "$jagsPath" >> $env:GITHUB_PATH
+      
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: any::rcmdcheck
+          needs: check
+
+      - name: Install rjags
+        if: runner.os != 'macOS'  
+        shell: Rscript {0}
+        run: |
+          install.packages(c("remotes", "rjags"), repos = "https://cran.r-project.org")
+
+      - name: Install rjags on macOS
+        if: runner.os == 'macOS'  
+        shell: Rscript {0}
+        run: |
+            J <- system("brew --prefix jags", intern = TRUE) 
+            install.packages("rjags",
+             type = "source",
+             configure.args = c(sprintf("--with-jags-prefix=%s", J), "--enable-rpath"))
+      - name: Check that rjags loads
+        shell: Rscript {0}
+        run: |
+          cat("rjags version:", as.character(packageVersion("rjags")), "\n")
+          library(rjags)
+          jags.version()            # prints the version string if everything linked correctly
+
+      - uses: r-lib/actions/check-r-package@v2
+        with:
+          upload-snapshots: true
+          build_args: 'c("--no-manual", "--compact-vignettes=gs+qpdf")'

@@ -1,0 +1,28 @@
+model {
+  for (i in 1:N) {
+    log_cost[i] ~ dnorm(mu[i], tau)
+    mu[i] <- alpha[country[i]] + inprod(x[i, ], beta[])
+  }
+
+  for (i in 1:N) {
+    log_cost_pred[i] ~ dnorm(mu[i], tau)
+    y_pred[i] <- exp(log_cost_pred[i])
+  }
+
+	mu_alpha ~ dnorm(prior.mu_alpha.mean, prior.mu_alpha.precision)
+	
+	sigma_alpha ~ dexp(prior.sigma_alpha.rate)
+	tau_alpha <- pow(sigma_alpha, -2)
+
+	for (i in 1:NC) {
+		z[i] ~ dnorm(0, 1)
+  	alpha[i] <- mu_alpha + z[i] * sigma_alpha
+	}
+
+	for (k in 1:K) {
+		beta[k] ~ dnorm(prior.beta.mean[k], prior.beta.precision[k])
+	}
+
+  sigma ~ dexp(prior.sigma.rate)
+  tau <- pow(sigma, -2)
+}
