@@ -16,9 +16,11 @@ predict_capturetb_logcost(dat, covariates, countries, samples)
 \item{samples}{coda::mcmc.list. Posterior samples from fit_capturetb_model().}
 }
 \value{
-Matrix of predicted log-costs. Rows = simulations, columns = input rows.
+Matrix of predicted log-costs.
+Rows = simulations, columns = input rows.
 }
 \description{
-Given a data.frame of new inputs and posterior samples of intercept and coefficients,
-returns a matrix of predicted log-costs for each simulation and input row.
+Given a data.frame of new inputs and posterior samples
+of intercept and coefficients, returns a matrix of
+predicted log-costs for each simulation and input row.
 }

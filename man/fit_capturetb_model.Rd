@@ -21,7 +21,8 @@ fit_capturetb_model(
 \arguments{
 \item{dat}{Data.frame. Data to fit the model to.}
 
-\item{covariates}{Character. Vector of covariate names to include in the model.}
+\item{covariates}{Character. Vector of covariate names to
+include in the model.}
 
 \item{target}{Character. Name of the target variable to model.}
 
@@ -29,7 +30,8 @@ fit_capturetb_model(
 
 \item{n.chains}{Integer. Number of MCMC chains. Default is 3.}
 
-\item{n.iter}{Integer. Number of total iterations per chain. Default is 100000.}
+\item{n.iter}{Integer. Number of total iterations per chain.
+Default is 100000.}
 
 \item{n.burnin}{Integer. Number of burn-in iterations. Default is 2000.}
 
@@ -45,5 +47,6 @@ fit_capturetb_model(
 A \code{coda::mcmc.list} object with posterior samples.
 }
 \description{
-Fits the JAGS model defined in \code{inst/jags/model.model} using the provided data and priors.
+Fits the JAGS model defined in \code{inst/jags/model.model}
+using the provided data and priors.
 }

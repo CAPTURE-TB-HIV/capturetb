@@ -164,8 +164,8 @@ fit_capturetb_model <- function(
 #' on \eqn{\sigma_\alpha}. Default is 10.
 #' @param beta.mean Numeric vector. Means of the priors for the \eqn{\beta}
 #' coefficients. Default is \code{c(0, -0.0142, -0.0412, 0.348, 0.352, -0.29)}.
-#' @param beta.precision Numeric vector. Precision of the priors for the 
-#' \eqn{\beta} coefficients. 
+#' @param beta.precision Numeric vector. Precision of the priors for the
+#' \eqn{\beta} coefficients.
 #' Default is \code{c(0.01, 22.7, 13.9, 8.08, 5.5, 23.45)}.
 #'
 #' @return A list of prior parameters with class \code{"capturetbpriors"}.
@@ -178,10 +178,14 @@ capturetb_priors <- function(mu_alpha.mean = 0,
                              mu_alpha.precision = 0.01,
                              sigma.rate = 1,
                              sigma_alpha.rate = 1,
-                             beta.mean = c(0, -0.0142, -0.0412, 
-                             0.348, 0.352, -0.29),
-                             beta.precision = c(0.01, 22.7, 13.9,
-                              8.08, 5.5, 23.45)) {
+                             beta.mean = c(
+                               0, -0.0142, -0.0412,
+                               0.348, 0.352, -0.29
+                             ),
+                             beta.precision = c(
+                               0.01, 22.7, 13.9,
+                               8.08, 5.5, 23.45
+                             )) {
   stopifnot(
     "mu_alpha.mean must be numeric" = is.numeric(mu_alpha.mean),
     "mu_alpha.mean must be scalar" = length(mu_alpha.mean) == 1,
@@ -218,7 +222,7 @@ capturetb_priors <- function(mu_alpha.mean = 0,
 #' Plots the distribution of a specified prior from a 'capturetbpriors' object.
 #'
 #' @param x Object of class 'capturetbpriors'. See \code{capturetb_priors}.
-#' @param prior Character. Name of the prior to plot.
+#' @param parameter Character. Name of the parameter prior to plot.
 #' ("mu_alpha_mean", "sigma", "sigma_alpha", "beta\[1\]", ...).
 #' Default is "mu_alpha_mean".
 #' @export
@@ -227,7 +231,7 @@ capturetb_priors <- function(mu_alpha.mean = 0,
 #' @importFrom utils read.csv
 #' @importFrom stats dexp dnorm qexp rnorm update
 #' @importFrom ggplot2 .data
-plot.capturetbpriors <- function(x, ..., prior = "mu_alpha_mean") {
+plot.capturetbpriors <- function(x, ..., parameter = "mu_alpha_mean") {
   if (!requireNamespace("ggplot2", quietly = TRUE)) {
     stop("Package 'ggplot2' is required but not installed.")
   }
@@ -266,8 +270,8 @@ plot.capturetbpriors <- function(x, ..., prior = "mu_alpha_mean") {
   )
 
   # Handle beta priors
-  if (grepl("^beta\\[\\d+\\]$", prior)) {
-    idx <- as.integer(sub("beta\\[(\\d+)\\]", "\\1", prior))
+  if (grepl("^beta\\[\\d+\\]$", parameter)) {
+    idx <- as.integer(sub("beta\\[(\\d+)\\]", "\\1", parameter))
     if (idx < 1 || idx > length(x$prior.beta.mean)) {
       stop("beta index out of range")
     }
@@ -277,12 +281,12 @@ plot.capturetbpriors <- function(x, ..., prior = "mu_alpha_mean") {
   }
 
   # Handle mapped priors
-  if (prior %in% names(prior_map)) {
-    if (prior == "mu_alpha_mean") {
+  if (parameter %in% names(prior_map)) {
+    if (parameter == "mu_alpha_mean") {
       mean <- x$prior.mu_alpha.mean
       sd <- 1 / sqrt(x$prior.mu_alpha.precision)
       return(plot_normal(mean, sd, "mu_alpha"))
-    } else if (prior == "sigma") {
+    } else if (parameter == "sigma") {
       rate <- x$prior.sigma.rate
       return(plot_exp(rate, "sigma"))
     } else if (prior == "sigma_alpha") {

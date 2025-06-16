@@ -21,7 +21,7 @@ test_that("run_capturetb_model runs and returns coda::mcmc.list", {
   expect_equal(dim(samples[[1]]), c(2000 / 2, 14))
 })
 
-testthat::test_that("predict_capturetb_logcost returns correct dimensions and values", {
+testthat::test_that("predict_capturetb_logcost returns correct values", {
   data <- data.frame(
     log_USD_p_bldgspace = c(1, 2),
     logVisits = c(0.5, 1.5),
@@ -81,7 +81,7 @@ testthat::test_that("predict_capturetb_logcost returns correct dimensions and va
 testthat::test_that("predict_capturetb_logcost works with fitted model", {
   data <- get_data(output_name = "OP treatment visit")
   samples <- fit_capturetb_model(
-		dat = data,
+    dat = data,
     n.chains = 2,
     n.iter = 2000,
     n.burnin = 500,
@@ -92,7 +92,9 @@ testthat::test_that("predict_capturetb_logcost works with fitted model", {
 
   countries <- unique(data$fc_country)
 
-  preds <- predict_capturetb_logcost(data, covariates = capturetb_covariates(), countries, samples)
+  preds <- predict_capturetb_logcost(data,
+    covariates = capturetb_covariates(), countries, samples
+  )
 
   testthat::expect_true(is.matrix(preds))
   testthat::expect_equal(dim(preds), c(2000, nrow(data)))
