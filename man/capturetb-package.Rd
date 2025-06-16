@@ -2,14 +2,13 @@
 % Please edit documentation in R/capturetb-package.R
 \docType{package}
 \name{capturetb-package}
-\alias{capturetb}
 \alias{capturetb-package}
 \title{capturetb: Econometric cost functions for estimating TB unit costs}
 \description{
 Econometric cost function for estimating TB unit costs, developed at LSHTM for the CAPTURE project Cost Analysis for Prioritizing TB and HIV Resources Efficiently.
 }
 \author{
-\strong{Maintainer}: Alex Hill \email{alex.hill@gmail.com}
+\strong{Maintainer}: Alex Hill \email{alex.hill@gmail.com} (\href{https://orcid.org/0009-0003-8104-1890}{ORCID})
 
 }
 \keyword{internal}

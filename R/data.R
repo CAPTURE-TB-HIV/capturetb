@@ -36,3 +36,94 @@ get_data <- function(output_name = NULL) {
 
   return(dat)
 }
+
+
+#' Create Prior Distributions for the CaptureTB Model
+#'
+#' Constructs a list of prior distributions for model parameters.
+#' This function validates the input arguments and returns a list
+#' with class \code{"capturetbpriors"}.
+#'
+#' @param mu_alpha.mean Numeric scalar. Mean of the prior for \eqn{\mu_\alpha}.
+#' Default is 0.
+#' @param mu_alpha.precision Numeric scalar. Precision (inverse variance) of
+#' the prior for \eqn{\mu_\alpha}. Default is 0.01.
+#' @param sigma.rate Numeric scalar. Rate parameter for prior on  \eqn{\sigma}.
+#' Default is 10.
+#' @param sigma_alpha.rate Numeric scalar. Rate parameter for prior
+#' on \eqn{\sigma_\alpha}. Default is 10.
+#' @param beta.mean Numeric vector. Means of the priors for the \eqn{\beta}
+#' coefficients. Default is \code{c(0, -0.0142, -0.0412, 0.348, 0.352, -0.29)}.
+#' @param beta.precision Numeric vector. Precision of the priors for the 
+#' \eqn{\beta} coefficients. 
+#' Default is \code{c(0.01, 22.7, 13.9, 8.08, 5.5, 23.45)}.
+#'
+#' @return A list of prior parameters with class \code{"capturetbpriors"}.
+#'
+#' @examples
+#' priors <- capturetb_priors()
+#'
+#' @export
+capturetb_priors <- function(mu_alpha.mean = 0,
+                             mu_alpha.precision = 0.01,
+                             sigma.rate = 1,
+                             sigma_alpha.rate = 1,
+                             beta.mean = c(0, -0.0142, -0.0412, 
+                             0.348, 0.352, -0.29),
+                             beta.precision = c(0.01, 22.7, 13.9,
+                              8.08, 5.5, 23.45)) {
+  stopifnot(
+    "mu_alpha.mean must be numeric" = is.numeric(mu_alpha.mean),
+    "mu_alpha.mean must be scalar" = length(mu_alpha.mean) == 1,
+    "mu_alpha.precision must be numeric" = is.numeric(mu_alpha.precision),
+    "mu_alpha.precision must be scalar" = length(mu_alpha.precision) == 1,
+    "sigma.rate must be numeric" = is.numeric(sigma.rate),
+    "sigma.rate must be scalar" = length(sigma.rate) == 1,
+    "sigma_alpha.rate must be numeric" = is.numeric(sigma_alpha.rate),
+    "sigma_alpha.rate must be scalar" = length(sigma_alpha.rate) == 1,
+    "beta.mean must be numeric" = is.numeric(beta.mean),
+    "beta.precision must be numeric" = is.numeric(beta.precision),
+    "mu_alpha.mean must not be NaN" = !is.nan(mu_alpha.mean),
+    "mu_alpha.precision must not be NaN" = !is.nan(mu_alpha.precision),
+    "sigma.rate must not be NaN" = !is.nan(sigma.rate),
+    "sigma_alpha.rate must not be NaN" = !is.nan(sigma_alpha.rate),
+    "beta.mean must not be NaN" = !any(is.nan(beta.mean)),
+    "beta.precision must not be NaN" = !any(is.nan(beta.precision))
+  )
+  priors <- list(
+    prior.mu_alpha.mean = mu_alpha.mean,
+    prior.mu_alpha.precision = mu_alpha.precision,
+    prior.sigma.rate = sigma.rate,
+    prior.sigma_alpha.rate = sigma_alpha.rate,
+    prior.beta.mean = beta.mean,
+    prior.beta.precision = beta.precision
+  )
+
+  class(priors) <- append("capturetbpriors", class(priors))
+  priors
+}
+
+#' Get List of Covariate Names for CaptureTB Model
+#'
+#' Returns a character vector of covariate names used in the CaptureTB model.
+#'
+#' @return A character vector containing the names of covariates:
+#'   \itemize{
+#'     \item \code{log_USD_p_bldgspace}: Log of USD per building space
+#'     \item \code{logVisits}: Log of visits
+#'     \item \code{logVisitsPP}: Log of visits per person
+#'     \item \code{secondary}: Indicator for secondary variable
+#'     \item \code{urban}: Indicator for urban location
+#'     \item \code{public}: Indicator for public status
+#'   }
+#' @export
+capturetb_covariates <- function() {
+  c(
+    "log_USD_p_bldgspace",
+    "logVisits",
+    "logVisitsPP",
+    "secondary",
+    "urban",
+    "public"
+  )
+}
