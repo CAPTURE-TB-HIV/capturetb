@@ -7,7 +7,7 @@
 #' outputs()
 #' @export
 outputs <- function() {
-  td_econ <- read.csv(system.file("td_econ.csv", package = "capturetb"))
+  td_econ <- utils::read.csv(system.file("td_econ.csv", package = "capturetb"))
   unique(td_econ$output)
 }
 
@@ -28,7 +28,7 @@ get_data <- function(output_name = NULL) {
     "'output_name' must be a string" =
       (is.null(output_name) || is.character(output_name))
   )
-  dat <- read.csv(system.file("td_econ.csv", package = "capturetb"))
+  dat <- utils::read.csv(system.file("td_econ.csv", package = "capturetb"))
   if (!is.null(output_name)) {
     dat <- dat |>
       dplyr::filter(.data$output == output_name)

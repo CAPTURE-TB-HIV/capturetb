@@ -1,17 +1,23 @@
 Package: capturetb
 Title: Econometric cost functions for estimating TB unit costs 
 Version: 0.0.0.9000
-Authors@R: c(person("Alex", "Hill", email = "alex.hill@gmail.com", role = c("aut", "cre")))
+Authors@R:
+  	person("Alex", "Hill", email = "alex.hill@gmail.com", role = c("aut", "cre"),
+			comment = c(ORCID = "0009-0003-8104-1890"))
 Description: Econometric cost function for estimating TB unit costs, 
 		developed at LSHTM for the CAPTURE project Cost Analysis for Prioritizing TB
 		and HIV Resources Efficiently.
 License: GPL (>= 3)
 Encoding: UTF-8
-LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 Imports:
+		dplyr,
+		ggplot2,
+		rlang
 Suggests:
-    testthat (>= 3.0.0),
-    knitr,
-    rmarkdown
+		coda,
+		knitr,
+    	testthat (>= 3.0.0),
+		rjags,
+    	rmarkdown
