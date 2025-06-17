@@ -6,3 +6,4 @@
 ^LICENSE\.md$
 ^docker$
 ^Dockerfile$
+^codecov.yml
