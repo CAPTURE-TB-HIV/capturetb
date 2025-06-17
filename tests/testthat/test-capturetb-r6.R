@@ -7,9 +7,20 @@ test_that("capturetb R6 class initialization works", {
   expect_false(model$is_fitted())
   expect_equal(model$get_covariates(), capturetb_covariates())
   expect_true(is.factor(model$get_countries()))
-  expect_equal(model$get_training_data(), dat)
   expect_equal(levels(model$get_countries()), unique(dat$fc_country))
   expect_equal(model$get_priors(), capturetb_priors())
+
+  dat_cleaned <- dat |>
+    dplyr::group_by(.data$fc_code) |>
+    dplyr::slice(1) |>
+    dplyr::ungroup() |>
+    dplyr::filter(
+      dplyr::if_all(
+        dplyr::all_of(capturetb_covariates()),
+        ~ !is.na(.) & !is.nan(.) & is.finite(.)
+      )
+    )
+  expect_equal(model$get_training_data(), dat_cleaned)
 })
 
 test_that("capturetb R6 class validation works", {
@@ -100,6 +111,7 @@ test_that("can make predictions for new countries", {
   n_sim <- 500
   smat <- matrix(
     c(
+      rep(0, n_sim), # sigma
       rep(1, n_sim), # mu_alpha
       rep(0.01, n_sim), # sigma_alpha
       rep(0.2, n_sim), # beta[1]
@@ -109,10 +121,11 @@ test_that("can make predictions for new countries", {
       rep(3, n_sim) # alpha[2]
     ),
     nrow = n_sim,
-    ncol = 7,
+    ncol = 8,
     byrow = FALSE
   )
   colnames(smat) <- c(
+    "sigma",
     "mu_alpha", "sigma_alpha",
     paste0("beta[", 1:3, "]"),
     paste0("alpha[", 1:2, "]")

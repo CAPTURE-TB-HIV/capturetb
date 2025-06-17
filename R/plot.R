@@ -4,7 +4,7 @@
 #' Plots the distribution of a specified prior from a 'capturetbpriors' object.
 #'
 #' @param x Object of class 'capturetbpriors'. See \code{capturetb_priors}.
-#' @param prior Character. Name of the prior to plot.
+#' @param parameter Character. Name of the paramater to plot.
 #' ("mu_alpha_mean", "sigma", "sigma_alpha", "beta\[1\]", ...).
 #' Default is "mu_alpha_mean".
 #' @export
@@ -13,7 +13,7 @@
 #' @importFrom utils read.csv
 #' @importFrom stats dexp dnorm qexp rnorm update
 #' @importFrom ggplot2 .data
-plot.capturetbpriors <- function(x, ..., prior = "mu_alpha_mean") {
+plot.capturetbpriors <- function(x, ..., parameter = "mu_alpha_mean") {
   if (!requireNamespace("ggplot2", quietly = TRUE)) {
     stop("Package 'ggplot2' is required but not installed.")
   }
@@ -52,8 +52,8 @@ plot.capturetbpriors <- function(x, ..., prior = "mu_alpha_mean") {
   )
 
   # Handle beta priors
-  if (grepl("^beta\\[\\d+\\]$", prior)) {
-    idx <- as.integer(sub("beta\\[(\\d+)\\]", "\\1", prior))
+  if (grepl("^beta\\[\\d+\\]$", parameter)) {
+    idx <- as.integer(sub("beta\\[(\\d+)\\]", "\\1", parameter))
     if (idx < 1 || idx > length(x$prior.beta.mean)) {
       stop("beta index out of range")
     }
@@ -63,21 +63,21 @@ plot.capturetbpriors <- function(x, ..., prior = "mu_alpha_mean") {
   }
 
   # Handle mapped priors
-  if (prior %in% names(prior_map)) {
-    if (prior == "mu_alpha_mean") {
+  if (parameter %in% names(prior_map)) {
+    if (parameter == "mu_alpha_mean") {
       mean <- x$prior.mu_alpha.mean
       sd <- 1 / sqrt(x$prior.mu_alpha.precision)
       return(plot_normal(mean, sd, "mu_alpha"))
-    } else if (prior == "sigma") {
+    } else if (parameter == "sigma") {
       rate <- x$prior.sigma.rate
       return(plot_exp(rate, "sigma"))
-    } else if (prior == "sigma_alpha") {
+    } else if (parameter == "sigma_alpha") {
       rate <- x$prior.sigma_alpha.rate
       return(plot_exp(rate, "sigma_alpha"))
     }
   }
 
-  stop("Unknown prior name. Use 'mu_alpha_mean', 'sigma',
+  stop("Unknown parameter name. Use 'mu_alpha_mean', 'sigma',
   'sigma_alpha', or 'beta[1]', etc.")
 }
 

@@ -66,6 +66,19 @@ capturetb <- R6::R6Class("capturetb",
 
       # Store in private variables
       private$covariates <- covariates
+
+      # if there are multiple facilities, take one at random
+      dat <- dat |>
+        dplyr::group_by(.data$fc_code) |>
+        dplyr::slice(1) |>
+        dplyr::ungroup() |>
+        dplyr::filter(
+          dplyr::if_all(
+            dplyr::all_of(private$covariates),
+            ~ !is.na(.) & !is.nan(.) & is.finite(.) # and exclude missing data
+          )
+        )
+
       private$training_data <- dat
       private$target <- target
       private$priors <- priors
@@ -98,25 +111,10 @@ capturetb <- R6::R6Class("capturetb",
         stop("Package 'coda' is required but not installed.")
       }
 
-      # if there are multiple facilities, take one at random
-      dat <- private$training_data |>
-        dplyr::group_by(.data$fc_code) |>
-        dplyr::slice(1) |>
-        dplyr::ungroup() |>
-        dplyr::filter(
-          dplyr::if_all(
-            dplyr::all_of(private$covariates),
-            ~ !is.na(.) & !is.nan(.) & is.finite(.)
-          )
-        )
-
       model_file <- system.file("jags", "model.model", package = "capturetb")
-
-      x <- dat[, private$covariates]
-      logical_cols <- sapply(x, is.logical)
-      if (any(logical_cols)) {
-        x[, logical_cols] <- lapply(x[, logical_cols, drop = FALSE], as.numeric)
-      }
+      
+      dat <- private$training_data
+      x <- private$numeric_to_logical(dat[, private$covariates])
 
       jags_data <- list(
         N = nrow(dat),
@@ -132,7 +130,6 @@ capturetb <- R6::R6Class("capturetb",
         data = jags_data,
         n.chains = n.chains,
         n.adapt = n.adapt,
-        quiet = TRUE,
         ...
       )
 
@@ -151,7 +148,6 @@ capturetb <- R6::R6Class("capturetb",
 
       # Store samples
       private$samples <- samples
-      private$fitted_data <- dat
 
       message(
         "Model fitted successfully with ", n.chains, " chains and ",
@@ -199,21 +195,23 @@ capturetb <- R6::R6Class("capturetb",
       smat <- as.matrix(private$samples)
 
       # known country intercepts
-      alpha_cols <- paste0("alpha[", seq_along(private$countries), "]")
+      alpha_cols <- paste0("alpha[", as.numeric(private$countries), "]")
       alphas <- smat[, alpha_cols, drop = FALSE]
 
       # if country not known, or not in training data
       # generate intercept using hyper-parameters
-      mu <- smat[, "mu_alpha"] # hyper-means
-      sig <- smat[, "sigma_alpha"] # hyper-sds
+      mu_alpha <- smat[, "mu_alpha"] # hyper-means
+      sig_alpha <- smat[, "sigma_alpha"] # hyper-sds
 
-      alpha_new <- rnorm(length(mu), mu, sig)
+      alpha_new <- rnorm(length(mu_alpha), mu_alpha, sig_alpha)
       alphas <- cbind(alphas, alpha_new)
 
       beta_cols <- paste0("beta[", seq_along(private$covariates), "]")
       betas <- smat[, beta_cols, drop = FALSE]
 
-      x <- as.matrix(dat[, private$covariates, drop = FALSE])
+      x <- as.matrix(private$numeric_to_logical(
+        dat[, private$covariates, drop = FALSE]
+      ))
       x_country <- dat[, "fc_country", drop = FALSE]
       x_country_matrix <- as.data.frame(lapply(
         private$countries,
@@ -229,7 +227,14 @@ capturetb <- R6::R6Class("capturetb",
         length(private$countries) + 1
       ] <- 1
 
-      preds <- alphas %*% t(x_country_matrix) + betas %*% t(x)
+      sig <- smat[, "sigma"]
+      pred_means <- alphas %*% t(x_country_matrix) + betas %*% t(x)
+
+      S <- length(sig)
+      N <- ncol(pred_means)
+      epsilon <- matrix(rnorm(S * N), nrow = S)
+      preds <- pred_means + epsilon * sig
+
       if (scale == "natural") {
         return(exp(preds))
       } else {
@@ -238,7 +243,7 @@ capturetb <- R6::R6Class("capturetb",
     },
 
     #' @description
-    #' Get the training data.
+    #' Get the data used to fit the model.
     #'
     #' @return data.frame.
     get_training_data = function() {
@@ -292,6 +297,13 @@ capturetb <- R6::R6Class("capturetb",
     fitted_data = NULL,
     target = NULL,
     priors = NULL,
-    samples = NULL
+    samples = NULL,
+    numeric_to_logical = function(x) {
+      logical_cols <- sapply(x, is.logical)
+      if (any(logical_cols)) {
+        x[, logical_cols] <- lapply(x[, logical_cols, drop = FALSE], as.numeric)
+      }
+      x
+    }
   )
 )

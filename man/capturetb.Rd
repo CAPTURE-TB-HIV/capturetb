@@ -135,7 +135,7 @@ Rows = simulations, columns = input rows.
 \if{html}{\out{<a id="method-capturetb-get_training_data"></a>}}
 \if{latex}{\out{\hypertarget{method-capturetb-get_training_data}{}}}
 \subsection{Method \code{get_training_data()}}{
-Get the training data.
+Get the data used to fit the model.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{capturetb$get_training_data()}\if{html}{\out{</div>}}
 }

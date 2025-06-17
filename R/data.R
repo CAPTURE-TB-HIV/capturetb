@@ -54,8 +54,8 @@ get_data <- function(output_name = NULL) {
 #' on \eqn{\sigma_\alpha}. Default is 10.
 #' @param beta.mean Numeric vector. Means of the priors for the \eqn{\beta}
 #' coefficients. Default is \code{c(0, -0.0142, -0.0412, 0.348, 0.352, -0.29)}.
-#' @param beta.precision Numeric vector. Precision of the priors for the 
-#' \eqn{\beta} coefficients. 
+#' @param beta.precision Numeric vector. Precision of the priors for the
+#' \eqn{\beta} coefficients.
 #' Default is \code{c(0.01, 22.7, 13.9, 8.08, 5.5, 23.45)}.
 #'
 #' @return A list of prior parameters with class \code{"capturetbpriors"}.
@@ -68,10 +68,14 @@ capturetb_priors <- function(mu_alpha.mean = 0,
                              mu_alpha.precision = 0.01,
                              sigma.rate = 1,
                              sigma_alpha.rate = 1,
-                             beta.mean = c(0, -0.0142, -0.0412, 
-                             0.348, 0.352, -0.29),
-                             beta.precision = c(0.01, 22.7, 13.9,
-                              8.08, 5.5, 23.45)) {
+                             beta.mean = c(
+                               0, -0.0142, -0.0412,
+                               0.348, 0.352, -0.29
+                             ),
+                             beta.precision = c(
+                               0.01, 22.7, 13.9,
+                               8.08, 5.5, 23.45
+                             )) {
   stopifnot(
     "mu_alpha.mean must be numeric" = is.numeric(mu_alpha.mean),
     "mu_alpha.mean must be scalar" = length(mu_alpha.mean) == 1,
@@ -88,7 +92,9 @@ capturetb_priors <- function(mu_alpha.mean = 0,
     "sigma.rate must not be NaN" = !is.nan(sigma.rate),
     "sigma_alpha.rate must not be NaN" = !is.nan(sigma_alpha.rate),
     "beta.mean must not be NaN" = !any(is.nan(beta.mean)),
-    "beta.precision must not be NaN" = !any(is.nan(beta.precision))
+    "beta.precision must not be NaN" = !any(is.nan(beta.precision)),
+    "beta.mean and beta.precision must be the same length" =
+      length(beta.precision) == length(beta.mean)
   )
   priors <- list(
     prior.mu_alpha.mean = mu_alpha.mean,
