@@ -2,7 +2,6 @@
 % Please edit documentation in R/capturetb-package.R
 \docType{package}
 \name{capturetb-package}
-\alias{capturetb}
 \alias{capturetb-package}
 \title{capturetb: Econometric cost functions for estimating TB unit costs}
 \description{

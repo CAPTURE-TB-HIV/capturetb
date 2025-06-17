@@ -3,3 +3,5 @@
 .Rproj.user
 *.tar.gz
 inst/doc
+*.html
+vignettes/*/*
