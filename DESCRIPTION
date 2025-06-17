@@ -17,7 +17,9 @@ Imports:
 		rlang
 Suggests:
 		coda,
+		gridExtra,
 		knitr,
     	testthat (>= 3.0.0),
 		rjags,
-    	rmarkdown
+		quarto
+VignetteBuilder: quarto

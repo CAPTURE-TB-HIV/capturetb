@@ -1,0 +1,2 @@
+ignore:
+  - "vignettes"  # ignore folders and all its contents

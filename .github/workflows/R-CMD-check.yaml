@@ -40,6 +40,10 @@ jobs:
           http-user-agent: ${{ matrix.config.http-user-agent }}
           use-public-rspm: true
 
+      - uses: quarto-dev/quarto-actions/setup@v2
+      - run: |
+          quarto --version
+
       - name: Install JAGS on ubuntu
         if: runner.os == 'linux'
         run: sudo apt-get update && sudo apt-get install -y jags 
@@ -92,7 +96,15 @@ jobs:
           library(rjags)
           jags.version()            # prints the version string if everything linked correctly
 
-      - uses: r-lib/actions/check-r-package@v2
+      - name: "Check non-Windows"
+        if: runner.os != 'windows'
+        uses: r-lib/actions/check-r-package@v2 
+
+      - name: check Windows
+        if: runner.os == 'windows'
+        uses: r-lib/actions/check-r-package@v2
         with:
           upload-snapshots: true
-          build_args: 'c("--no-manual", "--compact-vignettes=gs+qpdf")'
+          build_args: 'c("--no-build-vignettes")'
+          args: 'c("--ignore-vignettes")'
+          

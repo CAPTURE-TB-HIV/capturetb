@@ -1,0 +1,266 @@
+---
+title: "Model Fitting and Prediction with CaptureTB"
+author: "Alex Hill"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Model Fitting and Prediction with CaptureTB}
+  %\VignetteEngine{quarto::html}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 7,
+  fig.height = 5
+)
+```
+
+```{r setup}
+library(capturetb)
+library(ggplot2)
+library(dplyr)
+```
+
+## Introduction
+
+This vignette demonstrates how to use the CaptureTB package to:
+
+1. Fit a Bayesian hierarchical model to tuberculosis cost data
+2. Generate predictions from the fitted model
+3. Compare predicted values to observed values
+
+The package uses JAGS (Just Another Gibbs Sampler) to fit a hierarchical linear regression model with country-specific intercepts and shared covariate effects.
+
+## Loading and Exploring the Data
+
+First, let's load the data and explore what's available:
+
+```{r data-exploration}
+# Get all available output types
+available_outputs <- outputs()
+print(available_outputs)
+
+# Load data for outpatient treatment visits
+data <- get_data("OP treatment visit")
+print(paste("Number of observations:", nrow(data)))
+print(paste("Number of countries:", length(unique(data$fc_country))))
+
+# View the structure of the data
+str(data[, c("fc_country", "USD_unitcost_total", capturetb_covariates())])
+```
+
+## Setting Up Priors
+
+By default, the model uses power priors derived from the WHO-CHOICE model of outpatient treatment visit costs.
+
+```{r priors}
+# Create default priors
+priors <- capturetb_priors()
+knitr::kable(as.data.frame(priors))
+```
+
+Priors can be plotted by calling `plot(priors, parameter = "name_of_param")`:
+
+```{r beta-priors, fig.width=10, fig.height=6}
+# Plot prior distributions for the first few beta coefficients
+library(gridExtra)
+plots <- list()
+for(i in 1:3) {
+  plots[[i]] <- plot(priors, parameter = paste0("beta[", i, "]"))
+}
+do.call(grid.arrange, c(plots, ncol = 3))
+```
+
+## Fitting the Model
+
+Now we can fit the Bayesian hierarchical model. For the purpose of the vignette, we'll use fewer iterations that recommended for faster computation:
+
+```{r model-fitting, results='hide', message=FALSE}
+# Fit the model with reduced iterations for demonstration
+# In practice, you might want to use the defaults (n.iter = 100000)
+fitted_model <- fit_capturetb_model(
+  dat = data,
+  covariates = capturetb_covariates(),
+  target = "USD_unitcost_total",
+  priors = priors,
+  n.iter = 10000,
+  n.burnin = 500,
+  n.thin = 5,
+  seed = 123
+)
+```
+
+```{r model-summary}
+# Check summary statistics
+summary(fitted_model)
+```
+
+Checking Rhat values to see if the model coverged:
+
+```{r}
+gr <- coda::gelman.diag(fitted_model,
+                  autoburnin = FALSE,
+                  multivariate = FALSE)
+          
+ggplot(data.frame(Parameter = names(gr$psrf[,1]),
+                  Rhat      = gr$psrf[, "Point est."]),
+       aes(x = reorder(Parameter, Rhat), y = Rhat)) +
+  geom_hline(yintercept = 1.01, linetype = "dashed") +
+  geom_point(col = "red") +
+  labs(y = expression(hat(R)), x = NULL) +
+  theme_minimal()
+```
+
+## Generating Predictions
+
+We can now generate predictions for the training data to evaluate model fit:
+
+```{r predictions}
+# Get the covariates and countries from the training data
+covariates <- capturetb_covariates()
+countries <- unique(data$fc_country)
+
+# Generate predictions for the training data
+log_predictions <- predict_capturetb_logcost(
+  dat = data,
+  covariates = covariates,
+  countries = countries,
+  samples = fitted_model
+)
+
+# Convert to cost scale (exponentiate)
+predictions <- exp(log_predictions)
+predictions <- predictions[rowSums(is.infinite(predictions) == 0), , drop = FALSE ]
+
+# Calculate summary statistics for predictions
+pred_mean <- apply(predictions, 2, mean)
+pred_lower <- apply(predictions, 2, quantile, 0.025)
+pred_upper <- apply(predictions, 2, quantile, 0.975)
+
+# Create a data frame with predictions and observed values
+results_df <- data.frame(
+  observed = data$USD_unitcost_total,
+  predicted_mean = pred_mean,
+  predicted_lower = pred_lower,
+  predicted_upper = pred_upper,
+  country = data$fc_country
+)
+```
+
+## Plotting Predicted vs Observed Values
+
+### 1. Predicted vs Observed Scatter Plot
+
+```{r scatter-plot}
+# Create scatter plot of predicted vs observed values
+ggplot(results_df, aes(x = observed, y = predicted_mean)) +
+  geom_point(aes(color = country), alpha = 0.7) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "blue") +
+  scale_x_log10() +
+  scale_y_log10() +
+  labs(
+    title = "Predicted vs Observed Unit Costs",
+    x = "Observed Cost (USD)",
+    y = "Predicted Cost (USD)",
+    color = "Country"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+```
+
+### 2. 95% Credible Prediction Intervals
+
+```{r prediction-intervals}
+# Plot with prediction intervals
+ggplot(results_df, aes(x = observed)) +
+  geom_errorbar(aes(ymin = predicted_lower, ymax = predicted_upper), 
+              alpha = 0.3) +
+  geom_point(aes(y = predicted_mean, colour = country), alpha = 0.7) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "blue") +
+  scale_y_log10() +
+  scale_x_log10() +
+  labs(
+    title = "Credible Intervals vs Observed Unit Costs",
+    x = "Observed Cost (USD)",
+    y = "Predicted Cost (USD)",
+    color = "Country"
+  ) +
+  theme_minimal()
+```
+
+### 3. Residuals
+
+```{r residuals}
+# Calculate residuals on log scale
+results_df$residuals <- log(results_df$observed) - log(results_df$predicted_mean)
+
+# Plot residuals
+ggplot(results_df, aes(x = log(predicted_mean), y = residuals)) +
+  geom_point(aes(color = country), alpha = 0.7) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  geom_smooth(method = "loess", se = TRUE, color = "grey", alpha = 0.3) +
+  labs(
+    title = "Residuals vs Fitted Values",
+    x = "Log Predicted Cost",
+    y = "Residuals (Log Observed - Log Predicted)",
+    color = "Country"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+```
+
+### 4. Model Performance Metrics
+
+```{r performance-metrics}
+performance <- results_df %>%
+  summarise(
+    mae = mean(abs(observed - predicted_mean)),
+    rmse = sqrt(mean((observed - predicted_mean)^2)),
+    correlation = cor(observed, predicted_mean),
+    coverage = mean(observed >= predicted_lower & observed <= predicted_upper)
+  ) 
+colnames(performance) <- c("MAE", "RMSE", "Corelation", "95% CI Coverage")
+knitr::kable(performance)
+```
+
+## Country-Specific Perfomance
+
+Let's examine how well the model performs for different countries:
+
+```{r country-analysis}
+# Performance by country
+country_performance <- results_df %>%
+  group_by(country) %>%
+  summarise(
+    n_obs = n(),
+    mae = mean(abs(observed - predicted_mean)),
+    rmse = sqrt(mean((observed - predicted_mean)^2)),
+    correlation = cor(observed, predicted_mean),
+    coverage = mean(observed >= predicted_lower & observed <= predicted_upper),
+    .groups = 'drop'
+  ) %>%
+  arrange(desc(n_obs))
+colnames(country_performance) <- c("Country", "N", "MAE", "RMSE", "Corelation", "95% CI Coverage")
+
+knitr::kable(country_performance)
+```
+
+```{r country-plot}
+ggplot(results_df, aes(x = observed, y = predicted_mean)) +
+  geom_point(alpha = 0.7) +
+  geom_errorbar(aes(ymin = predicted_lower, ymax = predicted_upper), 
+              alpha = 0.3) +
+  scale_y_log10() +
+  scale_x_log10() +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "blue") +
+  facet_wrap(~country, scales = "free") +
+  labs(
+    title = "Predicted vs Observed by Country",
+    x = "Observed Cost (USD, log scale)",
+    y = "Predicted Cost (USD, log scale)"
+  ) +
+  theme_minimal()
+```
