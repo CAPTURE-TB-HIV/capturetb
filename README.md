@@ -6,6 +6,35 @@
 remotes::install_github("CAPTURE-TB-HIV/capturetb")
 ```
 
+## Basic usage
+
+```r
+# Load model
+model <- capturetb::unitcost()
+
+# View covariates
+covariates <- model$covariates()
+print(covariates)
+# [1] "log_USD_p_bldgspace" "logVisits"           "logVisitsPP"        
+# [4] "secondary"           "urban"               "public"    
+
+# Generate predictions from posterior
+pred <- model$predict(list(
+  log_USD_p_bldgspace = 1,
+  logVisits = 6.9, 
+  logVisitsPP = -1.29, 
+  secondary = FALSE, 
+  urban = FALSE, 
+  public = TRUE,
+  fc_country = "Ethiopia"
+), scale = "natural")
+
+# Expected unit cost is mean prediction
+expected_unit_cost <- mean(pred)
+print(expected_unit_cost)
+[1] 4.745807
+```
+
 ## Testing
 
 ```r

@@ -1,0 +1,260 @@
+---
+title: "Model Fitting"
+author: "Alex Hill"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Model Fitting}
+  %\VignetteEngine{quarto::html}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 7,
+  fig.height = 5
+)
+```
+
+```{r setup}
+library(capturetb)
+library(ggplot2)
+library(dplyr)
+```
+
+## Introduction
+
+This vignette demonstrates how to use this package to:
+
+1. Create a new mixed effects model instance with covariates, priors and training data
+2. Fit the model to estimate parameters
+
+This demonstrates how the default model was fitted and sensitivity analyses performed.
+
+Under the hood this uses JAGS (Just Another Gibbs Sampler) to fit a hierarchical linear regression model with country-specific intercepts and shared covariate effects.
+
+## Creating a model instance
+
+A model instance requires a list of covariates, a target variable to predict, training data, and priors for parameters. 
+
+```{r model-creation}
+covariates <- c("log_USD_p_bldgspace",
+ "logVisits", "logVisitsPP_TB", "primary",
+ "secondary", "urban", "public")
+
+# Specifying priors for the fixed effects
+# Others will take default values
+priors <- capturetb::capturetb_priors(
+  beta.mean = c(0,-0.0142, -0.0412, 0.304, 0.348, 0.352, -0.29),
+  beta.precision = c(0.01, 227, 139, 46.4, 80.8, 55.2, 234.5))
+
+data <- get_data("OP diagnostic visit") # or provide your own data; see capturetb::outputs() for all output data installed with the package
+
+model <- capturetb::MixedEffects$new(
+  dat = data,
+  covariates = covariates,
+  target = "USD_unitcost_total",
+  priors = priors
+)
+
+# See all priors used in the model
+priors <- model$priors()
+print(priors)
+```
+
+Priors can be visualised by calling `plot(priors, parameter = "name_of_param")`:
+
+```{r beta-priors, fig.width=10, fig.height=6}
+library(gridExtra)
+plots <- list()
+for(i in 1:3) {
+  plots[[i]] <- plot(priors, parameter = paste0("beta[", i, "]"))
+}
+plots[[4]] <- plot(priors, parameter = "mu_alpha_mean")
+plots[[5]] <- plot(priors, parameter = "sigma_alpha")
+plots[[6]] <- plot(priors, parameter = "sigma")
+do.call(grid.arrange, c(plots, ncol = 3))
+```
+
+## Fitting the model
+
+For the purpose of the vignette, we'll use fewer iterations than recommended for faster computation:
+
+```{r model-fitting, results='hide', message=FALSE}
+# Fit the model with reduced iterations for demonstration
+# In practice, you might want to use the defaults (n.iter = 100000)
+model$fit(
+ n.iter = 20000,
+ n.burnin = 1000,
+ n.thin = 5,
+ n.chains = 2
+)
+```
+
+```{r model-summary}
+# Check summary statistics of the fitted samples
+fitted_samples <- model$samples()
+summary(fitted_samples)
+```
+
+Checking Rhat values to see if the model converged:
+
+```{r}
+gr <- coda::gelman.diag(fitted_samples,
+                  autoburnin = FALSE,
+                  multivariate = FALSE)
+          
+ggplot(data.frame(Parameter = names(gr$psrf[,1]),
+                  Rhat      = gr$psrf[, "Point est."]),
+       aes(x = reorder(Parameter, Rhat), y = Rhat)) +
+  geom_hline(yintercept = 1.01, linetype = "dashed") +
+  geom_point(col = "red") +
+  labs(y = expression(hat(R)), x = NULL) +
+  theme_minimal()
+```
+
+Plotting posteriors:
+
+```{r}
+bayesplot::mcmc_areas(fitted_samples, 
+                      pars = paste0("beta[", 1:length(covariates), "]"),
+                      prob = 0.9) + 
+  scale_y_discrete(labels = model$covariates())
+```
+
+```{r}
+bayesplot::mcmc_areas(fitted_samples, 
+                      pars = c("mu_alpha", "sigma_alpha", "sigma",  paste0("alpha[", 1:5, "]")),
+                      prob = 0.9)
+```
+
+## Generating predictions
+
+We can now generate predictions for the training data to evaluate model fit:
+
+```{r predictions}
+# Generate predictions for the training data on log scale
+dat <- model$training_data()
+predictions <- model$predict(dat, scale = "log")
+
+# Calculate summary statistics for predictions
+pred_mean <- apply(predictions, 2, mean)
+pred_lower <- apply(predictions, 2, quantile, 0.025)
+pred_upper <- apply(predictions, 2, quantile, 0.975)
+
+# Create a data frame with predictions and observed values
+results_df <- data.frame(
+  observed = log(dat$USD_unitcost_total),
+  predicted_mean = pred_mean,
+  predicted_lower = pred_lower,
+  predicted_upper = pred_upper,
+  country = dat$fc_country
+)
+
+# Various measures of fit
+performance <- results_df %>%
+  summarise(
+    mae = mean(abs(observed - predicted_mean)),
+    rmse = sqrt(mean((observed - predicted_mean)^2)),
+    correlation = cor(observed, predicted_mean),
+    coverage = mean(observed >= predicted_lower & observed <= predicted_upper)
+  ) 
+colnames(performance) <- c("MAE", "RMSE", "Correlation", "95% CI Coverage")
+knitr::kable(performance)
+```
+
+## Visualising results
+
+### 1. Predicted vs Observed
+
+```{r scatter-plot}
+# Create scatter plot of predicted vs observed values
+ggplot(results_df, aes(x = observed, y = predicted_mean)) +
+  geom_point(aes(color = country), alpha = 0.7) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "blue") +
+  labs(
+    title = "Predicted vs Observed Unit Costs",
+    x = "Observed Cost (log(USD))",
+    y = "Predicted Cost (log(USD))",
+    color = "Country"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+```
+
+### 2. 95% Credible Prediction Intervals
+
+```{r prediction-intervals}
+# Plot with prediction intervals
+ggplot(results_df, aes(x = observed)) +
+  geom_errorbar(aes(ymin = predicted_lower, ymax = predicted_upper), 
+              alpha = 0.3) +
+  geom_point(aes(y = predicted_mean, colour = country), alpha = 0.7) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "blue") +
+  labs(
+    title = "Credible Intervals vs Observed Unit Costs",
+    x = "Observed Cost (log(USD))",
+    y = "Predicted Cost (log(USD))",
+    color = "Country"
+  ) +
+  theme_minimal()
+```
+
+### 3. Residuals
+
+```{r residuals}
+# Calculate residuals on log scale
+results_df$residuals <- results_df$observed - results_df$predicted_mean
+
+# Plot residuals
+ggplot(results_df, aes(x = predicted_mean, y = residuals)) +
+  geom_point(aes(color = country), alpha = 0.7) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  geom_smooth(method = "loess", se = TRUE, color = "grey", alpha = 0.3) +
+  labs(
+    title = "Residuals vs Fitted Values",
+    x = "Log Predicted Cost",
+    y = "Residuals (Log Observed - Log Predicted)",
+    color = "Country"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+```
+
+### 4. Country-Specific perfomance
+
+```{r country-analysis}
+# Performance by country
+country_performance <- results_df %>%
+  group_by(country) %>%
+  summarise(
+    n_obs = n(),
+    mae = mean(abs(observed - predicted_mean)),
+    rmse = sqrt(mean((observed - predicted_mean)^2)),
+    correlation = cor(observed, predicted_mean),
+    coverage = mean(observed >= predicted_lower & observed <= predicted_upper),
+    .groups = 'drop'
+  ) %>%
+  arrange(desc(n_obs))
+colnames(country_performance) <- c("Country", "N", "MAE",
+ "RMSE", "Corelation", "95% CI Coverage")
+
+knitr::kable(country_performance)
+```
+
+```{r country-plot}
+ggplot(results_df, aes(x = observed, y = predicted_mean)) +
+  geom_point(alpha = 0.7) +
+  geom_errorbar(aes(ymin = predicted_lower, ymax = predicted_upper), 
+              alpha = 0.3) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "blue") +
+  facet_wrap(~country, scales = "free") +
+  labs(
+    title = "Predicted vs Observed by Country",
+    x = "Observed Cost (USD, log scale)",
+    y = "Predicted Cost (USD, log scale)"
+  ) +
+  theme_minimal()
+```

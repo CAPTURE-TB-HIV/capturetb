@@ -195,8 +195,8 @@ MixedEffects <- R6::R6Class("MixedEffects",
       }
 
       # Validate prediction data
-      stopifnot("dat must be a data.frame" = is.data.frame(dat))
-
+      stopifnot("dat must be a list or data.frame" = is.list(dat))
+      dat <- as.data.frame(dat)
       missing_covs <- setdiff(private$.covariates, names(dat))
       if (length(missing_covs) > 0) {
         stop(
@@ -209,8 +209,7 @@ MixedEffects <- R6::R6Class("MixedEffects",
         stop("Column 'fc_country' required in prediction data")
       }
 
-      # Prediction logic (same as original function)
-      smat <- as.matrix(private$.samples)
+      smat <- do.call(rbind, lapply(private$.samples, as.matrix))
 
       # known country intercepts
       alpha_cols <- paste0("alpha[", as.numeric(private$.countries), "]")

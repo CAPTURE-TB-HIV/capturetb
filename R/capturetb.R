@@ -7,12 +7,12 @@
 #'
 #' @return An object of class \code{MixedEffects}.
 #' @examples
-#' mod <- capturetb_total()
+#' mod <- unitcost()
 #' \dontrun{
 #' mod$predict(new_data)
 #' }
 #' @export
-capturetb_total <- function() {
+unitcost <- function() {
     samples <- readRDS(system.file("posterior_samples.rds",
         package = "capturetb"
     ))

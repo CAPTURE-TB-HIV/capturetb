@@ -1,10 +1,10 @@
 ---
-title: "Model Fitting and Prediction with CaptureTB"
+title: "Using the model"
 author: "Alex Hill"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Model Fitting and Prediction with CaptureTB}
+  %\VignetteIndexEntry{using the model}
   %\VignetteEngine{quarto::html}
   %\VignetteEncoding{UTF-8}
 ---
@@ -28,14 +28,10 @@ library(dplyr)
 
 This vignette demonstrates how to use this package to:
 
-1. Create a model instance with priors and training data
-2. Fit the model to estimate parameters
-3. Generate predictions from the fitted model
-4. Compare predicted values to observed values
+1. Generate unit cost predictions from the fitted model
+2. Compare predicted values to observed values to assess model fit
 
-Under the hood this package uses JAGS (Just Another Gibbs Sampler) to fit a hierarchical linear regression model with country-specific intercepts and shared covariate effects.
-
-## Loading and Exploring the Data
+## Loading and exploring the raw data
 
 Top-down economic costs from the ValueTB database are installed with the package. This includes costs for multiple different output types; run `capturetb::outputs()` to retrieve a complete list of available outputs:
 
@@ -55,29 +51,22 @@ summarised <- data |>
 knitr::kable(summarised)
 ```
 
-## Creating a model instance
+This package includes fitted models for predicting the following outputs:
+* OP treatment visit unit cost
+* OP treatment visit fixed unit cost (average fixed costs per visit)
 
-A model instance requires a list of covariates, a target variable to predict, training data, and priors for parameters. 
+## Exploring the model
+
+ The OP treatment visit unit costs model is loaded via `capturetb_total`:
 
 ```{r model-creation}
-covariates <- c("log_USD_p_bldgspace",
- "logVisits", "logVisitsPP_TB", "primary",
- "secondary", "urban", "public")
+model <- capturetb::unitcost()
 
-# Specifying priors for the fixed effects
-# Others will take default values
-priors <- capturetb::capturetb_priors(
-  beta.mean = c(0,-0.0142, -0.0412, 0.304, 0.348, 0.352, -0.29),
-  beta.precision = c(0.01, 227, 139, 46.4, 80.8, 55.2, 234.5))
+# See model covariates
+covariates <- model$covariates()
+print(covariates)
 
-model <- capturetb::MixedEffects$new(
-  dat = data,
-  covariates = covariates,
-  target = "USD_unitcost_total",
-  priors = priors
-)
-
-# See all priors used in the model
+# See priors used in the model
 priors <- model$priors()
 print(priors)
 ```
@@ -96,50 +85,14 @@ plots[[6]] <- plot(priors, parameter = "sigma")
 do.call(grid.arrange, c(plots, ncol = 3))
 ```
 
-## Fitting the model
-
-For the purpose of the vignette, we'll use fewer iterations than recommended for faster computation:
-
-```{r model-fitting, results='hide', message=FALSE}
-# Fit the model with reduced iterations for demonstration
-# In practice, you might want to use the defaults (n.iter = 100000)
-model$fit(
- n.iter = 20000,
- n.burnin = 1000,
- n.thin = 5,
- n.chains = 2
-)
-```
-
-```{r model-summary}
-# Check summary statistics of the fitted samples
-fitted_samples <- model$samples()
-summary(fitted_samples)
-```
-
-Checking Rhat values to see if the model converged:
-
-```{r}
-gr <- coda::gelman.diag(fitted_samples,
-                  autoburnin = FALSE,
-                  multivariate = FALSE)
-          
-ggplot(data.frame(Parameter = names(gr$psrf[,1]),
-                  Rhat      = gr$psrf[, "Point est."]),
-       aes(x = reorder(Parameter, Rhat), y = Rhat)) +
-  geom_hline(yintercept = 1.01, linetype = "dashed") +
-  geom_point(col = "red") +
-  labs(y = expression(hat(R)), x = NULL) +
-  theme_minimal()
-```
-
 Plotting posteriors:
 
 ```{r}
+fitted_samples <- model$samples()
 bayesplot::mcmc_areas(fitted_samples, 
                       pars = paste0("beta[", 1:length(covariates), "]"),
                       prob = 0.9) + 
-  scale_y_discrete(labels = model$covariates())
+  scale_y_discrete(labels = covariates)
 ```
 
 ```{r}
@@ -150,7 +103,7 @@ bayesplot::mcmc_areas(fitted_samples,
 
 ## Generating predictions
 
-We can now generate predictions for the training data to evaluate model fit:
+We can generate predictions for the training data to demonstrate model fit:
 
 ```{r predictions}
 # Generate predictions for the training data on log scale
@@ -183,9 +136,11 @@ colnames(performance) <- c("MAE", "RMSE", "Correlation", "95% CI Coverage")
 knitr::kable(performance)
 ```
 
+Predictions of unit cost for new inputs, not in the training set, are generated in exactly the same way, via the `predict` method.
+
 ## Visualising results
 
-### 1. Predicted vs Observed
+### 1. Predicted vs observed
 
 ```{r scatter-plot}
 # Create scatter plot of predicted vs observed values
@@ -220,28 +175,7 @@ ggplot(results_df, aes(x = observed)) +
   theme_minimal()
 ```
 
-### 3. Residuals
-
-```{r residuals}
-# Calculate residuals on log scale
-results_df$residuals <- results_df$observed - results_df$predicted_mean
-
-# Plot residuals
-ggplot(results_df, aes(x = predicted_mean, y = residuals)) +
-  geom_point(aes(color = country), alpha = 0.7) +
-  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
-  geom_smooth(method = "loess", se = TRUE, color = "grey", alpha = 0.3) +
-  labs(
-    title = "Residuals vs Fitted Values",
-    x = "Log Predicted Cost",
-    y = "Residuals (Log Observed - Log Predicted)",
-    color = "Country"
-  ) +
-  theme_minimal() +
-  theme(legend.position = "bottom")
-```
-
-### 4. Country-Specific perfomance
+### 3. Country-Specific perfomance
 
 ```{r country-analysis}
 # Performance by country

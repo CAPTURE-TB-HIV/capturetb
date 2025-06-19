@@ -1,5 +1,5 @@
 test_that("Can load total cost model", {
-    mod <- capturetb_total()
+    mod <- unitcost()
     samples <- mod$samples()
     expect_true(mod$is_fitted())
     expect_true(inherits(samples, "mcmc.list"))
