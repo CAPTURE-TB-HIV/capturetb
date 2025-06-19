@@ -1,7 +1,6 @@
-test_that("capturetb R6 class initialization works", {
-  # Test default initialization
-  model <- MixedEffects$new()
-
+test_that("MixedEffects class initialization works", {
+  # test default initialisation options
+  model <- suppressWarnings(MixedEffects$new())
   dat <- get_data("OP treatment visit")
   expect_true(R6::is.R6(model))
   expect_false(model$is_fitted())
@@ -11,19 +10,34 @@ test_that("capturetb R6 class initialization works", {
   expect_equal(model$priors(), capturetb_priors())
 
   dat_cleaned <- dat |>
-    dplyr::group_by(.data$fc_code) |>
-    dplyr::slice(1) |>
-    dplyr::ungroup() |>
     dplyr::filter(
       dplyr::if_all(
         dplyr::all_of(capturetb_covariates()),
         ~ !is.na(.) & !is.nan(.) & is.finite(.)
       )
-    )
+    ) |>
+    dplyr::group_by(.data$fc_code) |>
+    dplyr::slice(1) |>
+    dplyr::ungroup()
+
   expect_equal(model$training_data(), dat_cleaned)
 })
 
-test_that("capturetb R6 class validation works", {
+test_that("MixedEffects$new validation works", {
+  warnings <- testthat::capture_warnings({
+    model <- MixedEffects$new()
+  })
+
+  expect_true(length(warnings) == 2)
+  expect_true(any(grepl(
+    "Removed 1 rows with missing data.",
+    warnings
+  )))
+  expect_true(any(grepl(
+    "Excluded 63 rows with duplicate facility codes.",
+    warnings
+  )))
+
   # Test invalid data
   expect_error(
     MixedEffects$new(dat = "not a data frame"),
@@ -31,7 +45,7 @@ test_that("capturetb R6 class validation works", {
   )
 
   # Test missing covariates
-  data <- get_data("OP treatment visit")
+  data <- dat_cleaned[1:50, ]
   data$log_USD_p_bldgspace <- NULL
   expect_error(
     MixedEffects$new(dat = data),
@@ -40,23 +54,32 @@ test_that("capturetb R6 class validation works", {
 
   # Test missing target
   expect_error(
-    MixedEffects$new(target = "nonexistent_column"),
+    MixedEffects$new(
+      dat = dat_cleaned,
+      target = "nonexistent_column"
+    ),
     "Target variable 'nonexistent_column' not found in data"
   )
 
   # Test mismatched priors and covariates
   expect_error(
-    MixedEffects$new(covariates = c("one", "two")),
+    MixedEffects$new(
+      dat = dat_cleaned,
+      covariates = c("one", "two")
+    ),
     "6 fixed effect priors provided but only 2 covariates"
   )
   expect_error(
-    MixedEffects$new(covariates = c(capturetb_covariates(), "another")),
+    MixedEffects$new(
+      dat = dat_cleaned,
+      covariates = c(capturetb_covariates(), "another")
+    ),
     "7 covariates provided but only 6 fixed effect priors"
   )
 })
 
-test_that("capturetb R6 predict method validation works", {
-  model <- MixedEffects$new()
+test_that("MixedEffects$predict method validation works", {
+  model <- MixedEffects$new(dat_cleaned)
 
   # Test prediction before fitting
   expect_error(
@@ -65,16 +88,13 @@ test_that("capturetb R6 predict method validation works", {
   )
 })
 
-test_that("capturetb R6 class methods work with small example", {
-  skip_if_not_installed("rjags")
-  skip_if_not_installed("coda")
-
+test_that("MixedEffects class methods work with small example", {
   # Use a small dataset for testing with multiple countries
   data <- get_data("OP treatment visit")
 
   countries_sample <- unique(data$fc_country)[1:2]
   n_countries <- 2
-  small_data <- data[data$fc_country %in% countries_sample, ]
+  small_data <- dat_cleaned[dat_cleaned$fc_country %in% countries_sample, ]
 
   model <- MixedEffects$new(dat = small_data)
 
@@ -99,8 +119,8 @@ test_that("capturetb R6 class methods work with small example", {
   expect_true(nrow(predictions) > 0)
 })
 
-test_that("capturetb R6 getter methods work", {
-  model <- MixedEffects$new()
+test_that("MixedEffects getter methods work", {
+  model <- MixedEffects$new(dat_cleaned)
 
   expect_equal(model$covariates(), capturetb_covariates())
   expect_true(is.factor(model$countries()))
@@ -108,44 +128,19 @@ test_that("capturetb R6 getter methods work", {
   expect_null(model$samples())
 })
 
-test_that("can make predictions for new countries", {
-  data <- get_data("OP treatment visit")
+test_that("can make predictions for known and new countries", {
   covariates <- capturetb_covariates()[1:3]
   priors <- capturetb_priors()
   priors$prior.beta.mean <- priors$prior.beta.mean[1:3]
   model <- MixedEffects$new(
     dat =
-      data[data$fc_country %in% c("Ethiopia", "Kenya"), ],
+      dat_cleaned[dat_cleaned$fc_country %in% c("Ethiopia", "Kenya"), ],
     covariates = covariates,
     priors = priors
   )
 
-  # Mock private$samples
-  n_sim <- 500
-  smat <- matrix(
-    c(
-      rep(0, n_sim), # sigma
-      rep(1, n_sim), # mu_alpha
-      rep(0.01, n_sim), # sigma_alpha
-      rep(0.2, n_sim), # beta[1]
-      rep(0.3, n_sim), # beta[2]
-      rep(0.4, n_sim), # beta[3]
-      rep(2, n_sim), # alpha[1]
-      rep(3, n_sim) # alpha[2]
-    ),
-    nrow = n_sim,
-    ncol = 8,
-    byrow = FALSE
-  )
-  colnames(smat) <- c(
-    "sigma",
-    "mu_alpha", "sigma_alpha",
-    paste0("beta[", 1:3, "]"),
-    paste0("alpha[", 1:2, "]")
-  )
-  fake_samples <- coda::as.mcmc(smat)
-  fake_samples <- coda::mcmc.list(fake_samples)
-  model$.__enclos_env__$private$.samples <- fake_samples
+  n_sim <- 200
+  model$.__enclos_env__$private$.samples <- mock_samples(n_sim)
 
   # Prepare newdata for prediction
   newdata <- data.frame(
@@ -176,4 +171,132 @@ test_that("can make predictions for new countries", {
   # tolerance required as intercept alpha_new will be generated
   # using rnorm(alpha_mu, sigma_mu)
   testthat::expect_equal(preds[1, 2], expected_2, tolerance = 0.01)
+})
+
+test_that("returns summarised predictions if summarised=TRUE", {
+  covariates <- capturetb_covariates()[1:3]
+  priors <- capturetb_priors()
+  priors$prior.beta.mean <- priors$prior.beta.mean[1:3]
+  model <- MixedEffects$new(
+    dat =
+      dat_cleaned[dat_cleaned$fc_country %in% c("Ethiopia", "Kenya"), ],
+    covariates = covariates,
+    priors = priors
+  )
+
+  model$.__enclos_env__$private$.samples <- mock_samples(200)
+
+  # Prepare newdata for prediction
+  newdata <- data.frame(
+    log_USD_p_bldgspace = c(1, 2),
+    logVisits = c(0.5, 1.5),
+    logVisitsPP = c(0.2, 0.3),
+    secondary = c(1, 0),
+    urban = c(0, 1),
+    public = c(1, 1),
+    fc_country = c("Kenya", "somewhere new")
+  )
+
+  # Test summarised predictions
+  preds_summary <- model$predict(newdata, summarised = TRUE)
+
+  expect_true(is.data.frame(preds_summary))
+  expect_equal(nrow(preds_summary), nrow(newdata))
+  expect_equal(names(preds_summary), c("mean", "lower", "upper"))
+  expect_true(all(preds_summary$lower <= preds_summary$mean))
+  expect_true(all(preds_summary$mean <= preds_summary$upper))
+
+  # Test with natural scale
+  preds_natural <- model$predict(newdata,
+    scale = "natural",
+    summarised = TRUE
+  )
+  expect_true(all(preds_natural$mean > 0))
+  expect_true(all(preds_natural$lower > 0))
+  expect_true(all(preds_natural$upper > 0))
+
+  # Compare with non-summarised predictions
+  preds_full <- model$predict(newdata, summarised = FALSE)
+  expect_true(is.matrix(preds_full))
+  expect_equal(ncol(preds_full), nrow(newdata))
+
+  # Check summarised mean
+  manual_mean <- apply(preds_full, 2, mean)
+  expect_equal(preds_summary$mean, manual_mean, tolerance = 0.001)
+})
+
+test_that("k_fold_cv works correctly", {
+  # Use small dataset with faster testing
+  data <- get_data("OP treatment visit")
+  countries_sample <- unique(data$fc_country)[1:3]
+  small_data <- dat_cleaned[dat_cleaned$fc_country %in% countries_sample, ]
+
+  # Further reduce data size for testing
+  set.seed(123)
+  small_data <- small_data[sample(
+    nrow(small_data),
+    30
+  ), ]
+
+  model <- MixedEffects$new(dat = small_data)
+
+  # Test with 3 folds and minimal iterations
+  expect_message(
+    cv_results <- model$k_fold_cv(
+      k_folds = 3,
+      scale = "log",
+      seed = 123,
+      n.chains = 2,
+      n.iter = 200,
+      n.burnin = 50,
+      n.thin = 2
+    ),
+    "Processing fold"
+  )
+
+  # Check output format
+  training_data <- model$training_data()
+  expect_true(is.data.frame(cv_results))
+  expect_equal(nrow(cv_results), nrow(training_data))
+  expect_true(all(c("fold", "observed", "mean", "lower", "upper") %in%
+    names(cv_results)))
+
+  # Check fold assignments
+  expect_true(all(cv_results$fold %in% 1:3))
+  expect_equal(length(unique(cv_results$fold)), 3)
+
+  # Check that all original observations are included
+  expect_equal(nrow(cv_results), nrow(training_data))
+
+  # Check prediction bounds
+  expect_true(all(cv_results$lower <= cv_results$mean))
+  expect_true(all(cv_results$mean <= cv_results$upper))
+
+  # Test with natural scale
+  cv_results_natural <- model$k_fold_cv(
+    k_folds = 2,
+    scale = "natural",
+    seed = 123,
+    n.chains = 2,
+    n.iter = 200,
+    n.burnin = 50,
+    n.thin = 2
+  )
+
+  expect_true(all(cv_results_natural$mean > 0))
+  expect_true(all(cv_results_natural$observed > 0))
+})
+
+test_that("can get n_eff after model fitting", {
+  model <- MixedEffects$new(dat_cleaned)
+
+  expect_error(
+    model$mcmc_acf(),
+    "Model must be fitted"
+  )
+
+  model <- unitcost()
+  res <- model$n_eff()
+  expect_equal(length(res), 14)
+  expect_true(is.numeric(res))
 })

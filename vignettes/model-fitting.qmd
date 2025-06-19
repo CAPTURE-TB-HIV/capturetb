@@ -103,8 +103,7 @@ Checking Rhat values to see if the model converged:
 
 ```{r}
 gr <- coda::gelman.diag(fitted_samples,
-                  autoburnin = FALSE,
-                  multivariate = FALSE)
+                  autoburnin = FALSE)
           
 ggplot(data.frame(Parameter = names(gr$psrf[,1]),
                   Rhat      = gr$psrf[, "Point est."]),

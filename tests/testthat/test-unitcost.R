@@ -1,4 +1,4 @@
-test_that("Can load total cost model", {
+test_that("can load total cost model", {
     mod <- unitcost()
     samples <- mod$samples()
     expect_true(mod$is_fitted())
@@ -13,4 +13,5 @@ test_that("Can load total cost model", {
     expect_equal(mod$priors(), capturetb_priors())
     expect_equal(mod$covariates(), capturetb_covariates())
     expect_equal(mod$target(), "USD_unitcost_total")
+    expect_true(all(mod$n_eff() > 10000))
 })

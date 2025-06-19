@@ -16,7 +16,18 @@ unitcost <- function() {
     samples <- readRDS(system.file("posterior_samples.rds",
         package = "capturetb"
     ))
-    mod <- MixedEffects$new()
+    data <- get_data("OP treatment visit") |>
+        dplyr::filter(
+            dplyr::if_all(
+                dplyr::all_of(capturetb_covariates()),
+                ~ !is.na(.) & !is.nan(.) & is.finite(.)
+            )
+        ) |>
+        dplyr::group_by(.data$fc_code) |>
+        dplyr::slice(1) |>
+        dplyr::ungroup()
+
+    mod <- MixedEffects$new(data)
     mod$.__enclos_env__$private$.samples <- samples
     mod
 }

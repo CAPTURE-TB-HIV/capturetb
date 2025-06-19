@@ -80,22 +80,35 @@ MixedEffects <- R6::R6Class("MixedEffects",
       # Store in private variables
       private$.covariates <- covariates
 
-      # if there are multiple facilities, take one at random
-      dat <- dat |>
-        dplyr::group_by(.data$fc_code) |>
-        dplyr::slice(1) |>
-        dplyr::ungroup() |>
+      dat_missing <- dat |>
         dplyr::filter(
-          dplyr::if_all(
+          dplyr::if_any(
             dplyr::all_of(private$.covariates),
-            ~ !is.na(.) & !is.nan(.) & is.finite(.) # and exclude missing data
+            ~ is.na(.) | is.nan(.) | !is.finite(.)
           )
         )
 
-      private$.training_data <- dat
+      dat <- dplyr::anti_join(dat, dat_missing, by = names(dat))
+
+      if (nrow(dat_missing) > 0) {
+        warning(sprintf("Removed %d rows with missing data.", nrow(dat_missing)))
+      }
+
+      # if there are multiple facilities, take one at random
+      dat_unique <- dat |>
+        dplyr::group_by(.data$fc_code) |>
+        dplyr::slice(1) |>
+        dplyr::ungroup()
+
+      n_dupes <- nrow(dat) - nrow(dat_unique)
+      if (n_dupes > 0) {
+        warning(sprintf("Excluded %d rows with duplicate facility codes.", n_dupes))
+      }
+
+      private$.training_data <- dat_unique
       private$.target <- target
       private$.priors <- priors
-      private$.countries <- as.factor(unique(dat$fc_country))
+      private$.countries <- as.factor(unique(dat_unique$fc_country))
       private$.samples <- NULL
     },
 
@@ -122,9 +135,6 @@ MixedEffects <- R6::R6Class("MixedEffects",
       if (!requireNamespace("rjags", quietly = TRUE)) {
         stop("Package 'rjags' is required but not installed.")
       }
-      if (!requireNamespace("coda", quietly = TRUE)) {
-        stop("Package 'coda' is required but not installed.")
-      }
 
       set.seed(seed)
 
@@ -143,11 +153,15 @@ MixedEffects <- R6::R6Class("MixedEffects",
       )
 
       jags_data <- c(jags_data, as.list(private$.priors))
+      jags_inits <- function(chain) {
+        list(.RNG.name = "base::Mersenne-Twister", .RNG.seed = seed * chain)
+      }
+
       jags_mod <- rjags::jags.model(model_file,
         data = jags_data,
         n.chains = n.chains,
         n.adapt = n.adapt,
-        inits = list(.RNG.name = "base::Wichmann-Hill", .RNG.seed = seed),
+        inits = jags_inits,
         ...
       )
 
@@ -182,9 +196,13 @@ MixedEffects <- R6::R6Class("MixedEffects",
     #'
     #' @param scale One of "log" or "natural". Default "log".
     #'
-    #' @return Matrix of predicted costs.
-    #' Rows = simulations, columns = input rows.
-    predict = function(dat, scale = "log") {
+    #' @param summarised Logical. If TRUE, returns mean and 95% CI instead of
+    #' full posterior samples. Default FALSE.
+    #'
+    #' @return If summarised=FALSE, matrix of predicted costs with
+    #' rows = simulations, columns = input rows. If summarised=TRUE,
+    #' data.frame with mean, lower (2.5%), and upper (97.5%) quantiles.
+    predict = function(dat, scale = "log", summarised = FALSE) {
       stopifnot(
         "scale must be 'log' or 'natural'" =
           (scale == "log" || scale == "natural")
@@ -253,7 +271,16 @@ MixedEffects <- R6::R6Class("MixedEffects",
       preds <- pred_means + epsilon * sig
 
       if (scale == "natural") {
-        return(exp(preds))
+        preds <- exp(preds)
+      }
+
+      if (summarised) {
+        pred_summary <- data.frame(
+          mean = apply(preds, 2, mean),
+          lower = apply(preds, 2, quantile, probs = 0.025),
+          upper = apply(preds, 2, quantile, probs = 0.975)
+        )
+        return(pred_summary)
       } else {
         return(preds)
       }
@@ -313,6 +340,143 @@ MixedEffects <- R6::R6Class("MixedEffects",
     #' @return Logical indicating if model is fitted.
     is_fitted = function() {
       !is.null(private$.samples)
+    },
+
+    #' @description
+    #' Create trace plots for MCMC chains using \code{bayesplot}.
+    #'
+    #' @param ... Additional arguments passed to \code{bayesplot::mcmc_trace}.
+    #'
+    #' @return A ggplot object showing trace plots.
+    #' @seealso \code{\link[bayesplot]{mcmc_trace}}
+    mcmc_trace = function(...) {
+      private$.check_fitted()
+      samples <- private$.samples
+      bayesplot::mcmc_trace(samples, ...)
+    },
+
+    #' @description
+    #' Compute and plot R-hat convergence diagnostics.
+    #'
+    #' @return A ggplot object showing R-hat diagnostics.
+    mcmc_rhat = function() {
+      private$.check_fitted()
+      samples <- private$.samples
+      rhat <- coda::gelman.diag(samples,
+        autoburnin = FALSE
+      )
+
+      ggplot2::ggplot(
+        data.frame(
+          Parameter = names(rhat$psrf[, 1]),
+          Rhat = rhat$psrf[, "Point est."]
+        ),
+        ggplot2::aes(x = reorder(Parameter, Rhat), y = Rhat)
+      ) +
+        ggplot2::geom_hline(yintercept = 1.05, linetype = "dashed") +
+        ggplot2::geom_point(col = "red") +
+        ggplot2::labs(y = expression(hat(R)), x = NULL) +
+        ggplot2::theme_minimal()
+    },
+    #' @description
+    #' Create autocorrelation plots for MCMC chains using \code{bayesplot}.
+    #'
+    #' @param ... Additional arguments passed to \code{bayesplot::mcmc_acf}.
+    #' @seealso \code{\link[bayesplot]{mcmc_acf}}
+    #' @return A ggplot object showing autocorrelation plots.
+    mcmc_acf = function(...) {
+      private$.check_fitted()
+      samples <- private$.samples
+      bayesplot::mcmc_acf(samples, ...)
+    },
+    #' @description
+    #' Computes the effective sample size of the posterior
+    #' samples using the \code{coda::effectiveSize} function.
+    #'
+    #' @return A named numeric vector.
+    #' @seealso \code{\link[coda]{effectiveSize}}
+    n_eff = function() {
+      private$.check_fitted()
+      samples <- private$.samples
+      coda::effectiveSize(samples)
+    },
+    #' @description
+    #' Plot posterior distributions using \code{bayesplot::mcmc_areas}.
+    #'
+    #' @param prob Numeric. Density to highlight. Default 0.9.
+    #' @param ... Additional arguments passed to \code{bayesplot::mcmc_areas}.
+    #' @return A ggplot object showing posterior distributions.
+    #' @seealso \code{\link[bayesplot]{mcmc_areas}}
+    plot_posteriors = function(prob = 0.9, ...) {
+      private$.check_fitted()
+      samples <- private$.samples
+      bayesplot::mcmc_areas(samples, ...)
+    },
+
+    #' @description
+    #' Perform k-fold cross-validation.
+    #'
+    #' @param k_folds Integer. Number of folds for cross-validation.
+    #' Default is 5.
+    #' @param scale Scale to return results in. One of "log" or "natural".
+    #' Default "log".
+    #' @param seed Integer. Optional random seed for reproducible fold
+    #' assignment. Default NULL.
+    #' @param ... Additional arguments passed to the fit() method.
+    #'
+    #' @return Data.frame with predictions from cross-validation, including
+    #' fold assignments and observed values.
+    k_fold_cv = function(k_folds = 5, scale = "log",
+                         seed = NULL, ...) {
+      if (!is.null(seed)) {
+        set.seed(seed)
+      }
+
+      dat <- private$.training_data
+      n_obs <- nrow(dat)
+
+      # Create fold assignments
+      fold_ids <- sample(rep(1:k_folds, length.out = n_obs))
+      dat$fold <- fold_ids
+
+      cv_predictions <- list()
+
+      for (fold in 1:k_folds) {
+        message("Processing fold ", fold, " of ", k_folds)
+
+        # Split data
+        train_data <- dat[dat$fold != fold, ]
+        test_data <- dat[dat$fold == fold, ]
+
+        # Create temporary model for this fold
+        temp_model <- MixedEffects$new(
+          dat = train_data,
+          covariates = private$.covariates,
+          target = private$.target,
+          priors = private$.priors
+        )
+
+        # Fit model on training fold
+        temp_model$fit(...)
+
+        # Make predictions on test fold
+        fold_preds <- temp_model$predict(
+          test_data,
+          scale = scale,
+          summarised = TRUE
+        )
+
+        fold_results <- data.frame(
+          fold = fold,
+          observed = test_data[[private$.target]],
+          fold_preds
+        )
+
+        cv_predictions[[fold]] <- fold_results
+      }
+
+      # Combine all fold results
+      do.call(rbind, cv_predictions)
     }
   ),
   private = list(
@@ -329,6 +493,14 @@ MixedEffects <- R6::R6Class("MixedEffects",
         x[, logical_cols] <- lapply(x[, logical_cols, drop = FALSE], as.numeric)
       }
       x
+    },
+    .check_fitted = function() {
+      if (!self$is_fitted()) {
+        stop(
+          "Model must be fitted first. ",
+          "Call $fit() first."
+        )
+      }
     }
   )
 )
