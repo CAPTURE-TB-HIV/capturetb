@@ -1,14 +1,14 @@
 test_that("capturetb R6 class initialization works", {
   # Test default initialization
-  model <- capturetb$new()
+  model <- MixedEffects$new()
 
   dat <- get_data("OP treatment visit")
   expect_true(R6::is.R6(model))
   expect_false(model$is_fitted())
-  expect_equal(model$get_covariates(), capturetb_covariates())
-  expect_true(is.factor(model$get_countries()))
-  expect_equal(levels(model$get_countries()), unique(dat$fc_country))
-  expect_equal(model$get_priors(), capturetb_priors())
+  expect_equal(model$covariates(), capturetb_covariates())
+  expect_true(is.factor(model$countries()))
+  expect_equal(levels(model$countries()), unique(dat$fc_country))
+  expect_equal(model$priors(), capturetb_priors())
 
   dat_cleaned <- dat |>
     dplyr::group_by(.data$fc_code) |>
@@ -20,13 +20,13 @@ test_that("capturetb R6 class initialization works", {
         ~ !is.na(.) & !is.nan(.) & is.finite(.)
       )
     )
-  expect_equal(model$get_training_data(), dat_cleaned)
+  expect_equal(model$training_data(), dat_cleaned)
 })
 
 test_that("capturetb R6 class validation works", {
   # Test invalid data
   expect_error(
-    capturetb$new(dat = "not a data frame"),
+    MixedEffects$new(dat = "not a data frame"),
     "dat must be a data.frame"
   )
 
@@ -34,19 +34,29 @@ test_that("capturetb R6 class validation works", {
   data <- get_data("OP treatment visit")
   data$log_USD_p_bldgspace <- NULL
   expect_error(
-    capturetb$new(dat = data),
-    "Missing covariates in data"
+    MixedEffects$new(dat = data),
+    "Missing covariates in data: log_USD_p_bldgspace"
   )
 
   # Test missing target
   expect_error(
-    capturetb$new(target = "nonexistent_column"),
-    "Target variable.*not found"
+    MixedEffects$new(target = "nonexistent_column"),
+    "Target variable 'nonexistent_column' not found in data"
+  )
+
+  # Test mismatched priors and covariates
+  expect_error(
+    MixedEffects$new(covariates = c("one", "two")),
+    "6 fixed effect priors provided but only 2 covariates"
+  )
+  expect_error(
+    MixedEffects$new(covariates = c(capturetb_covariates(), "another")),
+    "7 covariates provided but only 6 fixed effect priors"
   )
 })
 
 test_that("capturetb R6 predict method validation works", {
-  model <- capturetb$new()
+  model <- MixedEffects$new()
 
   # Test prediction before fitting
   expect_error(
@@ -66,7 +76,7 @@ test_that("capturetb R6 class methods work with small example", {
   n_countries <- 2
   small_data <- data[data$fc_country %in% countries_sample, ]
 
-  model <- capturetb$new(dat = small_data)
+  model <- MixedEffects$new(dat = small_data)
 
   # Test fitting with minimal iterations but sufficient for convergence
   expect_message(
@@ -75,7 +85,7 @@ test_that("capturetb R6 class methods work with small example", {
   )
 
   expect_true(model$is_fitted())
-  samples <- model$get_samples()
+  samples <- model$samples()
   expect_true(inherits(samples, "mcmc.list"))
   expect_equal(length(samples), 2)
   expect_equal(dim(samples[[1]]), c(500 / 2, 9 + n_countries))
@@ -90,21 +100,24 @@ test_that("capturetb R6 class methods work with small example", {
 })
 
 test_that("capturetb R6 getter methods work", {
-  model <- capturetb$new()
+  model <- MixedEffects$new()
 
-  expect_equal(model$get_covariates(), capturetb_covariates())
-  expect_true(is.factor(model$get_countries()))
-  expect_true(inherits(model$get_priors(), "capturetbpriors"))
-  expect_null(model$get_samples())
+  expect_equal(model$covariates(), capturetb_covariates())
+  expect_true(is.factor(model$countries()))
+  expect_true(inherits(model$priors(), "capturetbpriors"))
+  expect_null(model$samples())
 })
 
 test_that("can make predictions for new countries", {
   data <- get_data("OP treatment visit")
   covariates <- capturetb_covariates()[1:3]
-  model <- capturetb$new(
+  priors <- capturetb_priors()
+  priors$prior.beta.mean <- priors$prior.beta.mean[1:3]
+  model <- MixedEffects$new(
     dat =
       data[data$fc_country %in% c("Ethiopia", "Kenya"), ],
-    covariates = covariates
+    covariates = covariates,
+    priors = priors
   )
 
   # Mock private$samples
@@ -132,7 +145,7 @@ test_that("can make predictions for new countries", {
   )
   fake_samples <- coda::as.mcmc(smat)
   fake_samples <- coda::mcmc.list(fake_samples)
-  model$.__enclos_env__$private$samples <- fake_samples
+  model$.__enclos_env__$private$.samples <- fake_samples
 
   # Prepare newdata for prediction
   newdata <- data.frame(

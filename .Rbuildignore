@@ -7,3 +7,5 @@
 ^docker$
 ^Dockerfile$
 ^codecov.yml
+^.*.html
+vignettes/*/*
