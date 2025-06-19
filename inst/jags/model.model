@@ -10,7 +10,7 @@ model {
   }
 
 	mu_alpha ~ dnorm(prior.mu_alpha.mean, prior.mu_alpha.precision)
-	
+
 	sigma_alpha ~ dexp(prior.sigma_alpha.rate)
 	tau_alpha <- pow(sigma_alpha, -2)
 

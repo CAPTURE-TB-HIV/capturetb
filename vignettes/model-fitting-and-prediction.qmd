@@ -70,7 +70,7 @@ priors <- capturetb::capturetb_priors(
   beta.mean = c(0,-0.0142, -0.0412, 0.304, 0.348, 0.352, -0.29),
   beta.precision = c(0.01, 227, 139, 46.4, 80.8, 55.2, 234.5))
 
-model <- capturetb::capturetb$new(
+model <- capturetb::MixedEffects$new(
   dat = data,
   covariates = covariates,
   target = "USD_unitcost_total",
@@ -78,7 +78,7 @@ model <- capturetb::capturetb$new(
 )
 
 # See all priors used in the model
-priors <- model$get_priors()
+priors <- model$priors()
 print(priors)
 ```
 
@@ -113,7 +113,7 @@ model$fit(
 
 ```{r model-summary}
 # Check summary statistics of the fitted samples
-fitted_samples <- model$get_samples()
+fitted_samples <- model$samples()
 summary(fitted_samples)
 ```
 
@@ -139,7 +139,7 @@ Plotting posteriors:
 bayesplot::mcmc_areas(fitted_samples, 
                       pars = paste0("beta[", 1:length(covariates), "]"),
                       prob = 0.9) + 
-  scale_y_discrete(labels = model$get_covariates())
+  scale_y_discrete(labels = model$covariates())
 ```
 
 ```{r}
@@ -154,7 +154,7 @@ We can now generate predictions for the training data to evaluate model fit:
 
 ```{r predictions}
 # Generate predictions for the training data on log scale
-dat <- model$get_training_data()
+dat <- model$training_data()
 predictions <- model$predict(dat, scale = "log")
 
 # Calculate summary statistics for predictions
