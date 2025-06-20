@@ -300,3 +300,53 @@ test_that("can get n_eff after model fitting", {
   expect_equal(length(res), 14)
   expect_true(is.numeric(res))
 })
+
+test_that("performance method validation works", {
+  model <- MixedEffects$new(dat_cleaned)
+
+  # Test performance before fitting
+  expect_error(
+    model$performance(),
+    "Model must be fitted first"
+  )
+
+  # Test invalid scale parameter
+  model$.__enclos_env__$private$.samples <- mock_samples(100)
+  expect_error(
+    model$performance(scale = "invalid"),
+    "scale must be 'log' or 'natural'"
+  )
+})
+
+test_that("performance method works with log scale", {
+  model <- unitcost()
+  perf_log <- model$performance(scale = "log")
+
+  expect_true(is.data.frame(perf_log))
+  expect_equal(nrow(perf_log), 1)
+  expected_names <- c("mae", "rmse", "correlation", "ci_coverage")
+  expect_equal(names(perf_log), expected_names)
+  expect_true(all(sapply(perf_log, is.numeric)))
+  expect_true(perf_log$mae >= 0 & perf_log$mae <= 1)
+  expect_true(perf_log$rmse >= 0 & perf_log$rmse <= 1)
+  expect_true(perf_log$correlation >= 0.5 && perf_log$correlation <= 1)
+  expect_true(perf_log$ci_coverage >= 0.95 && perf_log$ci_coverage <= 1)
+})
+
+test_that("performance method works with natural scale", {
+  model <- unitcost()
+  perf_natural <- model$performance(scale = "natural")
+
+  expect_true(is.data.frame(perf_natural))
+  expect_equal(nrow(perf_natural), 1)
+  expected_names <- c("mae", "rmse", "correlation", "ci_coverage")
+  expect_equal(names(perf_natural), expected_names)
+  expect_true(all(sapply(perf_natural, is.numeric)))
+  expect_true(perf_natural$mae >= 1)
+  expect_true(perf_natural$rmse >= 2)
+  expect_true(perf_natural$correlation >= 0.5 && perf_natural$correlation <= 1)
+  expect_true(perf_natural$ci_coverage >= 0.95 && perf_natural$ci_coverage <= 1)
+
+  perf_log <- model$performance(scale = "log")
+  expect_equal(perf_log$ci_coverage, perf_natural$ci_coverage)
+})

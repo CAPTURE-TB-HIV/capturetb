@@ -375,7 +375,7 @@ MixedEffects <- R6::R6Class("MixedEffects",
     #' Compute and plot R-hat convergence diagnostics.
     #'
     #' @return A ggplot object showing R-hat diagnostics.
-    #' @importFrom ggplot2 ggplot geom_hline geom_point 
+    #' @importFrom ggplot2 ggplot geom_hline geom_point
     #' labs theme_minimal aes
     #' @importFrom coda gelman.diag
     mcmc_rhat = function() {
@@ -402,7 +402,7 @@ MixedEffects <- R6::R6Class("MixedEffects",
     #'
     #' @param ... Additional arguments passed to \code{bayesplot::mcmc_acf}.
     #' @seealso \code{\link[bayesplot]{mcmc_acf}}
-    #'@importFrom bayesplot mcmc_acf
+    #' @importFrom bayesplot mcmc_acf
     #' @return A ggplot object showing autocorrelation plots.
     mcmc_acf = function(...) {
       private$.check_fitted()
@@ -434,7 +434,236 @@ MixedEffects <- R6::R6Class("MixedEffects",
       samples <- private$.samples
       bayesplot::mcmc_areas(samples, prob = prob, ...)
     },
+    #' @description
+    #' Calculate model performance metrics on training data.
+    #'
+    #' This method evaluates the fitted model's performance by making predictions
+    #' on the training data and computing mean absolute error (MAE),
+    #' root mean square error (RMSE), correlation between observed
+    #' and predicted values, and credible interval coverage.
+    #'
+    #' @param scale Character. Scale for predictions and performance evaluation.
+    #' One of "log" (default) or "natural". When "log", observed values are
+    #' log-transformed for comparison with log-scale predictions.
+    #'
+    #' @return A data.frame with performance metrics:
+    #' \itemize{
+    #'   \item mae: Mean Absolute Error between observed and predicted values
+    #'   \item rmse: Root Mean Square Error between observed and predicted values
+    #'   \item correlation: Pearson correlation between observed and predicted values
+    #'   \item ci_coverage: Proportion of observations within 95% credible intervals
+    #' }
+    #'
+    #' @examples
+    #' \dontrun{
+    #' model <- MixedEffects$new()
+    #' model$fit()
+    #' performance_metrics <- model$performance()
+    #' print(performance_metrics)
+    #' }
+    performance = function(scale = "log") {
+      stopifnot(
+        "scale must be 'log' or 'natural'" =
+          (scale == "log" || scale == "natural")
+      )
 
+      private$.check_fitted()
+      dat <- private$.training_data
+      predictions <- self$predict(dat,
+        scale = scale,
+        summarised = TRUE
+      )
+
+      # Get observed values in the correct scale
+      if (scale == "log") {
+        observed_values <- log(dat[[private$.target]])
+      } else {
+        observed_values <- dat[[private$.target]]
+      }
+
+      results_df <- data.frame(
+        observed = observed_values,
+        country = dat$fc_country,
+        predictions
+      )
+
+      # Calculate performance metrics
+      performance_metrics <- results_df |>
+        dplyr::summarise(
+          mae = mean(abs(.data$observed - .data$mean)),
+          rmse = sqrt(mean((.data$observed - .data$mean)^2)),
+          correlation = stats::cor(.data$observed, .data$mean),
+          ci_coverage = mean(.data$observed >= .data$lower &
+            .data$observed <= .data$upper)
+        )
+
+      performance_metrics
+    },
+    #' @description
+    #' Create a residual plot for for diagnosing model fit.
+    #'
+    #' This method generates a diagnostic plot showing residuals (observed minus
+    #' predicted values) against fitted values. Residuals are on the log scale
+    #' as the model is fitted on a log scale. The plot includes a reference line
+    #' at zero, a LOESS smooth curve to identify patterns, and points colored by
+    #' country.
+    #'
+    #' @param add_smooth Logical. Whether to add a LOESS smooth curve to
+    #' identify patterns in residuals. Default TRUE.
+    #' @param color_by_country Logical. Whether to color points by country.
+    #' Default TRUE.
+    #'
+    #' @return A ggplot object showing residuals vs fitted values.
+    #' @importFrom ggplot2 ggplot aes geom_point geom_hline geom_smooth
+    #' labs theme_minimal theme
+    plot_residuals = function(add_smooth = TRUE,
+                              color_by_country = TRUE) {
+      stopifnot(
+        "add_smooth must be logical" = is.logical(add_smooth),
+        "color_by_country must be logical" = is.logical(color_by_country)
+      )
+
+      private$.check_fitted()
+      dat <- private$.training_data
+      pred <- self$predict(dat, scale = "log", summarised = TRUE)
+      observed <- dat[[private$.target]]
+
+      residuals <- log(observed) - pred$mean
+
+      res_df <- data.frame(
+        fitted = pred$mean,
+        country = dat$fc_country,
+        residuals = residuals
+      )
+
+      # Create base plot
+      p <- ggplot2::ggplot(res_df, ggplot2::aes(
+        x = .data$fitted,
+        y = .data$residuals
+      )) +
+        ggplot2::geom_hline(
+          yintercept = 0, linetype = "dashed",
+          color = "red"
+        )
+
+      if (color_by_country) {
+        p <- p + ggplot2::geom_point(ggplot2::aes(color = .data$country),
+          alpha = 0.7
+        )
+      } else {
+        p <- p + ggplot2::geom_point(alpha = 0.7)
+      }
+
+      if (add_smooth) {
+        p <- p + ggplot2::geom_smooth(
+          method = "loess", se = TRUE,
+          color = "grey", alpha = 0.3
+        )
+      }
+
+      p <- p + ggplot2::labs(
+        title = "Residuals vs Fitted Values",
+        subtitle = "Points should be randomly scattered around the red line",
+        x = "Residuals (Log Observed - Log Predicted)",
+        y = "Log Predicted Values",
+        color = "Country"
+      ) +
+        ggplot2::theme_minimal() +
+        ggplot2::theme(legend.position = "bottom")
+
+      return(p)
+    },
+    #' @description
+    #' Create a scatter plot of observed vs predicted values to assess fit.
+    #'
+    #' This method generates a diagnostic plot showing the relationship between
+    #' observed and predicted values on the training data, with a reference line
+    #' for perfect predictions and optional confidence intervals.
+    #'
+    #' @param scale Character. Scale for the plot. One of "log" (default) or
+    #' "natural". When "log", both observed and predicted values are shown on
+    #' log scale.
+    #' @param include_ci Logical. Whether to show prediction intervals as
+    #' error bars. Default TRUE.
+    #' @param color_by_country Logical. Whether to color points by country.
+    #' Default TRUE.
+    #' @return A ggplot object showing observed vs predicted values.
+    #'
+    #' @examples
+    #' \dontrun{
+    #' model <- MixedEffects$new()
+    #' model$fit()
+    #' p <- model$plot_fit()
+    #' print(p)
+    #'
+    #' # Natural scale without confidence intervals
+    #' p2 <- model$plot_fit(scale = "natural", include_ci = FALSE)
+    #' print(p2)
+    #' }
+    #'
+    #' @importFrom ggplot2 ggplot aes geom_point geom_abline geom_errorbar
+    #' labs theme_minimal
+    plot_fit = function(scale = "log",
+                        include_ci = TRUE,
+                        color_by_country = TRUE) {
+      stopifnot(
+        "scale must be 'log' or 'natural'" =
+          (scale == "log" || scale == "natural"),
+        "include_ci must be logical" = is.logical(include_ci)
+      )
+
+      private$.check_fitted()
+      dat <- private$.training_data
+      pred <- self$predict(dat, scale = scale, summarised = TRUE)
+      observed <- dat[[private$.target]]
+
+      if (scale == "log") {
+        observed <- log(observed)
+        x_lab <- paste("Observed", private$.target, "(log scale)")
+        y_lab <- paste("Predicted", private$.target, "(log scale)")
+      } else {
+        x_lab <- paste("Observed", private$.target)
+        y_lab <- paste("Predicted", private$.target)
+      }
+
+      results_df <- data.frame(
+        observed = observed,
+        country = dat$fc_country,
+        pred
+      )
+
+      plot <- ggplot2::ggplot(results_df, ggplot2::aes(
+        x = .data$observed,
+        y = .data$mean
+      )) +
+        ggplot2::geom_abline(
+          slope = 1, intercept = 0, linetype = "dashed",
+          color = "red"
+        ) +
+        ggplot2::labs(
+          title = "Observed vs Predicted Values",
+          subtitle = "Dashed line shows perfect predictions",
+          x = x_lab,
+          y = y_lab,
+          color = "Country"
+        ) +
+        ggplot2::theme_minimal()
+
+      if (include_ci) {
+        plot <- plot + ggplot2::geom_errorbar(
+          ggplot2::aes(ymin = .data$lower, ymax = .data$upper),
+          alpha = 0.3, width = 0
+        )
+      }
+      if (color_by_country) {
+        plot <- plot + ggplot2::geom_point(ggplot2::aes(color = .data$country),
+          alpha = 0.7
+        )
+      } else {
+        plot <- plot + ggplot2::geom_point(alpha = 0.7)
+      }
+      return(plot)
+    },
     #' @description
     #' Perform k-fold cross-validation.
     #'
@@ -488,9 +717,15 @@ MixedEffects <- R6::R6Class("MixedEffects",
           summarised = TRUE
         )
 
+        obs <- test_data[[private$.target]]
+
+        if (scale == "log") {
+          obs <- log(obs)
+        }
+
         fold_results <- data.frame(
           fold = fold,
-          observed = test_data[[private$.target]],
+          observed = obs,
           fold_preds
         )
 
