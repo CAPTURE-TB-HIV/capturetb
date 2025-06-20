@@ -24,6 +24,17 @@ predictions <- model$predict(new_data)
 }
 
 }
+\seealso{
+\code{\link[rjags]{jags.model}}
+
+\code{\link[bayesplot]{mcmc_trace}}
+
+\code{\link[bayesplot]{mcmc_acf}}
+
+\code{\link[coda]{effectiveSize}}
+
+\code{\link[bayesplot]{mcmc_areas}}
+}
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
@@ -37,6 +48,12 @@ predictions <- model$predict(new_data)
 \item \href{#method-MixedEffects-countries}{\code{MixedEffects$countries()}}
 \item \href{#method-MixedEffects-priors}{\code{MixedEffects$priors()}}
 \item \href{#method-MixedEffects-is_fitted}{\code{MixedEffects$is_fitted()}}
+\item \href{#method-MixedEffects-mcmc_trace}{\code{MixedEffects$mcmc_trace()}}
+\item \href{#method-MixedEffects-mcmc_rhat}{\code{MixedEffects$mcmc_rhat()}}
+\item \href{#method-MixedEffects-mcmc_acf}{\code{MixedEffects$mcmc_acf()}}
+\item \href{#method-MixedEffects-n_eff}{\code{MixedEffects$n_eff()}}
+\item \href{#method-MixedEffects-plot_posteriors}{\code{MixedEffects$plot_posteriors()}}
+\item \href{#method-MixedEffects-k_fold_cv}{\code{MixedEffects$k_fold_cv()}}
 \item \href{#method-MixedEffects-clone}{\code{MixedEffects$clone()}}
 }
 }
@@ -74,7 +91,7 @@ from the ValueTB dataset installed with this package.}
 \if{html}{\out{<a id="method-MixedEffects-fit"></a>}}
 \if{latex}{\out{\hypertarget{method-MixedEffects-fit}{}}}
 \subsection{Method \code{fit()}}{
-Fit the CaptureTB model using JAGS.
+Fit the model using JAGS. Requires JAGS and rjags to be installed.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{MixedEffects$fit(
   n.chains = 3,
@@ -82,7 +99,7 @@ Fit the CaptureTB model using JAGS.
   n.burnin = 5000,
   n.adapt = 5000,
   n.thin = 100,
-  seed = 123,
+  seed = NULL,
   ...
 )}\if{html}{\out{</div>}}
 }
@@ -95,13 +112,14 @@ Fit the CaptureTB model using JAGS.
 \item{\code{n.iter}}{Integer. Number of total iterations per chain.
 Default is 100000.}
 
-\item{\code{n.burnin}}{Integer. Number of burn-in iterations. Default is 2000.}
+\item{\code{n.burnin}}{Integer. Number of burn-in iterations. Default is 5000.}
 
-\item{\code{n.adapt}}{Integer. Number of adaptation iterations. Default is 2000.}
+\item{\code{n.adapt}}{Integer. Number of adaptation iterations. Default is 5000.}
 
-\item{\code{n.thin}}{Integer. Thinning interval. Default is 10.}
+\item{\code{n.thin}}{Integer. Thinning interval. Default is 100.}
 
-\item{\code{seed}}{Integer. Used to seed both the R and JAGS random generators.}
+\item{\code{seed}}{Optonal integer. Used to seed both the R and JAGS random
+generators for reproducible results.}
 
 \item{\code{...}}{Additional arguments passed to rjags::jags.model().}
 }
@@ -117,7 +135,7 @@ Self (invisibly) for method chaining.
 \subsection{Method \code{predict()}}{
 Generate predictions from the fitted model.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{MixedEffects$predict(dat, scale = "log")}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{MixedEffects$predict(dat, scale = "log", summarised = FALSE)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -126,12 +144,16 @@ Generate predictions from the fitted model.
 \item{\code{dat}}{Data.frame. New input data for predictions.}
 
 \item{\code{scale}}{One of "log" or "natural". Default "log".}
+
+\item{\code{summarised}}{Logical. If TRUE, returns mean and 95\% CI instead of
+full posterior samples. Default FALSE.}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-Matrix of predicted costs.
-Rows = simulations, columns = input rows.
+If summarised=FALSE, matrix of predicted costs with
+rows = simulations, columns = input rows. If summarised=TRUE,
+data.frame with mean, lower (2.5\%), and upper (97.5\%) quantiles.
 }
 }
 \if{html}{\out{<hr>}}
@@ -223,6 +245,125 @@ Check if the model has been fitted.
 
 \subsection{Returns}{
 Logical indicating if model is fitted.
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-MixedEffects-mcmc_trace"></a>}}
+\if{latex}{\out{\hypertarget{method-MixedEffects-mcmc_trace}{}}}
+\subsection{Method \code{mcmc_trace()}}{
+Create trace plots for MCMC chains using \code{bayesplot}.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{MixedEffects$mcmc_trace(...)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{...}}{Additional arguments passed to \code{bayesplot::mcmc_trace}.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+A ggplot object showing trace plots.
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-MixedEffects-mcmc_rhat"></a>}}
+\if{latex}{\out{\hypertarget{method-MixedEffects-mcmc_rhat}{}}}
+\subsection{Method \code{mcmc_rhat()}}{
+Compute and plot R-hat convergence diagnostics.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{MixedEffects$mcmc_rhat()}\if{html}{\out{</div>}}
+}
+
+\subsection{Returns}{
+A ggplot object showing R-hat diagnostics.
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-MixedEffects-mcmc_acf"></a>}}
+\if{latex}{\out{\hypertarget{method-MixedEffects-mcmc_acf}{}}}
+\subsection{Method \code{mcmc_acf()}}{
+Create autocorrelation plots for MCMC chains using \code{bayesplot}.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{MixedEffects$mcmc_acf(...)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{...}}{Additional arguments passed to \code{bayesplot::mcmc_acf}.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+A ggplot object showing autocorrelation plots.
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-MixedEffects-n_eff"></a>}}
+\if{latex}{\out{\hypertarget{method-MixedEffects-n_eff}{}}}
+\subsection{Method \code{n_eff()}}{
+Computes the effective sample size of the posterior
+samples using the \code{coda::effectiveSize} function.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{MixedEffects$n_eff()}\if{html}{\out{</div>}}
+}
+
+\subsection{Returns}{
+A named numeric vector.
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-MixedEffects-plot_posteriors"></a>}}
+\if{latex}{\out{\hypertarget{method-MixedEffects-plot_posteriors}{}}}
+\subsection{Method \code{plot_posteriors()}}{
+Plot posterior distributions using \code{bayesplot::mcmc_areas}.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{MixedEffects$plot_posteriors(prob = 0.9, ...)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{prob}}{Numeric. Density to highlight. Default 0.9.}
+
+\item{\code{...}}{Additional arguments passed to \code{bayesplot::mcmc_areas}.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+A ggplot object showing posterior distributions.
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-MixedEffects-k_fold_cv"></a>}}
+\if{latex}{\out{\hypertarget{method-MixedEffects-k_fold_cv}{}}}
+\subsection{Method \code{k_fold_cv()}}{
+Perform k-fold cross-validation.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{MixedEffects$k_fold_cv(k_folds = 5, scale = "log", seed = NULL, ...)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{k_folds}}{Integer. Number of folds for cross-validation.
+Default is 5.}
+
+\item{\code{scale}}{Scale to return results in. One of "log" or "natural".
+Default "log".}
+
+\item{\code{seed}}{Integer. Optional random seed for reproducible fold
+assignment and model runs. Default NULL.}
+
+\item{\code{...}}{Additional arguments passed to the fit() method.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+Data.frame with predictions from cross-validation, including
+fold assignments and observed values.
 }
 }
 \if{html}{\out{<hr>}}
