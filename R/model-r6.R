@@ -605,8 +605,18 @@ JAGSModel <- R6::R6Class("JAGSModel",
         train_data <- dat[dat$fold != fold, ]
         test_data <- dat[dat$fold == fold, ]
 
+        if (private$.model == "fixedeffects.model") {
+          model_type <- FixedEffects
+        }
+        if (private$.model == "mixedeffects.model") {
+          model_type <- MixedEffects
+        }
+        if (private$.model == "randomeffects.model") {
+          model_type <- RandomEffects
+        }
+
         # Create temporary model for this fold
-        temp_model <- MixedEffects$new(
+        temp_model <- model_type$new(
           dat = train_data,
           covariates = private$.covariates,
           target = private$.target,
