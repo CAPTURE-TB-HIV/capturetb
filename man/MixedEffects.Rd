@@ -23,6 +23,33 @@ model$fit(n.iter = 5000)
 predictions <- model$predict(new_data)
 }
 
+
+## ------------------------------------------------
+## Method `MixedEffects$performance`
+## ------------------------------------------------
+
+\dontrun{
+model <- MixedEffects$new()
+model$fit()
+performance_metrics <- model$performance()
+print(performance_metrics)
+}
+
+## ------------------------------------------------
+## Method `MixedEffects$plot_fit`
+## ------------------------------------------------
+
+\dontrun{
+model <- MixedEffects$new()
+model$fit()
+p <- model$plot_fit()
+print(p)
+
+# Natural scale without confidence intervals
+p2 <- model$plot_fit(scale = "natural", include_ci = FALSE)
+print(p2)
+}
+
 }
 \seealso{
 \code{\link[rjags]{jags.model}}
@@ -53,6 +80,9 @@ predictions <- model$predict(new_data)
 \item \href{#method-MixedEffects-mcmc_acf}{\code{MixedEffects$mcmc_acf()}}
 \item \href{#method-MixedEffects-n_eff}{\code{MixedEffects$n_eff()}}
 \item \href{#method-MixedEffects-plot_posteriors}{\code{MixedEffects$plot_posteriors()}}
+\item \href{#method-MixedEffects-performance}{\code{MixedEffects$performance()}}
+\item \href{#method-MixedEffects-plot_residuals}{\code{MixedEffects$plot_residuals()}}
+\item \href{#method-MixedEffects-plot_fit}{\code{MixedEffects$plot_fit()}}
 \item \href{#method-MixedEffects-k_fold_cv}{\code{MixedEffects$k_fold_cv()}}
 \item \href{#method-MixedEffects-clone}{\code{MixedEffects$clone()}}
 }
@@ -337,6 +367,132 @@ A ggplot object showing posterior distributions.
 }
 }
 \if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-MixedEffects-performance"></a>}}
+\if{latex}{\out{\hypertarget{method-MixedEffects-performance}{}}}
+\subsection{Method \code{performance()}}{
+Calculate model performance metrics on training data.
+
+This method evaluates the fitted model's performance by making predictions
+on the training data and computing mean absolute error (MAE),
+root mean square error (RMSE), correlation between observed
+and predicted values, and credible interval coverage.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{MixedEffects$performance(scale = "log")}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{scale}}{One of "log" or "natural". Default "log".}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+A data.frame with performance metrics:
+\itemize{
+\item mae: Mean Absolute Error between observed and predicted values
+\item rmse: Root Mean Square Error between observed and predicted values
+\item correlation: Pearson correlation between observed and predicted values
+\item ci_coverage: Proportion of observations within 95\% credible intervals
+}
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\dontrun{
+model <- MixedEffects$new()
+model$fit()
+performance_metrics <- model$performance()
+print(performance_metrics)
+}
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-MixedEffects-plot_residuals"></a>}}
+\if{latex}{\out{\hypertarget{method-MixedEffects-plot_residuals}{}}}
+\subsection{Method \code{plot_residuals()}}{
+Create a residual plot for for diagnosing model fit.
+
+This method generates a diagnostic plot showing residuals (observed minus
+predicted values) against fitted values. Residuals are on the log scale
+as the model is fitted on a log scale. The plot includes a reference line
+at zero, a LOESS smooth curve to identify patterns, and points colored by
+country.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{MixedEffects$plot_residuals(add_smooth = TRUE, color_by_country = TRUE)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{add_smooth}}{Logical. Whether to add a LOESS smooth curve to
+identify patterns in residuals. Default TRUE.}
+
+\item{\code{color_by_country}}{Logical. Whether to color points by country.
+Default TRUE.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+A ggplot object showing residuals vs fitted values.
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-MixedEffects-plot_fit"></a>}}
+\if{latex}{\out{\hypertarget{method-MixedEffects-plot_fit}{}}}
+\subsection{Method \code{plot_fit()}}{
+Create a scatter plot of observed vs predicted values to assess fit.
+
+This method generates a diagnostic plot showing the relationship between
+observed and predicted values on the training data, with a reference line
+for perfect predictions and optional confidence intervals.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{MixedEffects$plot_fit(
+  scale = "log",
+  include_ci = TRUE,
+  color_by_country = TRUE
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{scale}}{One of "log" or "natural". Default "log".}
+
+\item{\code{include_ci}}{Logical. Whether to show prediction intervals as
+error bars. Default TRUE.}
+
+\item{\code{color_by_country}}{Logical. Whether to color points by country.
+Default TRUE.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+A ggplot object showing observed vs predicted values.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\dontrun{
+model <- MixedEffects$new()
+model$fit()
+p <- model$plot_fit()
+print(p)
+
+# Natural scale without confidence intervals
+p2 <- model$plot_fit(scale = "natural", include_ci = FALSE)
+print(p2)
+}
+
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-MixedEffects-k_fold_cv"></a>}}
 \if{latex}{\out{\hypertarget{method-MixedEffects-k_fold_cv}{}}}
 \subsection{Method \code{k_fold_cv()}}{
@@ -351,8 +507,7 @@ Perform k-fold cross-validation.
 \item{\code{k_folds}}{Integer. Number of folds for cross-validation.
 Default is 5.}
 
-\item{\code{scale}}{Scale to return results in. One of "log" or "natural".
-Default "log".}
+\item{\code{scale}}{One of "log" or "natural". Default "log".}
 
 \item{\code{seed}}{Integer. Optional random seed for reproducible fold
 assignment and model runs. Default NULL.}

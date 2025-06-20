@@ -50,3 +50,30 @@ test_that("can plot acf once fitted", {
     res <- model$mcmc_acf()
     expect_true(inherits(res, "ggplot"))
 })
+
+test_that("can plot fit once fitted", {
+    model <- MixedEffects$new(dat_cleaned)
+
+    expect_error(
+        model$plot_fit(),
+        "Model must be fitted"
+    )
+
+    model <- unitcost()
+    res <- model$plot_fit()
+    expect_true(inherits(res, "ggplot"))
+})
+
+
+test_that("can plot residuals once fitted", {
+    model <- MixedEffects$new(dat_cleaned)
+
+    expect_error(
+        model$plot_residuals(),
+        "Model must be fitted"
+    )
+
+    model <- unitcost()
+    res <- model$plot_residuals()
+    expect_true(inherits(res, "ggplot"))
+})
