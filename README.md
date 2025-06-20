@@ -8,6 +8,8 @@ remotes::install_github("CAPTURE-TB-HIV/capturetb")
 
 ## Basic usage
 
+To predict the unitcost of one outpatient treatment visit given facility characteristics:
+
 ```r
 # Load model
 model <- capturetb::unitcost()
@@ -27,10 +29,10 @@ pred <- model$predict(list(
   urban = FALSE, 
   public = TRUE,
   fc_country = "Ethiopia"
-), scale = "natural")
+), scale = "natural", summarised = TRUE)
 
 # Expected unit cost is mean prediction
-expected_unit_cost <- mean(pred)
+expected_unit_cost <- pred$mean
 print(expected_unit_cost)
 [1] 4.745807
 ```

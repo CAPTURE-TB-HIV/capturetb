@@ -113,30 +113,34 @@ MixedEffects <- R6::R6Class("MixedEffects",
     },
 
     #' @description
-    #' Fit the CaptureTB model using JAGS.
+    #' Fit the model using JAGS. Requires JAGS and rjags to be installed.
     #'
     #' @param n.chains Integer. Number of MCMC chains. Default is 3.
     #' @param n.iter Integer. Number of total iterations per chain.
     #' Default is 100000.
-    #' @param n.burnin Integer. Number of burn-in iterations. Default is 2000.
-    #' @param n.adapt Integer. Number of adaptation iterations. Default is 2000.
-    #' @param n.thin Integer. Thinning interval. Default is 10.
-    #' @param seed Integer. Used to seed both the R and JAGS random generators.
+    #' @param n.burnin Integer. Number of burn-in iterations. Default is 5000.
+    #' @param n.adapt Integer. Number of adaptation iterations. Default is 5000.
+    #' @param n.thin Integer. Thinning interval. Default is 100.
+    #' @param seed Optonal integer. Used to seed both the R and JAGS random
+    #' generators for reproducible results.
     #' @param ... Additional arguments passed to rjags::jags.model().
     #'
     #' @return Self (invisibly) for method chaining.
+    #' @seealso \code{\link[rjags]{jags.model}}
     fit = function(n.chains = 3,
                    n.iter = 1000000,
                    n.burnin = 5000,
                    n.adapt = 5000,
                    n.thin = 100,
-                   seed = 123,
+                   seed = NULL,
                    ...) {
       if (!requireNamespace("rjags", quietly = TRUE)) {
         stop("Package 'rjags' is required but not installed.")
       }
 
-      set.seed(seed)
+      if (!is.null(seed)) {
+        set.seed(seed)
+      }
 
       model_file <- system.file("jags", "model.model", package = "capturetb")
 
@@ -153,18 +157,29 @@ MixedEffects <- R6::R6Class("MixedEffects",
       )
 
       jags_data <- c(jags_data, as.list(private$.priors))
-      jags_inits <- function(chain) {
-        list(.RNG.name = "base::Mersenne-Twister", .RNG.seed = seed * chain)
+
+      if (is.null(seed)) {
+        jags_mod <- rjags::jags.model(model_file,
+          data = jags_data,
+          n.chains = n.chains,
+          n.adapt = n.adapt,
+          ...
+        )
+      } else {
+        jags_inits <- function(chain) {
+          list(
+            .RNG.name = "base::Mersenne-Twister",
+            .RNG.seed = seed * chain
+          )
+        }
+        jags_mod <- rjags::jags.model(model_file,
+          data = jags_data,
+          n.chains = n.chains,
+          n.adapt = n.adapt,
+          inits = jags_inits,
+          ...
+        )
       }
-
-      jags_mod <- rjags::jags.model(model_file,
-        data = jags_data,
-        n.chains = n.chains,
-        n.adapt = n.adapt,
-        inits = jags_inits,
-        ...
-      )
-
       update(jags_mod, n.iter = n.burnin)
       samples <- rjags::coda.samples(jags_mod,
         variable.names = c(
@@ -348,6 +363,7 @@ MixedEffects <- R6::R6Class("MixedEffects",
     #' @param ... Additional arguments passed to \code{bayesplot::mcmc_trace}.
     #'
     #' @return A ggplot object showing trace plots.
+    #' @importFrom bayesplot mcmc_trace
     #' @seealso \code{\link[bayesplot]{mcmc_trace}}
     mcmc_trace = function(...) {
       private$.check_fitted()
@@ -359,6 +375,9 @@ MixedEffects <- R6::R6Class("MixedEffects",
     #' Compute and plot R-hat convergence diagnostics.
     #'
     #' @return A ggplot object showing R-hat diagnostics.
+    #' @importFrom ggplot2 ggplot geom_hline geom_point 
+    #' labs theme_minimal aes
+    #' @importFrom coda gelman.diag
     mcmc_rhat = function() {
       private$.check_fitted()
       samples <- private$.samples
@@ -383,6 +402,7 @@ MixedEffects <- R6::R6Class("MixedEffects",
     #'
     #' @param ... Additional arguments passed to \code{bayesplot::mcmc_acf}.
     #' @seealso \code{\link[bayesplot]{mcmc_acf}}
+    #'@importFrom bayesplot mcmc_acf
     #' @return A ggplot object showing autocorrelation plots.
     mcmc_acf = function(...) {
       private$.check_fitted()
@@ -394,6 +414,7 @@ MixedEffects <- R6::R6Class("MixedEffects",
     #' samples using the \code{coda::effectiveSize} function.
     #'
     #' @return A named numeric vector.
+    #' @importFrom coda effectiveSize
     #' @seealso \code{\link[coda]{effectiveSize}}
     n_eff = function() {
       private$.check_fitted()
@@ -407,10 +428,11 @@ MixedEffects <- R6::R6Class("MixedEffects",
     #' @param ... Additional arguments passed to \code{bayesplot::mcmc_areas}.
     #' @return A ggplot object showing posterior distributions.
     #' @seealso \code{\link[bayesplot]{mcmc_areas}}
+    #' @importFrom bayesplot mcmc_areas
     plot_posteriors = function(prob = 0.9, ...) {
       private$.check_fitted()
       samples <- private$.samples
-      bayesplot::mcmc_areas(samples, ...)
+      bayesplot::mcmc_areas(samples, prob = prob, ...)
     },
 
     #' @description
@@ -421,7 +443,7 @@ MixedEffects <- R6::R6Class("MixedEffects",
     #' @param scale Scale to return results in. One of "log" or "natural".
     #' Default "log".
     #' @param seed Integer. Optional random seed for reproducible fold
-    #' assignment. Default NULL.
+    #' assignment and model runs. Default NULL.
     #' @param ... Additional arguments passed to the fit() method.
     #'
     #' @return Data.frame with predictions from cross-validation, including
@@ -457,7 +479,7 @@ MixedEffects <- R6::R6Class("MixedEffects",
         )
 
         # Fit model on training fold
-        temp_model$fit(...)
+        temp_model$fit(seed = seed, ...)
 
         # Make predictions on test fold
         fold_preds <- temp_model$predict(

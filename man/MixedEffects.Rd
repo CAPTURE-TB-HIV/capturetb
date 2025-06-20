@@ -25,6 +25,8 @@ predictions <- model$predict(new_data)
 
 }
 \seealso{
+\code{\link[rjags]{jags.model}}
+
 \code{\link[bayesplot]{mcmc_trace}}
 
 \code{\link[bayesplot]{mcmc_acf}}
@@ -89,7 +91,7 @@ from the ValueTB dataset installed with this package.}
 \if{html}{\out{<a id="method-MixedEffects-fit"></a>}}
 \if{latex}{\out{\hypertarget{method-MixedEffects-fit}{}}}
 \subsection{Method \code{fit()}}{
-Fit the CaptureTB model using JAGS.
+Fit the model using JAGS. Requires JAGS and rjags to be installed.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{MixedEffects$fit(
   n.chains = 3,
@@ -97,7 +99,7 @@ Fit the CaptureTB model using JAGS.
   n.burnin = 5000,
   n.adapt = 5000,
   n.thin = 100,
-  seed = 123,
+  seed = NULL,
   ...
 )}\if{html}{\out{</div>}}
 }
@@ -110,13 +112,14 @@ Fit the CaptureTB model using JAGS.
 \item{\code{n.iter}}{Integer. Number of total iterations per chain.
 Default is 100000.}
 
-\item{\code{n.burnin}}{Integer. Number of burn-in iterations. Default is 2000.}
+\item{\code{n.burnin}}{Integer. Number of burn-in iterations. Default is 5000.}
 
-\item{\code{n.adapt}}{Integer. Number of adaptation iterations. Default is 2000.}
+\item{\code{n.adapt}}{Integer. Number of adaptation iterations. Default is 5000.}
 
-\item{\code{n.thin}}{Integer. Thinning interval. Default is 10.}
+\item{\code{n.thin}}{Integer. Thinning interval. Default is 100.}
 
-\item{\code{seed}}{Integer. Used to seed both the R and JAGS random generators.}
+\item{\code{seed}}{Optonal integer. Used to seed both the R and JAGS random
+generators for reproducible results.}
 
 \item{\code{...}}{Additional arguments passed to rjags::jags.model().}
 }
@@ -352,7 +355,7 @@ Default is 5.}
 Default "log".}
 
 \item{\code{seed}}{Integer. Optional random seed for reproducible fold
-assignment. Default NULL.}
+assignment and model runs. Default NULL.}
 
 \item{\code{...}}{Additional arguments passed to the fit() method.}
 }
