@@ -104,23 +104,10 @@ We can generate predictions for the training data to demonstrate model fit:
 # Generate predictions for the training data on log scale
 dat <- model$training_data()
 predictions <- model$predict(dat, scale = "log", summarised = TRUE)
-
-# Create a data frame with predictions and observed values
-results_df <- cbind(
-  observed = log(dat$USD_unitcost_total),
-  country = dat$fc_country,
-  predictions
-)
+head(predictions)
 
 # Various measures of fit
-performance <- results_df %>%
-  summarise(
-    mae = mean(abs(observed - mean)),
-    rmse = sqrt(mean((observed - mean)^2)),
-    correlation = cor(observed, mean),
-    coverage = mean(observed >= lower & observed <= upper)
-  ) 
-colnames(performance) <- c("MAE", "RMSE", "Correlation", "95% CI Coverage")
+performance <- model$performance(scale = "log")
 knitr::kable(performance)
 ```
 
@@ -153,35 +140,14 @@ knitr::kable(pred)
 
 ```{r scatter-plot}
 # Create scatter plot of predicted vs observed values
-ggplot(results_df, aes(x = observed, y = mean)) +
-  geom_point(aes(color = country), alpha = 0.7) +
-  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "blue") +
-  labs(
-    title = "Predicted vs Observed Unit Costs",
-    x = "Observed Cost (log(USD))",
-    y = "Predicted Cost (log(USD))",
-    color = "Country"
-  ) +
-  theme_minimal() +
-  theme(legend.position = "bottom")
+model$plot_fit(include_ci = FALSE, scale = "log")
 ```
 
 ### 2. 95% Credible Prediction Intervals
 
 ```{r prediction-intervals}
 # Plot with prediction intervals
-ggplot(results_df, aes(x = observed)) +
-  geom_errorbar(aes(ymin = lower, ymax = upper), 
-              alpha = 0.3) +
-  geom_point(aes(y = mean, colour = country), alpha = 0.7) +
-  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "blue") +
-  labs(
-    title = "Credible Intervals vs Observed Unit Costs",
-    x = "Observed Cost (log(USD))",
-    y = "Predicted Cost (log(USD))",
-    color = "Country"
-  ) +
-  theme_minimal()
+model$plot_fit(include_ci = "TRUE", scale = "log")
 ```
 
 ### 3. Country-Specific perfomance
@@ -206,16 +172,6 @@ knitr::kable(country_performance)
 ```
 
 ```{r country-plot}
-ggplot(results_df, aes(x = observed, y = mean)) +
-  geom_point(alpha = 0.7) +
-  geom_errorbar(aes(ymin = lower, ymax = upper), 
-              alpha = 0.3) +
-  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "blue") +
-  facet_wrap(~country, scales = "free") +
-  labs(
-    title = "Predicted vs Observed by Country",
-    x = "Observed Cost (USD, log scale)",
-    y = "Predicted Cost (USD, log scale)"
-  ) +
-  theme_minimal()
+model$plot_fit() + 
+  facet_wrap(~country, scales = "free")
 ```

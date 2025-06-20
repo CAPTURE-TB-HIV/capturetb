@@ -383,9 +383,7 @@ and predicted values, and credible interval coverage.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{scale}}{Character. Scale for predictions and performance evaluation.
-One of "log" (default) or "natural". When "log", observed values are
-log-transformed for comparison with log-scale predictions.}
+\item{\code{scale}}{One of "log" or "natural". Default "log".}
 }
 \if{html}{\out{</div>}}
 }
@@ -462,9 +460,7 @@ for perfect predictions and optional confidence intervals.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{scale}}{Character. Scale for the plot. One of "log" (default) or
-"natural". When "log", both observed and predicted values are shown on
-log scale.}
+\item{\code{scale}}{One of "log" or "natural". Default "log".}
 
 \item{\code{include_ci}}{Logical. Whether to show prediction intervals as
 error bars. Default TRUE.}
@@ -511,8 +507,7 @@ Perform k-fold cross-validation.
 \item{\code{k_folds}}{Integer. Number of folds for cross-validation.
 Default is 5.}
 
-\item{\code{scale}}{Scale to return results in. One of "log" or "natural".
-Default "log".}
+\item{\code{scale}}{One of "log" or "natural". Default "log".}
 
 \item{\code{seed}}{Integer. Optional random seed for reproducible fold
 assignment and model runs. Default NULL.}

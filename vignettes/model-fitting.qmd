@@ -144,6 +144,7 @@ We can now generate predictions for the training data to evaluate model fit:
 # Generate predictions for the training data on log scale
 dat <- model$training_data()
 predictions <- model$predict(dat, scale = "log", summarised = TRUE)
+head(predictions)
 
 # Various measures of fit
 performance <- model$performance(scale = "log")

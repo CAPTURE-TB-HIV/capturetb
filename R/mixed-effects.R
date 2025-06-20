@@ -442,9 +442,7 @@ MixedEffects <- R6::R6Class("MixedEffects",
     #' root mean square error (RMSE), correlation between observed
     #' and predicted values, and credible interval coverage.
     #'
-    #' @param scale Character. Scale for predictions and performance evaluation.
-    #' One of "log" (default) or "natural". When "log", observed values are
-    #' log-transformed for comparison with log-scale predictions.
+    #' @param scale One of "log" or "natural". Default "log".
     #'
     #' @return A data.frame with performance metrics:
     #' \itemize{
@@ -580,9 +578,7 @@ MixedEffects <- R6::R6Class("MixedEffects",
     #' observed and predicted values on the training data, with a reference line
     #' for perfect predictions and optional confidence intervals.
     #'
-    #' @param scale Character. Scale for the plot. One of "log" (default) or
-    #' "natural". When "log", both observed and predicted values are shown on
-    #' log scale.
+    #' @param scale One of "log" or "natural". Default "log".
     #' @param include_ci Logical. Whether to show prediction intervals as
     #' error bars. Default TRUE.
     #' @param color_by_country Logical. Whether to color points by country.
@@ -669,8 +665,7 @@ MixedEffects <- R6::R6Class("MixedEffects",
     #'
     #' @param k_folds Integer. Number of folds for cross-validation.
     #' Default is 5.
-    #' @param scale Scale to return results in. One of "log" or "natural".
-    #' Default "log".
+    #' @param scale One of "log" or "natural". Default "log".
     #' @param seed Integer. Optional random seed for reproducible fold
     #' assignment and model runs. Default NULL.
     #' @param ... Additional arguments passed to the fit() method.
