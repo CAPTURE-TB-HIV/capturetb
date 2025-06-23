@@ -1,16 +1,16 @@
 #' MixedEffects R6 Class
 #'
-#' An R6 class for fitting and predicting costs using a mixed effects model.
+#' An R6 class for fitting and predicting costs using a fixed effects model.
 #'
 #' @description
-#' This class encapsulates the CaptureTB mixed effects model with
-#' country-specific intercepts and fixed covariate effects, providing
+#' This class encapsulates the CaptureTB fixed effects model with
+#' single intercept and fixed covariate effects, providing
 #' methods to fit the JAGS model and generate predictions.
 #'
 #' @examples
 #' \dontrun{
-#' # Create a new MixedEffects model instance with default covariates and priors
-#' model <- capturetb::MixedEffects$new()
+#' # Create a new FixedEffects model instance with default covariates and priors
+#' model <- capturetb::FixedEffects$new()
 #'
 #' # Fit the model
 #' model$fit(n.iter = 5000)
@@ -22,7 +22,7 @@
 #' @export
 #' @importFrom R6 R6Class
 #' @importFrom rlang .data
-MixedEffects <- R6::R6Class("MixedEffects",
+FixedEffects <- R6::R6Class("FixedEffects",
   inherit = JAGSModel,
   public = list(
     #' @description
@@ -38,7 +38,7 @@ MixedEffects <- R6::R6Class("MixedEffects",
                           covariates = capturetb_covariates(),
                           target = "USD_unitcost_total",
                           priors = capturetb_priors()) {
-      super$initialize(dat, covariates, target, priors, "mixedeffects.model")
+      super$initialize(dat, covariates, target, priors, "fixedeffects.model")
     },
     #' Generate predictions from the fitted model.
     #'
@@ -73,47 +73,19 @@ MixedEffects <- R6::R6Class("MixedEffects",
         )
       }
 
-      if (!"fc_country" %in% names(dat)) {
-        stop("Column 'fc_country' required in prediction data")
-      }
-
       smat <- do.call(rbind, lapply(private$.samples, as.matrix))
-
-      # known country intercepts
-      alpha_cols <- paste0("alpha[", as.numeric(private$.countries), "]")
-      alphas <- smat[, alpha_cols, drop = FALSE]
-
-      # if country not known, or not in training data
-      # generate intercept using hyper-parameters
-      mu_alpha <- smat[, "mu_alpha"] # hyper-means
-      sig_alpha <- smat[, "sigma_alpha"] # hyper-sds
-
-      alpha_new <- rnorm(length(mu_alpha), mu_alpha, sig_alpha)
-      alphas <- cbind(alphas, alpha_new)
 
       beta_cols <- paste0("beta[", seq_along(private$.covariates), "]")
       betas <- smat[, beta_cols, drop = FALSE]
 
+      alpha <- smat[, "alpha", drop = FALSE]
+      sig <- smat[, "sigma"]
+
       x <- as.matrix(private$.numeric_to_logical(
         dat[, private$.covariates, drop = FALSE]
       ))
-      x_country <- dat[, "fc_country", drop = FALSE]
-      x_country_matrix <- as.data.frame(lapply(
-        private$.countries,
-        function(country) as.character(country) == x_country
-      ))
-      x_country_matrix[, ] <- lapply(
-        x_country_matrix[, , drop = FALSE],
-        as.numeric
-      )
-      x_country_matrix[, length(private$.countries) + 1] <- 0
-      x_country_matrix[
-        which(rowSums(x_country_matrix) == 0),
-        length(private$.countries) + 1
-      ] <- 1
 
-      sig <- smat[, "sigma"]
-      pred_means <- alphas %*% t(x_country_matrix) + betas %*% t(x)
+      pred_means <- alpha[, rep(1, times = nrow(dat))] + betas %*% t(x)
 
       S <- length(sig)
       N <- ncol(pred_means)

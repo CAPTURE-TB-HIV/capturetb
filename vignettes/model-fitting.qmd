@@ -223,4 +223,3 @@ fit <- res |>
 
 knitr::kable(fit)
 ```
-

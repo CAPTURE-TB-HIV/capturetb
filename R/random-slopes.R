@@ -1,16 +1,17 @@
-#' MixedEffects R6 Class
+#' RandomSlopes R6 Class
 #'
-#' An R6 class for fitting and predicting costs using a mixed effects model.
+#' An R6 class for fitting and predicting costs using a model with random slopes.
 #'
 #' @description
-#' This class encapsulates the CaptureTB mixed effects model with
-#' country-specific intercepts and fixed covariate effects, providing
+#' This class encapsulates the CaptureTB random effects model with
+#' country-specific intercepts and country-specific covariate effects, providing
 #' methods to fit the JAGS model and generate predictions.
 #'
 #' @examples
 #' \dontrun{
-#' # Create a new MixedEffects model instance with default covariates and priors
-#' model <- capturetb::MixedEffects$new()
+#' # Create a new RandomSlopes model instance with default covariates and
+#' # priors
+#' model <- capturetb::RandomSlopes$new()
 #'
 #' # Fit the model
 #' model$fit(n.iter = 5000)
@@ -22,7 +23,7 @@
 #' @export
 #' @importFrom R6 R6Class
 #' @importFrom rlang .data
-MixedEffects <- R6::R6Class("MixedEffects",
+RandomSlopes <- R6::R6Class("RandomSlopes",
   inherit = JAGSModel,
   public = list(
     #' @description
@@ -38,7 +39,7 @@ MixedEffects <- R6::R6Class("MixedEffects",
                           covariates = capturetb_covariates(),
                           target = "USD_unitcost_total",
                           priors = capturetb_priors()) {
-      super$initialize(dat, covariates, target, priors, "mixedeffects.model")
+      super$initialize(dat, covariates, target, priors, "randomslopes.model")
     },
     #' Generate predictions from the fitted model.
     #'
@@ -91,8 +92,28 @@ MixedEffects <- R6::R6Class("MixedEffects",
       alpha_new <- rnorm(length(mu_alpha), mu_alpha, sig_alpha)
       alphas <- cbind(alphas, alpha_new)
 
-      beta_cols <- paste0("beta[", seq_along(private$.covariates), "]")
-      betas <- smat[, beta_cols, drop = FALSE]
+      # Extract country-specific beta coefficients
+      # beta[k, j] where k is covariate index, j is country index
+      n_countries_total <- length(private$.countries) + 1  # +1 for new countries
+      beta_arrays <- array(NA, dim = c(nrow(smat), length(private$.covariates), n_countries_total))
+      
+      # Extract known country beta coefficients
+      for (k in seq_along(private$.covariates)) {
+        for (j in seq_along(private$.countries)) {
+          beta_col <- paste0("beta[", k, ",", j, "]")
+          beta_arrays[, k, j] <- smat[, beta_col]
+        }
+      }
+      
+      # Generate new beta coefficients for unknown countries using hyper-parameters
+      mu_beta <- smat[, paste0("mu_beta[", seq_along(private$.covariates), "]"), drop = FALSE]
+      sigma_beta <- smat[, paste0("sigma_beta[", seq_along(private$.covariates), "]"), drop = FALSE]
+      
+      for (k in seq_along(private$.covariates)) {
+        beta_arrays[, k, n_countries_total] <- rnorm(nrow(smat), mu_beta[, k], sigma_beta[, k])
+      }
+      
+      betas <- beta_arrays
 
       x <- as.matrix(private$.numeric_to_logical(
         dat[, private$.covariates, drop = FALSE]
@@ -113,10 +134,28 @@ MixedEffects <- R6::R6Class("MixedEffects",
       ] <- 1
 
       sig <- smat[, "sigma"]
-      pred_means <- alphas %*% t(x_country_matrix) + betas %*% t(x)
 
-      S <- length(sig)
-      N <- ncol(pred_means)
+      # Calculate predictions using country-specific beta coefficients
+      S <- nrow(smat)
+      N <- nrow(dat)
+      pred_means <- matrix(0, nrow = S, ncol = N)
+
+      for (i in 1:N) {
+        # Determine which country column to use (known countries + 1 for new)
+        country_idx <- which(x_country_matrix[i, ] == 1)
+
+        # Get alpha for this country
+        alpha_i <- alphas[, country_idx]
+
+        # Get beta coefficients for this country
+        beta_i <- betas[, , country_idx]
+
+        # Calculate prediction: alpha + sum(x * beta)
+        x_rep <- matrix(x[i, ], nrow = S, ncol = length(private$.covariates),
+                        byrow = TRUE)
+        pred_means[, i] <- alpha_i + rowSums(beta_i * x_rep)
+      }
+
       epsilon <- matrix(rnorm(S * N), nrow = S)
       preds <- pred_means + epsilon * sig
 
