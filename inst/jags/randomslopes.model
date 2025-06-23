@@ -17,7 +17,7 @@ model {
     # PC prior for each sigma_beta assuming p(sigma_beta > 1) ~ 0.05
     # => lambda = -log(0.05)
     # sigma_beta ~ Exp(3)
-    mu_beta[k] ~ dnorm(0, 0.01)
+    mu_beta[k] ~ dnorm(prior.beta.mean[k], prior.beta.precision[k])
 
     sigma_beta[k] ~ dexp(3)
     tau_beta[k] <- pow(sigma_beta[k], -2)

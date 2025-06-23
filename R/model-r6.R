@@ -20,6 +20,7 @@ JAGSModel <- R6::R6Class("JAGSModel",
     #' @param target Character. Name of the target variable.
     #' @param priors List of class 'capturetbpriors'. Should be created using
     #' \code{capturetb_priors}.
+    #' @param model Name of the JAGS model file.
     initialize = function(dat = get_data("OP treatment visit"),
                           covariates = capturetb_covariates(),
                           target = "USD_unitcost_total",
@@ -209,7 +210,7 @@ JAGSModel <- R6::R6Class("JAGSModel",
     #' rows = simulations, columns = input rows. If summarised=TRUE,
     #' data.frame with mean, lower (2.5%), and upper (97.5%) quantiles.
     predict = function(dat, scale = "log", summarised = FALSE) {
-      stop("Method not implemented on the base Model class. Use one of FixedEffects, MixedEffects or RandomEffects")
+      stop("Method not implemented on the base Model class. Use one of FixedEffects, MixedEffects or RandomSlopes")
     },
 
     #' @description
@@ -355,12 +356,15 @@ JAGSModel <- R6::R6Class("JAGSModel",
     #'
     #' @param scale One of "log" or "natural". Default "log".
     #'
+    #' @param by_country Logical. If TRUE, returns metrics calculated
+    #' on country sub-grpups. Default FALSE.
     #' @return A data.frame with performance metrics:
     #' \itemize{
-    #'   \item mae: Mean Absolute Error between observed and predicted values
-    #'   \item rmse: Root Mean Square Error between observed and predicted values
-    #'   \item correlation: Pearson correlation between observed and predicted values
-    #'   \item ci_coverage: Proportion of observations within 95% credible intervals
+    #'  \item Country: Only present if by_country = TRUE
+    #'   \item MAE: Mean Absolute Error between observed and predicted values
+    #'   \item RMSE: Root Mean Square Error between observed and predicted values
+    #'   \item Correlation: Pearson correlation between observed and predicted values
+    #'   \item 95% CI coverage: Proportion of observations within 95% credible intervals
     #' }
     #'
     #' @examples
@@ -370,7 +374,7 @@ JAGSModel <- R6::R6Class("JAGSModel",
     #' performance_metrics <- model$performance()
     #' print(performance_metrics)
     #' }
-    performance = function(scale = "log") {
+    performance = function(scale = "log", by_country = FALSE) {
       stopifnot(
         "scale must be 'log' or 'natural'" =
           (scale == "log" || scale == "natural")
@@ -396,6 +400,10 @@ JAGSModel <- R6::R6Class("JAGSModel",
         predictions
       )
 
+      if (by_country) {
+        results_df <- results_df |> dplyr::group_by(country)
+      }
+
       # Calculate performance metrics
       performance_metrics <- results_df |>
         dplyr::summarise(
@@ -406,6 +414,11 @@ JAGSModel <- R6::R6Class("JAGSModel",
             .data$observed <= .data$upper)
         )
 
+      cols <- c("MAE", "RMSE", "Corelation", "95% CI Coverage")
+      if (by_country) {
+        cols <- c("Country",cols)
+      }
+      colnames(performance_metrics) <- cols
       performance_metrics
     },
     #' @description
@@ -611,8 +624,8 @@ JAGSModel <- R6::R6Class("JAGSModel",
         if (private$.model == "mixedeffects.model") {
           model_type <- MixedEffects
         }
-        if (private$.model == "randomeffects.model") {
-          model_type <- RandomEffects
+        if (private$.model == "randomslopes.model") {
+          model_type <- RandomSlopes
         }
 
         # Create temporary model for this fold

@@ -1,6 +1,6 @@
-#' MixedEffects R6 Class
+#' RandomSlopes R6 Class
 #'
-#' An R6 class for fitting and predicting costs using a random effects model.
+#' An R6 class for fitting and predicting costs using a model with random slopes.
 #'
 #' @description
 #' This class encapsulates the CaptureTB random effects model with
@@ -9,9 +9,9 @@
 #'
 #' @examples
 #' \dontrun{
-#' # Create a new RandomEffects model instance with default covariates and
+#' # Create a new RandomSlopes model instance with default covariates and
 #' # priors
-#' model <- capturetb::RandomEffects$new()
+#' model <- capturetb::RandomSlopes$new()
 #'
 #' # Fit the model
 #' model$fit(n.iter = 5000)
@@ -23,7 +23,7 @@
 #' @export
 #' @importFrom R6 R6Class
 #' @importFrom rlang .data
-RandomEffects <- R6::R6Class("RandomEffects",
+RandomSlopes <- R6::R6Class("RandomSlopes",
   inherit = JAGSModel,
   public = list(
     #' @description
@@ -39,7 +39,7 @@ RandomEffects <- R6::R6Class("RandomEffects",
                           covariates = capturetb_covariates(),
                           target = "USD_unitcost_total",
                           priors = capturetb_priors()) {
-      super$initialize(dat, covariates, target, priors, "randomeffects.model")
+      super$initialize(dat, covariates, target, priors, "randomslopes.model")
     },
     #' Generate predictions from the fitted model.
     #'
