@@ -93,7 +93,7 @@ covariates <- random_effects$covariates()
 lower <- function(x) quantile(x, probs = 0.025)
 upper <- function(x) quantile(x, probs = 0.975)
 
-alpha_cols <- paste0(f"alpha[", seq_along(countries), "]")
+alpha_cols <- paste0("alpha[", seq_along(countries), "]")
 beta_cols <- with(expand.grid(i = seq_along(covariates), j = seq_along(countries)),
                sprintf("beta[%d,%d]", i, j))
 mu_beta_cols <- paste0("mu_beta[", seq_along(covariates), "]")

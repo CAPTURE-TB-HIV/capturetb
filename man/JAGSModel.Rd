@@ -392,11 +392,11 @@ on country sub-grpups. Default FALSE.}
 \subsection{Returns}{
 A data.frame with performance metrics:
 \itemize{
-\item Country: Only present if by_country = TRUE
-\item MAE: Mean Absolute Error between observed and predicted values
-\item RMSE: Root Mean Square Error between observed and predicted values
-\item Correlation: Pearson correlation between observed and predicted values
-\item 95\% CI coverage: Proportion of observations within 95\% credible intervals
+\item country: Only present if by_country = TRUE
+\item mae: Mean Absolute Error between observed and predicted values
+\item rmse: Root Mean Square Error between observed and predicted values
+\item correlation: Pearson correlation between observed and predicted values
+\item ci_coverage: Proportion of observations within 95\% credible intervals
 }
 }
 \subsection{Examples}{

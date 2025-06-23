@@ -360,11 +360,11 @@ JAGSModel <- R6::R6Class("JAGSModel",
     #' on country sub-grpups. Default FALSE.
     #' @return A data.frame with performance metrics:
     #' \itemize{
-    #'  \item Country: Only present if by_country = TRUE
-    #'   \item MAE: Mean Absolute Error between observed and predicted values
-    #'   \item RMSE: Root Mean Square Error between observed and predicted values
-    #'   \item Correlation: Pearson correlation between observed and predicted values
-    #'   \item 95% CI coverage: Proportion of observations within 95% credible intervals
+    #'  \item country: Only present if by_country = TRUE
+    #'   \item mae: Mean Absolute Error between observed and predicted values
+    #'   \item rmse: Root Mean Square Error between observed and predicted values
+    #'   \item correlation: Pearson correlation between observed and predicted values
+    #'   \item ci_coverage: Proportion of observations within 95% credible intervals
     #' }
     #'
     #' @examples
@@ -414,11 +414,6 @@ JAGSModel <- R6::R6Class("JAGSModel",
             .data$observed <= .data$upper)
         )
 
-      cols <- c("MAE", "RMSE", "Corelation", "95% CI Coverage")
-      if (by_country) {
-        cols <- c("Country",cols)
-      }
-      colnames(performance_metrics) <- cols
       performance_metrics
     },
     #' @description
