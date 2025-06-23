@@ -40,6 +40,7 @@ predictions <- model$predict(new_data)
 <ul>
 <li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="countries"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-countries'><code>capturetb::JAGSModel$countries()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="covariates"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-covariates'><code>capturetb::JAGSModel$covariates()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="evpi"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-evpi'><code>capturetb::JAGSModel$evpi()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="fit"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-fit'><code>capturetb::JAGSModel$fit()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="is_fitted"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-is_fitted'><code>capturetb::JAGSModel$is_fitted()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="k_fold_cv"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-k_fold_cv'><code>capturetb::JAGSModel$k_fold_cv()</code></a></span></li>

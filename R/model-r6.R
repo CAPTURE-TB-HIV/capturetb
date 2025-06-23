@@ -658,6 +658,60 @@ JAGSModel <- R6::R6Class("JAGSModel",
 
       # Combine all fold results
       do.call(rbind, cv_predictions)
+    },
+    #' @description
+    #' This function computes the Expected Value of Perfect Information (EVPI)
+    #' for a given set of input data and a vector of willingness-to-pay
+    #' thresholds (\code{lambda}).
+    #'
+    #' @param dat A single set of model inputs, provided as a \code{data.frame}
+    #'  with one row or as a list.
+    #' @param lambda Numeric vector of willingness-to-pay thresholds
+    #' at which to calculate EVPI.
+    #'
+    #' @param n_outputs Numeric scalar. The number of outputs to compare to the
+    #' willingness-to-pay thresholds. If the willingness-to-pay is for a single
+    #' output then leave as the default of 1.
+    #'
+    #' @return A numeric vector of EVPI values, one for each value
+    #' in \code{lambda}.
+    #'
+    #' @examples
+    #' \dontrun{
+    #' dat <- list(x1 = 1, x2 = 2)
+    #' lambda <- c(10000, 20000, 30000)
+    #' model$evpi(dat, lambda)
+    #' }
+    #'
+    #' @seealso \code{\link{predict}}
+    #' @export
+    evpi = function(dat, lambda, n_outputs = 1) {
+      stopifnot(
+        "dat must be a single set of inputs in list or data.frame form" =
+          (is.list(dat) && (nrow(dat) == 1 || is.null(nrow(dat))))
+      )
+      stopifnot(
+        "n_outputs must be a numeric scalar" =
+          (is.numeric(n_outputs) && length(n_outputs) == 1)
+      )
+      stopifnot("lambda must be a numeric vector" = is.numeric(lambda))
+      cost_pred <- self$predict(dat,
+        scale = "natural",
+        summarised = FALSE
+      ) * n_outputs
+      evpi <- c()
+      for (i in seq_along(lambda)) {
+        exp_max <- mean(sapply(
+          cost_pred,
+          function(c) max(private$.net_benefit(lambda[i], c), 0)
+        ))
+        max_exp <- max(mean(sapply(
+          cost_pred,
+          function(c) private$.net_benefit(lambda[i], c)
+        )), 0)
+        evpi <- c(evpi, exp_max - max_exp)
+      }
+      evpi
     }
   ),
   private = list(
@@ -675,6 +729,9 @@ JAGSModel <- R6::R6Class("JAGSModel",
         x[, logical_cols] <- lapply(x[, logical_cols, drop = FALSE], as.numeric)
       }
       x
+    },
+    .net_benefit = function(lambda, cost) {
+      lambda - cost
     },
     .check_fitted = function() {
       if (!self$is_fitted()) {

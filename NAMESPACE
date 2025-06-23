@@ -2,6 +2,7 @@
 
 S3method(plot,capturetbpriors)
 export(FixedEffects)
+export(JAGSModel)
 export(MixedEffects)
 export(RandomSlopes)
 export(capturetb_covariates)

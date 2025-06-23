@@ -42,6 +42,17 @@ p2 <- model$plot_fit(scale = "natural", include_ci = FALSE)
 print(p2)
 }
 
+
+## ------------------------------------------------
+## Method `JAGSModel$evpi`
+## ------------------------------------------------
+
+\dontrun{
+dat <- list(x1 = 1, x2 = 2)
+lambda <- c(10000, 20000, 30000)
+model$evpi(dat, lambda)
+}
+
 }
 \seealso{
 FixedEffects
@@ -57,6 +68,8 @@ MixedEffects
 \code{\link[coda]{effectiveSize}}
 
 \code{\link[bayesplot]{mcmc_areas}}
+
+\code{\link{predict}}
 }
 \section{Methods}{
 \subsection{Public methods}{
@@ -80,6 +93,7 @@ MixedEffects
 \item \href{#method-JAGSModel-plot_residuals}{\code{JAGSModel$plot_residuals()}}
 \item \href{#method-JAGSModel-plot_fit}{\code{JAGSModel$plot_fit()}}
 \item \href{#method-JAGSModel-k_fold_cv}{\code{JAGSModel$k_fold_cv()}}
+\item \href{#method-JAGSModel-evpi}{\code{JAGSModel$evpi()}}
 \item \href{#method-JAGSModel-clone}{\code{JAGSModel$clone()}}
 }
 }
@@ -519,6 +533,50 @@ assignment and model runs. Default NULL.}
 Data.frame with predictions from cross-validation, including
 fold assignments and observed values.
 }
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-JAGSModel-evpi"></a>}}
+\if{latex}{\out{\hypertarget{method-JAGSModel-evpi}{}}}
+\subsection{Method \code{evpi()}}{
+This function computes the Expected Value of Perfect Information (EVPI)
+for a given set of input data and a vector of willingness-to-pay
+thresholds (\code{lambda}).
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{JAGSModel$evpi(dat, lambda, n_outputs = 1)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{dat}}{A single set of model inputs, provided as a \code{data.frame}
+with one row or as a list.}
+
+\item{\code{lambda}}{Numeric vector of willingness-to-pay thresholds
+at which to calculate EVPI.}
+
+\item{\code{n_outputs}}{Numeric scalar. The number of outputs to compare to the
+willingness-to-pay thresholds. If the willingness-to-pay is for a single
+output then leave as the default of 1.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+A numeric vector of EVPI values, one for each value
+in \code{lambda}.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\dontrun{
+dat <- list(x1 = 1, x2 = 2)
+lambda <- c(10000, 20000, 30000)
+model$evpi(dat, lambda)
+}
+
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-JAGSModel-clone"></a>}}

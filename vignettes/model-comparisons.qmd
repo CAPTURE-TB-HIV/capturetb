@@ -333,7 +333,7 @@ Comparing country-specific performance of the models:
 
 ```{r}
 fe_country <- cbind(mod = "fixed", fixed_effects$performance(by_country = TRUE))
-me_ country <- cbind(mod = "mixed", mixed_effects$performance(by_country = TRUE))
+me_country <- cbind(mod = "mixed", mixed_effects$performance(by_country = TRUE))
 re_country <- cbind(mod = "random", random_effects$performance(by_country = TRUE))
 knitr::kable(rbind(fe_country, me_country, re_country))
 ```
