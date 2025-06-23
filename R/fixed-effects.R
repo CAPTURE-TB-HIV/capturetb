@@ -1,24 +1,12 @@
-#' MixedEffects R6 Class
+#' FixedEffects R6 Class
 #'
 #' An R6 class for fitting and predicting costs using a fixed effects model.
 #'
 #' @description
-#' This class encapsulates the CaptureTB fixed effects model with
-#' single intercept and fixed covariate effects, providing
-#' methods to fit the JAGS model and generate predictions.
-#'
-#' @examples
-#' \dontrun{
-#' # Create a new FixedEffects model instance with default covariates and priors
-#' model <- capturetb::FixedEffects$new()
-#'
-#' # Fit the model
-#' model$fit(n.iter = 5000)
-#'
-#' # Make predictions
-#' predictions <- model$predict(new_data)
-#' }
-#'
+#' This class allows the user to fit and use a fixed effects model with
+#' single intercept and fixed covariate effects. Its primary purpose is for 
+#' the comparison of different model structures; see the 
+#' `vignette("03_model-comparisons", package = "capturetb")` vignette.
 #' @export
 #' @importFrom R6 R6Class
 #' @importFrom rlang .data
@@ -32,8 +20,8 @@ FixedEffects <- R6::R6Class("FixedEffects",
     #' from the ValueTB dataset installed with this package.
     #' @param covariates Character vector. Names of covariate columns.
     #' @param target Character. Name of the target variable.
-    #' @param priors List of class 'capturetbpriors'. Should be created using
-    #' \code{capturetb_priors}.
+    #' @param priors List of class "capturetbpriors". Should be created using
+    #' [`capturetb_priors()`].
     initialize = function(dat = get_data("OP treatment visit"),
                           covariates = capturetb_covariates(),
                           target = "USD_unitcost_total",

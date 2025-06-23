@@ -2,7 +2,7 @@
 % Please edit documentation in R/data.R
 \name{capturetb_priors}
 \alias{capturetb_priors}
-\title{Create Prior Distributions for the CaptureTB Model}
+\title{Create prior distributions for a model.}
 \usage{
 capturetb_priors(
   mu_alpha.mean = 0,
@@ -14,34 +14,41 @@ capturetb_priors(
 )
 }
 \arguments{
-\item{mu_alpha.mean}{Numeric scalar. Mean of the prior for \eqn{\mu_\alpha}.
-Default is 0.}
+\item{mu_alpha.mean}{Numeric scalar. Mean of the prior for \code{mu_alpha}
+in a \code{\link{MixedEffects}} or \code{\link{RandomSlopes}} model or \code{alpha} if the model
+is an instance of \code{\link{FixedEffects}}. Default is 0.}
 
 \item{mu_alpha.precision}{Numeric scalar. Precision (inverse variance) of
-the prior for \eqn{\mu_\alpha}. Default is 0.01.}
+the prior for \code{mu_alpha} in a \code{\link{MixedEffects}} or \code{\link{RandomSlopes}} model
+or \code{alpha} if the model is an instance of \code{\link{FixedEffects}}. Default is 0.01.}
 
-\item{sigma.rate}{Numeric scalar. Rate parameter for prior on  \eqn{\sigma}.
+\item{sigma.rate}{Numeric scalar. Rate parameter for prior on \code{sigma}.
 Default is 10.}
 
 \item{sigma_alpha.rate}{Numeric scalar. Rate parameter for prior
-on \eqn{\sigma_\alpha}. Default is 10.}
+on \code{sigma_alpha}if model is an instance of \code{\link{MixedEffects}} or
+\code{\link{RandomSlopes}}. Ignored if the model is an instance of \code{\link{FixedEffects}}.
+Default is 10.}
 
-\item{beta.mean}{Numeric vector. Means of the priors for the \eqn{\beta}
-coefficients. Default is \code{c(0, -0.0142, -0.0412, 0.348, 0.352, -0.29)}.}
+\item{beta.mean}{Numeric vector. Means of the priors for the \code{beta}
+coefficients in a \code{\link{FixedEffects}} or \code{\link{MixedEffects}} model,
+or the \code{mu_beta} hyper-parameters in a \code{\link{RandomSlopes}} model.
+Default is \code{c(0, -0.0142, -0.0412, 0.348, 0.352, -0.29)}.}
 
 \item{beta.precision}{Numeric vector. Precision of the priors for the
-\eqn{\beta} coefficients.
+\code{beta} coefficients in a \code{\link{FixedEffects}} or \code{\link{MixedEffects}} model,
+or the \code{mu_beta} hyper-parameters in a \code{\link{RandomSlopes}} model.
 Default is \code{c(0.01, 22.7, 13.9, 8.08, 5.5, 23.45)}.}
 }
 \value{
-A list of prior parameters with class \code{"capturetbpriors"}.
+A list of prior parameters with class \code{capturetbpriors}.
 }
 \description{
 Constructs a list of prior distributions for model parameters.
 This function validates the input arguments and returns a list
-with class \code{"capturetbpriors"}.
-}
-\examples{
-priors <- capturetb_priors()
-
+with class \code{capturetbpriors}. Note that if these priors are
+used in a \code{\link{RandomSlopes}} model, \code{beta.mean} and
+\code{beta.precision} define priors on the \code{mu_beta} hyper-parameters
+which in turn define priors for the country-specific coefficients.
+See \code{vignette("03_model-comparisons", package = "capturetb")} for details.
 }

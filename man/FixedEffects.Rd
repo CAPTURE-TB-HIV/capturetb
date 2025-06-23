@@ -2,27 +2,15 @@
 % Please edit documentation in R/fixed-effects.R
 \name{FixedEffects}
 \alias{FixedEffects}
-\title{MixedEffects R6 Class}
+\title{FixedEffects R6 Class}
 \description{
-This class encapsulates the CaptureTB fixed effects model with
-single intercept and fixed covariate effects, providing
-methods to fit the JAGS model and generate predictions.
+This class allows the user to fit and use a fixed effects model with
+single intercept and fixed covariate effects. Its primary purpose is for
+the comparison of different model structures; see the
+\code{vignette("03_model-comparisons", package = "capturetb")} vignette.
 }
 \details{
 An R6 class for fitting and predicting costs using a fixed effects model.
-}
-\examples{
-\dontrun{
-# Create a new FixedEffects model instance with default covariates and priors
-model <- capturetb::FixedEffects$new()
-
-# Fit the model
-model$fit(n.iter = 5000)
-
-# Make predictions
-predictions <- model$predict(new_data)
-}
-
 }
 \section{Super class}{
 \code{\link[capturetb:JAGSModel]{capturetb::JAGSModel}} -> \code{FixedEffects}
@@ -83,8 +71,8 @@ from the ValueTB dataset installed with this package.}
 
 \item{\code{target}}{Character. Name of the target variable.}
 
-\item{\code{priors}}{List of class 'capturetbpriors'. Should be created using
-\code{capturetb_priors}.
+\item{\code{priors}}{List of class "capturetbpriors". Should be created using
+\code{\link[=capturetb_priors]{capturetb_priors()}}.
 Generate predictions from the fitted model.}
 }
 \if{html}{\out{</div>}}

@@ -1,0 +1,25 @@
+url: ~
+template:
+  bootstrap: 5
+project:
+  render: ['*.qmd']
+reference:
+- title: "Predictions"
+  desc: "Functions needed to predict costs"
+  contents:
+    - unitcost
+- title: "Data"
+  desc: "Functions for interfacing with ValueTB data"
+  contents:
+    - outputs
+    - get_data
+- title: "Advanced usage"
+  desc: "Functions for fitting models to new data, using different model structures, or using different priors"
+  contents:
+    - FixedEffects
+    - MixedEffects
+    - RandomSlopes
+    - JAGSModel
+    - capturetb_priors
+    - plot.capturetbpriors
+    

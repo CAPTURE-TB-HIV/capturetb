@@ -3,12 +3,14 @@
 #' Base R6 class for fitting and predicting costs using a JAGS model.
 #' Contains functionality that is shared across model classes.
 #' Should not be instantiated directly, rather one of its children
-#' classes should be used: FixedEffects, MixedEffects.
+#' classes should be used:  [`FixedEffects`],
+#' [`MixedEffects`],  [`RandomSlopes`]
 #'
 #' @importFrom R6 R6Class
 #' @importFrom rlang .data
-#' @seealso FixedEffects
-#' @seealso MixedEffects
+#' @seealso [`FixedEffects`]
+#' @seealso [`MixedEffects`]
+#' @seealso [`RandomSlopes`]
 JAGSModel <- R6::R6Class("JAGSModel",
   public = list(
     #' @description
@@ -18,8 +20,8 @@ JAGSModel <- R6::R6Class("JAGSModel",
     #' from the ValueTB dataset installed with this package.
     #' @param covariates Character vector. Names of covariate columns.
     #' @param target Character. Name of the target variable.
-    #' @param priors List of class 'capturetbpriors'. Should be created using
-    #' \code{capturetb_priors}.
+    #' @param priors List of class "capturetbpriors". Should be created using
+    #' [`capturetb_priors`]
     #' @param model Name of the JAGS model file.
     initialize = function(dat = get_data("OP treatment visit"),
                           covariates = capturetb_covariates(),
@@ -113,10 +115,10 @@ JAGSModel <- R6::R6Class("JAGSModel",
     #' @param n.thin Integer. Thinning interval. Default is 100.
     #' @param seed Optonal integer. Used to seed both the R and JAGS random
     #' generators for reproducible results.
-    #' @param ... Additional arguments passed to rjags::jags.model().
+    #' @param ... Additional arguments passed to [rjags::jags.model].
     #'
     #' @return Self (invisibly) for method chaining.
-    #' @seealso \code{\link[rjags]{jags.model}}
+    #' @seealso [rjags::jags.model].
     fit = function(n.chains = 3,
                    n.iter = 1000000,
                    n.burnin = 5000,
@@ -171,16 +173,20 @@ JAGSModel <- R6::R6Class("JAGSModel",
         )
       }
       update(jags_mod, n.iter = n.burnin)
+      vars <- c(
+        "alpha",
+        "beta",
+        "sigma"
+      )
+      model_type <- private$.model
+      if (model_type != "fixedeffects.model") {
+        vars <- c(vars, "mu_alpha", "sigma_alpha")
+      }
+      if (model_type == "randomslopes.model") {
+        vars <- c(vars, "mu_beta", "sigma_beta")
+      }
       samples <- rjags::coda.samples(jags_mod,
-        variable.names = c(
-          "mu_alpha",
-          "sigma",
-          "sigma_alpha",
-          "mu_beta",
-          "sigma_beta",
-          "beta",
-          "alpha"
-        ),
+        variable.names = vars,
         n.iter = n.iter,
         thin = n.thin
       )
@@ -232,7 +238,7 @@ JAGSModel <- R6::R6Class("JAGSModel",
     #' @description
     #' Get the fitted MCMC samples.
     #'
-    #' @return coda::mcmc.list object or NULL if not fitted.
+    #' @return [coda::mcmc.list] object or NULL if not fitted.
     samples = function() {
       private$.samples
     },
@@ -270,13 +276,13 @@ JAGSModel <- R6::R6Class("JAGSModel",
     },
 
     #' @description
-    #' Create trace plots for MCMC chains using \code{bayesplot}.
+    #' Create trace plots for MCMC chains using [bayesplot::mcmc_trace].
     #'
-    #' @param ... Additional arguments passed to \code{bayesplot::mcmc_trace}.
+    #' @param ... Additional arguments passed to [bayesplot::mcmc_trace].
     #'
     #' @return A ggplot object showing trace plots.
     #' @importFrom bayesplot mcmc_trace
-    #' @seealso \code{\link[bayesplot]{mcmc_trace}}
+    #' @seealso [bayesplot::mcmc_trace]
     mcmc_trace = function(...) {
       private$.check_fitted()
       samples <- private$.samples
@@ -286,7 +292,7 @@ JAGSModel <- R6::R6Class("JAGSModel",
     #' @description
     #' Compute and plot R-hat convergence diagnostics.
     #'
-    #' @return A ggplot object showing R-hat diagnostics.
+    #' @return A [ggplot2::ggplot] object showing R-hat diagnostics.
     #' @importFrom ggplot2 ggplot geom_hline geom_point
     #' labs theme_minimal aes
     #' @importFrom coda gelman.diag
@@ -310,10 +316,10 @@ JAGSModel <- R6::R6Class("JAGSModel",
         ggplot2::theme_minimal()
     },
     #' @description
-    #' Create autocorrelation plots for MCMC chains using \code{bayesplot}.
+    #' Create autocorrelation plots for MCMC chains using [bayesplot::mcmc_acf].
     #'
-    #' @param ... Additional arguments passed to \code{bayesplot::mcmc_acf}.
-    #' @seealso \code{\link[bayesplot]{mcmc_acf}}
+    #' @param ... Additional arguments passed to [bayesplot::mcmc_acf].
+    #' @seealso [bayesplot::mcmc_acf]
     #' @importFrom bayesplot mcmc_acf
     #' @return A ggplot object showing autocorrelation plots.
     mcmc_acf = function(...) {
@@ -323,23 +329,23 @@ JAGSModel <- R6::R6Class("JAGSModel",
     },
     #' @description
     #' Computes the effective sample size of the posterior
-    #' samples using the \code{coda::effectiveSize} function.
+    #' samples using the [coda::effectiveSize] function.
     #'
     #' @return A named numeric vector.
     #' @importFrom coda effectiveSize
-    #' @seealso \code{\link[coda]{effectiveSize}}
+    #' @seealso [coda::effectiveSize]
     n_eff = function() {
       private$.check_fitted()
       samples <- private$.samples
       coda::effectiveSize(samples)
     },
     #' @description
-    #' Plot posterior distributions using \code{bayesplot::mcmc_areas}.
+    #' Plot posterior distributions using [bayesplot::mcmc_areas].
     #'
     #' @param prob Numeric. Density to highlight. Default 0.9.
-    #' @param ... Additional arguments passed to \code{bayesplot::mcmc_areas}.
+    #' @param ... Additional arguments passed to [bayesplot::mcmc_areas].
     #' @return A ggplot object showing posterior distributions.
-    #' @seealso \code{\link[bayesplot]{mcmc_areas}}
+    #' @seealso [bayesplot::mcmc_areas]
     #' @importFrom bayesplot mcmc_areas
     plot_posteriors = function(prob = 0.9, ...) {
       private$.check_fitted()
@@ -430,7 +436,7 @@ JAGSModel <- R6::R6Class("JAGSModel",
     #' @param color_by_country Logical. Whether to color points by country.
     #' Default TRUE.
     #'
-    #' @return A ggplot object showing residuals vs fitted values.
+    #' @return A [ggplot2::ggplot] object showing residuals vs fitted values.
     #' @importFrom ggplot2 ggplot aes geom_point geom_hline geom_smooth
     #' labs theme_minimal theme
     plot_residuals = function(add_smooth = TRUE,
@@ -502,7 +508,7 @@ JAGSModel <- R6::R6Class("JAGSModel",
     #' error bars. Default TRUE.
     #' @param color_by_country Logical. Whether to color points by country.
     #' Default TRUE.
-    #' @return A ggplot object showing observed vs predicted values.
+    #' @return A [ggplot2::ggplot] object showing observed vs predicted values.
     #'
     #' @examples
     #' \dontrun{
@@ -662,9 +668,9 @@ JAGSModel <- R6::R6Class("JAGSModel",
     #' @description
     #' This function computes the Expected Value of Perfect Information (EVPI)
     #' for a given set of input data and a vector of willingness-to-pay
-    #' thresholds (\code{lambda}).
+    #' thresholds (`lambda`).
     #'
-    #' @param dat A single set of model inputs, provided as a \code{data.frame}
+    #' @param dat A single set of model inputs, provided as a `data.frame`
     #'  with one row or as a list.
     #' @param lambda Numeric vector of willingness-to-pay thresholds
     #' at which to calculate EVPI.
@@ -674,7 +680,7 @@ JAGSModel <- R6::R6Class("JAGSModel",
     #' output then leave as the default of 1.
     #'
     #' @return A numeric vector of EVPI values, one for each value
-    #' in \code{lambda}.
+    #' in `lambda`.
     #'
     #' @examples
     #' \dontrun{
@@ -683,7 +689,7 @@ JAGSModel <- R6::R6Class("JAGSModel",
     #' model$evpi(dat, lambda)
     #' }
     #'
-    #' @seealso \code{\link{predict}}
+    #' @seealso [predict()]
     #' @export
     evpi = function(dat, lambda, n_outputs = 1) {
       stopifnot(

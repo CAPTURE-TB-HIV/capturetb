@@ -5,3 +5,6 @@
 inst/doc
 *.html
 vignettes/*/*
+*.rmarkdown
+docs
+vignettes/_quarto.yaml

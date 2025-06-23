@@ -7,17 +7,16 @@
 unitcost()
 }
 \value{
-An object of class \code{MixedEffects}.
+An object of class \code{\link{MixedEffects}}.
 }
 \description{
-This function loads a \code{MixedEffects} model object
+This function loads a \code{\link{MixedEffects}} model object
 fitted using default covariates and priors, with
 a total of 30,000 posterior samples. This can be used to
 predict unit costs for new inputs via the predict method.
 }
 \examples{
 mod <- unitcost()
-\dontrun{
-mod$predict(new_data)
-}
+new_data <- get_data("OP treatment visit")[1, ]
+mod$predict(new_data, summarised = TRUE)
 }

@@ -73,12 +73,12 @@ samples_mixed <- as.matrix(mixed_effects$samples())
 
 # fit fixed effects model to same data and priors
 fixed_effects <- capturetb::FixedEffects$new()
-fixed_effects$fit(quiet = TRUE)
+fixed_effects$fit(quiet = TRUE, n.iter = 10000)
 samples_fixed <- as.matrix(fixed_effects$samples())
 
 # fit random effects model to same data and priors
 random_effects <- capturetb::RandomSlopes$new()
-random_effects$fit(quiet = TRUE)
+random_effects$fit(quiet = TRUE, n.iter = 10000)
 samples_random <- as.matrix(random_effects$samples())
 ```
 

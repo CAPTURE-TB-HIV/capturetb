@@ -1,5 +1,5 @@
 ---
-title: "Value of information analysis"
+title: "Value of Information Analysis"
 author: "Alex Hill"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
@@ -24,7 +24,7 @@ library(ggplot2)
 library(dplyr)
 ```
 
-When using model estimates in the context of an HTA, model uncertainty will have a certain cost associated with it. The `unitcost` model has a built-in method for calulating the Expected Value of Perfect Information (EVPI) - in other words, the cost of model uncertainty - given a willingness-to-pay threshold for a single treatment visit.
+When using model estimates in the context of an HTA, model uncertainty will have a certain cost associated with it. The \link{unitcost} model has a built-in method for calulating the Expected Value of Perfect Information (EVPI) - in other words, the cost of model uncertainty - given a willingness-to-pay threshold for a single treatment visit.
 
 So, for example, we predict costs for an unseen facility:
 

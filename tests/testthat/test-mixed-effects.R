@@ -371,7 +371,7 @@ test_that("lambda must be a numeric vector", {
     model$evpi(dat_cleaned[1, ], "one"),
     "lambda must be a numeric vector"
   )
-    expect_silent(
+  expect_silent(
     model$evpi(as.list(dat_cleaned[1, ]), 1:2)
   )
 })
@@ -382,7 +382,7 @@ test_that("n_putputs must be a numeric scalar", {
     model$evpi(dat_cleaned[1, ], 1:5, 1:5),
     "n_outputs must be a numeric scalar"
   )
-    expect_silent(
+  expect_silent(
     model$evpi(as.list(dat_cleaned[1, ]), 1:2, 5)
   )
 })

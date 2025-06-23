@@ -9,3 +9,6 @@
 ^codecov.yml
 ^.*.html
 vignettes/*/*
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
