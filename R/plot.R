@@ -1,10 +1,10 @@
 
-#' Plot Prior Distribution from a capturetbpriors Object
+#' Plot prior distribution from a `capturetbpriors` object
 #'
-#' Plots the distribution of a specified prior from a 'capturetbpriors' object.
+#' Plots the distribution of a specified prior from a `capturetbpriors`` object.
 #'
-#' @param x Object of class 'capturetbpriors'. See \code{capturetb_priors}.
-#' @param parameter Character. Name of the paramater to plot.
+#' @param x Object of class 'capturetbpriors'. See [capturetb_priors()].
+#' @param parameter Character. Name of the parameter to plot.
 #' ("mu_alpha_mean", "sigma", "sigma_alpha", "beta\[1\]", ...).
 #' Default is "mu_alpha_mean".
 #' @export
@@ -13,11 +13,10 @@
 #' @importFrom utils read.csv
 #' @importFrom stats dexp dnorm qexp rnorm update
 #' @importFrom ggplot2 .data
-plot.capturetbpriors <- function(x, ..., parameter = "mu_alpha_mean") {
-  if (!requireNamespace("ggplot2", quietly = TRUE)) {
-    stop("Package 'ggplot2' is required but not installed.")
-  }
-
+#' @examples
+#' mod <- unitcost()
+#' plot(mod$priors())
+plot.capturetbpriors <- function(x, ..., parameter = "mu_alpha") {
   # Helper to plot normal
   plot_normal <- function(mean, sd, label) {
     vals <- seq(mean - 4 * sd, mean + 4 * sd, length.out = 200)
@@ -44,13 +43,6 @@ plot.capturetbpriors <- function(x, ..., parameter = "mu_alpha_mean") {
       )
   }
 
-  # Map user-friendly names to internal list names
-  prior_map <- list(
-    mu_alpha_mean = "prior.mu_alpha.mean",
-    sigma = "prior.sigma.rate",
-    sigma_alpha = "prior.sigma_alpha.rate"
-  )
-
   # Handle beta priors
   if (grepl("^beta\\[\\d+\\]$", parameter)) {
     idx <- as.integer(sub("beta\\[(\\d+)\\]", "\\1", parameter))
@@ -62,9 +54,9 @@ plot.capturetbpriors <- function(x, ..., parameter = "mu_alpha_mean") {
     return(plot_normal(mean, sd, paste0("beta[", idx, "]")))
   }
 
-  # Handle mapped priors
-  if (parameter %in% names(prior_map)) {
-    if (parameter == "mu_alpha_mean") {
+  # Handle other priors
+  if (parameter %in% c("mu_alpha", "sigma_alpha", "sigma")) {
+    if (parameter == "mu_alpha") {
       mean <- x$prior.mu_alpha.mean
       sd <- 1 / sqrt(x$prior.mu_alpha.precision)
       return(plot_normal(mean, sd, "mu_alpha"))
@@ -77,10 +69,6 @@ plot.capturetbpriors <- function(x, ..., parameter = "mu_alpha_mean") {
     }
   }
 
-  stop("Unknown parameter name. Use 'mu_alpha_mean', 'sigma',
+  stop("Unknown parameter name. Use 'mu_alpha', 'sigma',
   'sigma_alpha', or 'beta[1]', etc.")
 }
-
-## TODO: plot predictions
-
-## TODO: plot model diagnostics

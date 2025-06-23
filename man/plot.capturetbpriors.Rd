@@ -2,19 +2,23 @@
 % Please edit documentation in R/plot.R
 \name{plot.capturetbpriors}
 \alias{plot.capturetbpriors}
-\title{Plot Prior Distribution from a capturetbpriors Object}
+\title{Plot prior distribution from a \code{capturetbpriors} object}
 \usage{
-\method{plot}{capturetbpriors}(x, ..., parameter = "mu_alpha_mean")
+\method{plot}{capturetbpriors}(x, ..., parameter = "mu_alpha")
 }
 \arguments{
-\item{x}{Object of class 'capturetbpriors'. See \code{capturetb_priors}.}
+\item{x}{Object of class 'capturetbpriors'. See \code{\link[=capturetb_priors]{capturetb_priors()}}.}
 
 \item{\dots}{Further arguments passed to the method.}
 
-\item{parameter}{Character. Name of the paramater to plot.
+\item{parameter}{Character. Name of the parameter to plot.
 ("mu_alpha_mean", "sigma", "sigma_alpha", "beta[1]", ...).
 Default is "mu_alpha_mean".}
 }
 \description{
-Plots the distribution of a specified prior from a 'capturetbpriors' object.
+Plots the distribution of a specified prior from a `capturetbpriors`` object.
+}
+\examples{
+mod <- unitcost()
+plot(mod$priors())
 }

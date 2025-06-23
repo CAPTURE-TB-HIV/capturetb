@@ -350,3 +350,39 @@ test_that("performance method works with natural scale", {
   perf_log <- model$performance(scale = "log")
   expect_equal(perf_log$ci_coverage, perf_natural$ci_coverage)
 })
+
+test_that("evpi expects a single row of inputs", {
+  model <- unitcost()
+  expect_error(
+    model$evpi(dat_cleaned, 1),
+    "dat must be a single set of inputs in list or data.frame form"
+  )
+  expect_silent(
+    model$evpi(dat_cleaned[1, ], 1)
+  )
+  expect_silent(
+    model$evpi(as.list(dat_cleaned[1, ]), 1)
+  )
+})
+
+test_that("lambda must be a numeric vector", {
+  model <- unitcost()
+  expect_error(
+    model$evpi(dat_cleaned[1, ], "one"),
+    "lambda must be a numeric vector"
+  )
+  expect_silent(
+    model$evpi(as.list(dat_cleaned[1, ]), 1:2)
+  )
+})
+
+test_that("n_putputs must be a numeric scalar", {
+  model <- unitcost()
+  expect_error(
+    model$evpi(dat_cleaned[1, ], 1:5, 1:5),
+    "n_outputs must be a numeric scalar"
+  )
+  expect_silent(
+    model$evpi(as.list(dat_cleaned[1, ]), 1:2, 5)
+  )
+})

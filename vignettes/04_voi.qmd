@@ -1,0 +1,105 @@
+---
+title: "Value of Information Analysis"
+author: "Alex Hill"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Model Comparisons}
+  %\VignetteEngine{quarto::html}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 8,
+  fig.height = 8
+)
+```
+
+```{r setup}
+library(capturetb)
+library(ggplot2)
+library(dplyr)
+```
+
+When using model estimates in the context of an HTA, model uncertainty will have a certain cost associated with it. The \link{unitcost} model has a built-in method for calulating the Expected Value of Perfect Information (EVPI) - in other words, the cost of model uncertainty - given a willingness-to-pay threshold for a single treatment visit.
+
+So, for example, we predict costs for an unseen facility:
+
+```{r}
+model <- capturetb::unitcost()
+
+# Include all covariates and facility country `fc_country`
+new_inputs <- list(
+  log_USD_p_bldgspace = 1,
+  logVisits = 6.9, 
+  logVisitsPP = -1.29, 
+  secondary = FALSE, 
+  urban = FALSE, 
+  public = TRUE,
+  fc_country = "Ethiopia"
+)
+
+pred <- model$predict(new_inputs, scale = "natural", summarised = TRUE)
+
+# Expected unit cost is mean prediction
+expected_unit_cost <- pred$mean
+knitr::kable(pred)
+```
+
+As well as the point estimates, the model actually gives a full probability distribution for predicted costs:
+
+```{r}
+pred <- model$predict(new_inputs, scale = "natural", summarised = FALSE)
+ggplot(data.frame(cost = pred), aes(x = cost)) + geom_density()
+```
+
+We can use this to calculate the EVPI given various WTP thresholds:
+
+```{r}
+lambda <- c(2:10)
+evpi <- model$evpi(new_inputs, lambda)
+ggplot(data.frame(lambda, evpi)) + 
+    geom_line(aes(x = lambda, y = evpi))
+```
+
+In this case, the maximum EVPI is about $1 per OP treatment visit - this scales linearly with the number of visits, so if an intervention includes 1000 visits, the EVPI will be $1000. 
+
+Notice that EVPI peaks when the WTP threshold $\lambda$ is equal to the expected cost; this is because in the case, even a tiny under-prediction of costs will lead to the wrong decision being made. 
+
+To get a general sense of the cost of model uncertainty, we can average over the input vectors in the training set and look at EVPI relative to predicted costs.
+
+```{r}
+lambda <- seq(0, 2.5, by = 0.25)
+dat <- model$training_data()
+pred <- model$predict(dat, summarise = TRUE, scale = "natural")[, "mean"]
+all_evpi <- lapply(1:nrow(dat),
+		function(ind) sapply(lambda * pred[ind],
+		function(l) model$evpi(dat[ind, ], l)))
+
+all_evpi_normalised <- lapply(1:nrow(dat), 
+	function(i) all_evpi[[i]]/pred[i])
+
+all_evpi_df <- do.call(rbind, all_evpi_normalised)
+all_evpi_quants <- apply(all_evpi_df, 2, quantile, probs = c(0.10, 0.5, 0.90, 1))
+
+all_evpi_mean <- apply(all_evpi_df, 2, mean)
+all_evpi_mean_trimmed <- apply(all_evpi_df, 2, mean, trim = 0.1)
+
+plot(lambda, all_evpi_normalised[[1]], 
+	type = "l", 
+	ylab = "EVPI / predicted cost",
+	xlab = "WTP / predicted cost",
+	ylim = c(0, 0.25),
+	col = "grey")
+for (i in 2:nrow(dat)) {
+	lines(lambda, all_evpi_normalised[[i]], col = "grey")
+}
+lines(lambda, all_evpi_mean, col = "blue")
+lines(lambda, all_evpi_quants[1, ])
+lines(lambda, all_evpi_quants[3, ])
+```
+
+We can see that when a WTP threshold is close to the predicted cost, resolving model uncertainty completely would be worth approximately 20% of the total cost of the intervention. Of couse in practice we can never measure costs "perfectly", but this gives some indication of the magnitude of the value of collecting primary cost data when assessing cost-effectiveness.

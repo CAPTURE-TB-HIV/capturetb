@@ -2,7 +2,7 @@
 % Please edit documentation in R/data.R
 \name{get_data}
 \alias{get_data}
-\title{Get Raw Data Filtered by Output Type}
+\title{Get raw data filtered by output type}
 \usage{
 get_data(output_name = NULL)
 }
@@ -17,5 +17,5 @@ A data frame containing only rows matching the specified output type.
 Returns the raw ValueTB data filtered to a specified output type.
 }
 \examples{
-get_data("IP bedday")
+head(get_data("IP bedday"))
 }

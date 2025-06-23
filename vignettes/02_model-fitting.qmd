@@ -18,67 +18,69 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r setup}
+```{r setup, message = FALSE, warn = FALSE}
 library(capturetb)
 library(ggplot2)
 library(dplyr)
 ```
 
-## Introduction
+This vignette demonstrates how the default model was fitted and sensitivity analyses performed. It also shows how models could be fit using different covariates, target variable, training data or priors.
 
-This vignette demonstrates how to use this package to:
-
-1. Create a new mixed effects model instance with covariates, priors and training data
-2. Fit the model to estimate parameters
-
-This demonstrates how the default model was fitted and sensitivity analyses performed.
-
-Under the hood this uses JAGS (Just Another Gibbs Sampler) to fit a hierarchical linear regression model with country-specific intercepts and shared covariate effects.
+The following functions were included in the package to make the process of model development transparent and reproducible, but if you want to use the final CaptureTB model to predict costs you should read `vignette("01_model-predictions")` instead.
 
 ## Creating a model instance
 
 A model instance requires a list of covariates, a target variable to predict, training data, and priors for parameters. 
 
-```{r model-creation}
+```{r model-inputs}
 covariates <- c("log_USD_p_bldgspace",
- "logVisits", "logVisitsPP_TB", "primary",
+ "logVisits", "logVisitsPP", "logVisitsPP_TB", "primary",
  "secondary", "urban", "public")
 
 # Specifying priors for the fixed effects
-# Others will take default values
+# One beta coefficient for each covariate
+# Other parameters will take default values
 priors <- capturetb::capturetb_priors(
-  beta.mean = c(0,-0.0142, -0.0412, 0.304, 0.348, 0.352, -0.29),
-  beta.precision = c(0.01, 227, 139, 46.4, 80.8, 55.2, 234.5))
+  beta.mean = c(0,-0.0142, -0.0412, -0.0412, 0.304, 0.348, 0.352, -0.29),
+  beta.precision = c(0.01, 227, 139, 139, 46.4, 80.8, 55.2, 234.5)
+)
 
-data <- get_data("OP diagnostic visit") # or provide your own data; see capturetb::outputs() for all output data installed with the package
+data <- get_data("OP diagnostic visit") 
+# or provide your own data;
+# see capturetb::outputs() for all output data 
+# installed with the package
+```
 
+We now create an instance of the `capturetb::MixedEffects` class to fit a model with country-specific intercepts and shared slopes. To fit a fixed effects model we could use the FixedEffects class, or to fit a model with random slopes, 
+we could use a RandomSlopes class. See `vignette("03_model-comparisons")` for details on the different model structures.
+ 
+```{r model-creation}
 model <- capturetb::MixedEffects$new(
   dat = data,
   covariates = covariates,
   target = "USD_unitcost_total",
   priors = priors
 )
-
-# See all priors used in the model
-priors <- model$priors()
-print(priors)
 ```
 
 Priors can be visualised by calling `plot(priors, parameter = "name_of_param")`:
 
 ```{r beta-priors, fig.width=10, fig.height=6}
 library(gridExtra)
+priors <- model$priors()
 plots <- list()
 for(i in 1:3) {
   plots[[i]] <- plot(priors, parameter = paste0("beta[", i, "]"))
 }
-plots[[4]] <- plot(priors, parameter = "mu_alpha_mean")
+plots[[4]] <- plot(priors, parameter = "mu_alpha")
 plots[[5]] <- plot(priors, parameter = "sigma_alpha")
 plots[[6]] <- plot(priors, parameter = "sigma")
 do.call(grid.arrange, c(plots, ncol = 3))
 ```
 
 ## Fitting the model
+
+Under the hood the MixedEffects class uses JAGS (Just Another Gibbs Sampler) to fit a hierarchical linear regression model with country-specific intercepts and shared covariate effects. To fit the model, [JAGS](https://sourceforge.net/projects/mcmc-jags/) and the [rjags](https://cran.r-project.org/web/packages/rjags/index.html) package must be installed on your machine.
 
 For the purpose of the vignette, we'll use fewer iterations than recommended for faster computation:
 
@@ -100,6 +102,8 @@ summary(fitted_samples)
 ```
 
 ### Diagnostics
+
+Several functions are available on the model class to check whether the model has converged:
 
 Rhat:
 
@@ -125,7 +129,7 @@ Effective sample size:
 knitr::kable(model$n_eff())
 ```
 
-Plotting posteriors:
+We can also plot the posterior distributions of each parameter:
 
 ```{r}
 model$plot_posteriors(pars = paste0("beta[", 1:length(covariates), "]")) + 
@@ -138,7 +142,7 @@ model$plot_posteriors(pars = c("mu_alpha", "sigma_alpha", "sigma",  paste0("alph
 
 ## Generating predictions
 
-We can now generate predictions for the training data to evaluate model fit:
+We can now generate predictions for the training data and evaluate model fit:
 
 ```{r predictions}
 # Generate predictions for the training data on log scale
@@ -164,7 +168,7 @@ model$plot_fit(include_ci = FALSE, scale = "log")
 
 ```{r prediction-intervals}
 # Plot with prediction intervals
-model$plot_fit(include_ci = "TRUE", scale = "log")
+model$plot_fit(include_ci = TRUE, scale = "log")
 ```
 
 ### 3. Residuals
@@ -177,25 +181,11 @@ model$plot_residuals(add_smooth = TRUE, color_by_country = TRUE)
 
 ```{r country-analysis}
 # Performance by country
-results_df <- cbind(
-  observed = log(dat$USD_unitcost_total),
-  country = dat$fc_country,
-  predictions
-)
+country_performance <- model$performance(by_country = TRUE)
+colnames(country_performance) <- c("Country", "MAE",
+ "RMSE", "Correlation", "95% CI Coverage")
 
-country_performance <- results_df %>%
-  group_by(country) %>%
-  summarise(
-    n_obs = n(),
-    mae = mean(abs(observed - mean)),
-    rmse = sqrt(mean((observed - mean)^2)),
-    correlation = cor(observed, mean),
-    coverage = mean(observed >= lower & observed <= upper),
-    .groups = 'drop'
-  ) %>%
-  arrange(desc(n_obs))
-colnames(country_performance) <- c("Country", "N", "MAE",
- "RMSE", "Corelation", "95% CI Coverage")
+knitr::kable(country_performance)
 
 knitr::kable(country_performance)
 ```
@@ -207,7 +197,7 @@ model$plot_fit() +
 
 ### 5. Out-of-sample performance
 
-We can check for overfitting and estimate out-of-sample performance using k-fold cross-validation:
+We can check for overfitting and estimate out-of-sample performance using k-fold cross-validation. Here we use 3 folds for quick compilation; in practice, 10 or 20 folds would give a more accurate picture.
 
 ```{r}
 res <- model$k_fold_cv(k_folds = 3, 

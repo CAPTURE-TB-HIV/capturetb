@@ -2,7 +2,7 @@
 % Please edit documentation in R/data.R
 \name{capturetb_covariates}
 \alias{capturetb_covariates}
-\title{Get List of Covariate Names for CaptureTB Model}
+\title{Get list of covariates used in the final CaptureTB model.}
 \usage{
 capturetb_covariates()
 }
@@ -18,5 +18,6 @@ A character vector containing the names of covariates:
 }
 }
 \description{
-Returns a character vector of covariate names used in the CaptureTB model.
+Returns a character vector of covariate names.
 }
+\keyword{internal}

@@ -1,16 +1,15 @@
 #' CaptureTB total unit cost model
 #'
-#' This function loads a \code{MixedEffects} model object
+#' This function loads a [`MixedEffects`] model object
 #' fitted using default covariates and priors, with
 #' a total of 30,000 posterior samples. This can be used to
 #' predict unit costs for new inputs via the predict method.
 #'
-#' @return An object of class \code{MixedEffects}.
+#' @return An object of class [`MixedEffects`].
 #' @examples
 #' mod <- unitcost()
-#' \dontrun{
-#' mod$predict(new_data)
-#' }
+#' new_data <- get_data("OP treatment visit")[1, ]
+#' mod$predict(new_data, summarised = TRUE)
 #' @export
 unitcost <- function() {
     samples <- readRDS(system.file("posterior_samples.rds",

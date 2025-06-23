@@ -3,22 +3,11 @@
 #' An R6 class for fitting and predicting costs using a mixed effects model.
 #'
 #' @description
-#' This class encapsulates the CaptureTB mixed effects model with
-#' country-specific intercepts and fixed covariate effects, providing
-#' methods to fit the JAGS model and generate predictions.
-#'
-#' @examples
-#' \dontrun{
-#' # Create a new MixedEffects model instance with default covariates and priors
-#' model <- capturetb::MixedEffects$new()
-#'
-#' # Fit the model
-#' model$fit(n.iter = 5000)
-#'
-#' # Make predictions
-#' predictions <- model$predict(new_data)
-#' }
-#'
+#' This class allows the user to fit and use a mixed effects model with
+#' intercepts that vary by country and fixed covariate effects. It is used
+#' for the comparison of different model structures as in the 
+#' `vignette("03_model-comparisons", package = "capturetb")` vignette, and 
+#' is the class used to generate the [`unitcost`] model.
 #' @export
 #' @importFrom R6 R6Class
 #' @importFrom rlang .data
@@ -32,8 +21,8 @@ MixedEffects <- R6::R6Class("MixedEffects",
     #' from the ValueTB dataset installed with this package.
     #' @param covariates Character vector. Names of covariate columns.
     #' @param target Character. Name of the target variable.
-    #' @param priors List of class 'capturetbpriors'. Should be created using
-    #' \code{capturetb_priors}.
+    #' @param priors List of class "capturetbpriors". Should be created using
+    #' [`capturetb_priors()`]].
     initialize = function(dat = get_data("OP treatment visit"),
                           covariates = capturetb_covariates(),
                           target = "USD_unitcost_total",

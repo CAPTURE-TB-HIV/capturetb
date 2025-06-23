@@ -1,6 +1,6 @@
-#' List Unique Output Types in Raw Data
+#' List unique output types in raw data
 #'
-#' Returns all unique output types found in the ValueTB raw data.
+#' Returns all unique output types found in the ValueTB data.
 #'
 #' @return A character vector of unique output types.
 #' @examples
@@ -11,7 +11,7 @@ outputs <- function() {
   unique(td_econ$output)
 }
 
-#' Get Raw Data Filtered by Output Type
+#' Get raw data filtered by output type
 #'
 #' Returns the raw ValueTB data filtered to a specified output type.
 #'
@@ -20,7 +20,7 @@ outputs <- function() {
 #'
 #' @return A data frame containing only rows matching the specified output type.
 #' @examples
-#' get_data("IP bedday")
+#' head(get_data("IP bedday"))
 #' @export
 #' @importFrom rlang .data
 get_data <- function(output_name = NULL) {
@@ -38,31 +38,38 @@ get_data <- function(output_name = NULL) {
 }
 
 
-#' Create Prior Distributions for the CaptureTB Model
+#' Create prior distributions for a model.
 #'
 #' Constructs a list of prior distributions for model parameters.
 #' This function validates the input arguments and returns a list
-#' with class \code{"capturetbpriors"}.
+#' with class `capturetbpriors`. Note that if these priors are
+#' used in a [`RandomSlopes`] model, `beta.mean` and
+#' `beta.precision` define priors on the `mu_beta` hyper-parameters
+#' which in turn define priors for the country-specific coefficients.
+#' See `vignette("03_model-comparisons", package = "capturetb")` for details.
 #'
-#' @param mu_alpha.mean Numeric scalar. Mean of the prior for \eqn{\mu_\alpha}.
-#' Default is 0.
+#' @param mu_alpha.mean Numeric scalar. Mean of the prior for `mu_alpha`
+#' in a [`MixedEffects`] or [`RandomSlopes`] model or `alpha` if the model
+#' is an instance of [`FixedEffects`]. Default is 0.
 #' @param mu_alpha.precision Numeric scalar. Precision (inverse variance) of
-#' the prior for \eqn{\mu_\alpha}. Default is 0.01.
-#' @param sigma.rate Numeric scalar. Rate parameter for prior on  \eqn{\sigma}.
+#' the prior for `mu_alpha` in a [`MixedEffects`] or [`RandomSlopes`] model
+#' or `alpha` if the model is an instance of [`FixedEffects`]. Default is 0.01.
+#' @param sigma.rate Numeric scalar. Rate parameter for prior on `sigma`.
 #' Default is 10.
 #' @param sigma_alpha.rate Numeric scalar. Rate parameter for prior
-#' on \eqn{\sigma_\alpha}. Default is 10.
-#' @param beta.mean Numeric vector. Means of the priors for the \eqn{\beta}
-#' coefficients. Default is \code{c(0, -0.0142, -0.0412, 0.348, 0.352, -0.29)}.
+#' on `sigma_alpha`if model is an instance of [`MixedEffects`] or
+#' [`RandomSlopes`]. Ignored if the model is an instance of [`FixedEffects`].
+#' Default is 10.
+#' @param beta.mean Numeric vector. Means of the priors for the `beta`
+#' coefficients in a [`FixedEffects`] or [`MixedEffects`] model,
+#' or the `mu_beta` hyper-parameters in a [`RandomSlopes`] model.
+#' Default is `c(0, -0.0142, -0.0412, 0.348, 0.352, -0.29)`.
 #' @param beta.precision Numeric vector. Precision of the priors for the
-#' \eqn{\beta} coefficients.
-#' Default is \code{c(0.01, 22.7, 13.9, 8.08, 5.5, 23.45)}.
+#' `beta` coefficients in a [`FixedEffects`] or [`MixedEffects`] model,
+#' or the `mu_beta` hyper-parameters in a [`RandomSlopes`] model.
+#' Default is `c(0.01, 22.7, 13.9, 8.08, 5.5, 23.45)`.
 #'
-#' @return A list of prior parameters with class \code{"capturetbpriors"}.
-#'
-#' @examples
-#' priors <- capturetb_priors()
-#'
+#' @return A list of prior parameters with class `capturetbpriors`.
 #' @export
 capturetb_priors <- function(mu_alpha.mean = 0,
                              mu_alpha.precision = 0.01,
@@ -109,9 +116,9 @@ capturetb_priors <- function(mu_alpha.mean = 0,
   priors
 }
 
-#' Get List of Covariate Names for CaptureTB Model
+#' Get list of covariates used in the final CaptureTB model.
 #'
-#' Returns a character vector of covariate names used in the CaptureTB model.
+#' Returns a character vector of covariate names.
 #'
 #' @return A character vector containing the names of covariates:
 #'   \itemize{
@@ -122,7 +129,7 @@ capturetb_priors <- function(mu_alpha.mean = 0,
 #'     \item \code{urban}: Indicator for urban location
 #'     \item \code{public}: Indicator for public status
 #'   }
-#' @export
+#' @keywords internal
 capturetb_covariates <- function() {
   c(
     "log_USD_p_bldgspace",

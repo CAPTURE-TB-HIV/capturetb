@@ -4,26 +4,15 @@
 \alias{RandomSlopes}
 \title{RandomSlopes R6 Class}
 \description{
-This class encapsulates the CaptureTB random effects model with
-country-specific intercepts and country-specific covariate effects, providing
-methods to fit the JAGS model and generate predictions.
+This class allows the user to fit and use a random slopes model with
+coyntry specific intercepts and country specific covariate effects.
+Its primary purpose is for the comparison of different model structures
+as per the \code{vignette("03_model-comparisons", package = "capturetb")}
+vignette.
 }
 \details{
-An R6 class for fitting and predicting costs using a model with random slopes.
-}
-\examples{
-\dontrun{
-# Create a new RandomSlopes model instance with default covariates and
-# priors
-model <- capturetb::RandomSlopes$new()
-
-# Fit the model
-model$fit(n.iter = 5000)
-
-# Make predictions
-predictions <- model$predict(new_data)
-}
-
+An R6 class for fitting and predicting costs using a model with
+random slopes.
 }
 \section{Super class}{
 \code{\link[capturetb:JAGSModel]{capturetb::JAGSModel}} -> \code{RandomSlopes}
@@ -41,6 +30,7 @@ predictions <- model$predict(new_data)
 <ul>
 <li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="countries"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-countries'><code>capturetb::JAGSModel$countries()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="covariates"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-covariates'><code>capturetb::JAGSModel$covariates()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="evpi"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-evpi'><code>capturetb::JAGSModel$evpi()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="fit"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-fit'><code>capturetb::JAGSModel$fit()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="is_fitted"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-is_fitted'><code>capturetb::JAGSModel$is_fitted()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="k_fold_cv"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-k_fold_cv'><code>capturetb::JAGSModel$k_fold_cv()</code></a></span></li>
@@ -84,7 +74,7 @@ from the ValueTB dataset installed with this package.}
 \item{\code{target}}{Character. Name of the target variable.}
 
 \item{\code{priors}}{List of class 'capturetbpriors'. Should be created using
-\code{capturetb_priors}.
+\code{\link[=capturetb_priors]{capturetb_priors()}}.
 Generate predictions from the fitted model.}
 }
 \if{html}{\out{</div>}}

@@ -2,7 +2,7 @@
 % Please edit documentation in R/data.R
 \name{outputs}
 \alias{outputs}
-\title{List Unique Output Types in Raw Data}
+\title{List unique output types in raw data}
 \usage{
 outputs()
 }
@@ -10,7 +10,7 @@ outputs()
 A character vector of unique output types.
 }
 \description{
-Returns all unique output types found in the ValueTB raw data.
+Returns all unique output types found in the ValueTB data.
 }
 \examples{
 outputs()
