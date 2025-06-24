@@ -218,7 +218,41 @@ JAGSModel <- R6::R6Class("JAGSModel",
     predict = function(dat, scale = "log", summarised = FALSE) {
       stop("Method not implemented on the base Model class. Use one of FixedEffects, MixedEffects or RandomSlopes")
     },
+    #' @description
+    #' View distribution of binary characteristics across countries
+    #' 
+    #' @return A data frame with one row per country (`fc_country`), including
+    #' the total number of records for that country (`n_total`) and the count of
+    #' `TRUE` values for each logical covariate.
+    baselines = function() {
+      logical_cols <- names(private$.training_data[, covariates] |>
+                              dplyr::select_if(is.logical))
 
+      private$.training_data |>
+        dplyr::group_by(fc_country) |>
+        dplyr::summarise(
+          n_total = n(),
+          dplyr::across(
+            all_of(logical_cols),
+            ~ sum(.x == 1),
+            .names = "n_{.col}"
+          )
+        )
+    },
+    #' @description
+    #' View correlations between covariates in the training data
+    #' 
+    #' @param plot Logical. If TRUE, return a ggplot2 
+    #' object. If FALSE return a correlation matrix. Default TRUE.
+    #' @return ggplot2 object or correlation matrix
+    covariate_correlation = function(plot = TRUE) {
+      cor_mat <- cor(private$.training_data[, covariates])
+      if (plot) {
+        return(ggcorrplot::ggcorrplot())
+      } else {
+        return(cor_mat)
+      }
+    },
     #' @description
     #' Get the name of the target variable.
     #'
@@ -693,26 +727,27 @@ JAGSModel <- R6::R6Class("JAGSModel",
     #' @export
     evpi = function(dat, lambda, n_outputs = 1) {
       stopifnot(
-        "dat must be a single set of inputs in list or data.frame form" =
-          (is.list(dat) && (nrow(dat) == 1 || is.null(nrow(dat))))
+        "dat must be a list or data.frame" =
+          (is.list(dat))
       )
       stopifnot(
-        "n_outputs must be a numeric scalar" =
-          (is.numeric(n_outputs) && length(n_outputs) == 1)
+        "n_outputs must have length == nrow(dat)" =
+          (is.numeric(n_outputs) && length(n_outputs) == nrow(dat))
       )
       stopifnot("lambda must be a numeric vector" = is.numeric(lambda))
       cost_pred <- self$predict(dat,
         scale = "natural",
         summarised = FALSE
-      ) * n_outputs
+      )
+      cost_pred_sum <- rowSums(cost_pred * n_outputs)
       evpi <- c()
       for (i in seq_along(lambda)) {
         exp_max <- mean(sapply(
-          cost_pred,
+          cost_pred_sum,
           function(c) max(private$.net_benefit(lambda[i], c), 0)
         ))
         max_exp <- max(mean(sapply(
-          cost_pred,
+          cost_pred_sum,
           function(c) private$.net_benefit(lambda[i], c)
         )), 0)
         evpi <- c(evpi, exp_max - max_exp)
