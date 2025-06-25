@@ -354,8 +354,8 @@ test_that("performance method works with natural scale", {
 test_that("evpi expects a single row of inputs", {
   model <- unitcost()
   expect_error(
-    model$evpi(dat_cleaned, 1),
-    "dat must be a single set of inputs in list or data.frame form"
+    model$evpi(1:10, 1),
+    "dat must be a list or data.frame"
   )
   expect_silent(
     model$evpi(dat_cleaned[1, ], 1)
@@ -376,13 +376,51 @@ test_that("lambda must be a numeric vector", {
   )
 })
 
-test_that("n_putputs must be a numeric scalar", {
+test_that("evpi expects n_outputs to be scalar or have right length", {
   model <- unitcost()
   expect_error(
     model$evpi(dat_cleaned[1, ], 1:5, 1:5),
-    "n_outputs must be a numeric scalar"
+    "n_outputs must have length"
   )
   expect_silent(
-    model$evpi(as.list(dat_cleaned[1, ]), 1:2, 5)
+    model$evpi(dat_cleaned[1:2, ], 1:2, 5)
   )
+  expect_silent(
+    model$evpi(dat_cleaned[1:2, ], 1, 5)
+  )
+})
+
+test_that("evpi supports scalar n_outputs", {
+  model <- unitcost()
+  res1 <- model$evpi(dat_cleaned[1:2, ], 1)
+  res2 <- model$evpi(dat_cleaned[1:2, ], 1:1)
+  expect_equal(res1, res2, tolerance = 0.01)
+})
+
+test_that("predict_total expects n_outputs to be scalar or have right length", {
+  model <- unitcost()
+  expect_error(
+    model$predict_total(dat_cleaned[1, ], 1:5),
+    "n_outputs must have length"
+  )
+  expect_silent(
+    model$predict_total(dat_cleaned[1:2, ], 1:2)
+  )
+  expect_silent(
+    model$predict_total(dat_cleaned[1:2, ], 1)
+  )
+})
+
+test_that("predict_total supports scalar n_outputs", {
+  model <- unitcost()
+  res1 <- model$predict_total(dat_cleaned[1:2, ], 1)
+  res2 <- model$predict_total(dat_cleaned[1:2, ], 1:1)
+  expect_equal(mean(res1), mean(res2), tolerance = 0.01)
+})
+
+test_that("predict_total supports list inputs", {
+  model <- unitcost()
+  res1 <- model$predict_total(as.list(dat_cleaned[1, ]), 1)
+  res2 <- model$predict_total(dat_cleaned[1, ], 1)
+  expect_equal(mean(res1), mean(res2), tolerance = 0.01)
 })

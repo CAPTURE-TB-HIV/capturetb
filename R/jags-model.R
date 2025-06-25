@@ -220,13 +220,13 @@ JAGSModel <- R6::R6Class("JAGSModel",
     },
     #' @description
     #' View distribution of binary characteristics across countries
-    #' 
+    #'
     #' @return A data frame with one row per country (`fc_country`), including
     #' the total number of records for that country (`n_total`) and the count of
     #' `TRUE` values for each logical covariate.
     baselines = function() {
       logical_cols <- names(private$.training_data[, covariates] |>
-                              dplyr::select_if(is.logical))
+        dplyr::select_if(is.logical))
 
       private$.training_data |>
         dplyr::group_by(fc_country) |>
@@ -241,8 +241,8 @@ JAGSModel <- R6::R6Class("JAGSModel",
     },
     #' @description
     #' View correlations between covariates in the training data
-    #' 
-    #' @param plot Logical. If TRUE, return a ggplot2 
+    #'
+    #' @param plot Logical. If TRUE, return a ggplot2
     #' object. If FALSE return a correlation matrix. Default TRUE.
     #' @return ggplot2 object or correlation matrix
     covariate_correlation = function(plot = TRUE) {
@@ -701,17 +701,17 @@ JAGSModel <- R6::R6Class("JAGSModel",
     },
     #' @description
     #' This function computes the Expected Value of Perfect Information (EVPI)
-    #' for a given set of input data and a vector of willingness-to-pay
+    #' for given facility characteristics and a vector of willingness-to-pay
     #' thresholds (`lambda`).
     #'
-    #' @param dat A single set of model inputs, provided as a `data.frame`
-    #'  with one row or as a list.
+    #' @param dat `data.frame` of model inputs (facility characteristics)
     #' @param lambda Numeric vector of willingness-to-pay thresholds
     #' at which to calculate EVPI.
-    #'
     #' @param n_outputs Numeric scalar. The number of outputs to compare to the
     #' willingness-to-pay thresholds. If the willingness-to-pay is for a single
-    #' output then leave as the default of 1.
+    #' output then leave as the default of 1. Should either be length 1, for
+    #' the same number of outputs at each facility, or should have an entry for
+    #' each row in `dat`.
     #'
     #' @return A numeric vector of EVPI values, one for each value
     #' in `lambda`.
@@ -730,6 +730,10 @@ JAGSModel <- R6::R6Class("JAGSModel",
         "dat must be a list or data.frame" =
           (is.list(dat))
       )
+      dat <- as.data.frame(dat)
+      if (length(n_outputs) == 1) {
+        n_outputs <- rep(n_outputs, nrow(dat))
+      }
       stopifnot(
         "n_outputs must have length == nrow(dat)" =
           (is.numeric(n_outputs) && length(n_outputs) == nrow(dat))
@@ -753,6 +757,34 @@ JAGSModel <- R6::R6Class("JAGSModel",
         evpi <- c(evpi, exp_max - max_exp)
       }
       evpi
+    },
+    #' @description
+    #' Predict the total cost across multiple facilities with arbitrary numbers
+    #' of outputs at each
+    #'
+    #' @param dat `data.frame` of model inputs (facility characteristics)
+    #' @param n_outputs Number of outputs at each facility. Should either be
+    #' length 1, for the same number of outputs at each facility, or should
+    #' have an entry for each row in `dat`.
+    #'
+    #' @return Posterior distribution of predicted total cost, as a vector
+    #' @export
+    predict_total = function(dat, n_outputs) {
+      stopifnot(
+        "dat must be a list or data.frame" =
+          (is.list(dat))
+      )
+      dat <- as.data.frame(dat)
+      if (length(n_outputs) == 1) {
+        n_outputs <- rep(n_outputs, nrow(dat))
+      }
+      stopifnot(
+        "n_outputs must have length == nrow(dat)" =
+          (is.numeric(n_outputs) && length(n_outputs) == nrow(dat))
+      )
+      samples <- self$predict(dat, scale = "natural", summarised = FALSE)
+      samples_total <- sweep(samples, 2, n_outputs, "*")
+      rowSums(samples_total)
     }
   ),
   private = list(

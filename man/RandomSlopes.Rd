@@ -28,7 +28,9 @@ random slopes.
 \if{html}{\out{
 <details><summary>Inherited methods</summary>
 <ul>
+<li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="baselines"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-baselines'><code>capturetb::JAGSModel$baselines()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="countries"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-countries'><code>capturetb::JAGSModel$countries()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="covariate_correlation"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-covariate_correlation'><code>capturetb::JAGSModel$covariate_correlation()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="covariates"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-covariates'><code>capturetb::JAGSModel$covariates()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="evpi"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-evpi'><code>capturetb::JAGSModel$evpi()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="fit"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-fit'><code>capturetb::JAGSModel$fit()</code></a></span></li>
@@ -42,6 +44,7 @@ random slopes.
 <li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="plot_fit"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-plot_fit'><code>capturetb::JAGSModel$plot_fit()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="plot_posteriors"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-plot_posteriors'><code>capturetb::JAGSModel$plot_posteriors()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="plot_residuals"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-plot_residuals'><code>capturetb::JAGSModel$plot_residuals()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="predict_total"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-predict_total'><code>capturetb::JAGSModel$predict_total()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="priors"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-priors'><code>capturetb::JAGSModel$priors()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="samples"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-samples'><code>capturetb::JAGSModel$samples()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="target"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-target'><code>capturetb::JAGSModel$target()</code></a></span></li>

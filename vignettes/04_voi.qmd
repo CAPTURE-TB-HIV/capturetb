@@ -120,54 +120,11 @@ ggplot(data.frame(lambda, evpi)) + geom_line(aes(lambda, evpi))
 
 ## Budgeting and strategic planning
 
-A formal EVPI measure can be defined for any decision context that has a loss function associated with it, but there is no single way to think about loss associated with uncertainty in a budgeting or planning context. If under or over-prediction are equally costly, we might still have a linear or a quadratic loss function. Alternatively, there may be an assymmetric loss function - e.g. over-budgeting wastes funds, under-budgeting causes a project to fail. 
+A formal EVPI measure can be defined for any decision context that has a loss function associated with it, but there is no single way to think about loss associated with uncertainty in a budgeting or planning context. If under or over-prediction are equally costly, we might still have a linear or a quadratic loss function. Alternatively, there may be an asymmetric loss function - e.g. over-budgeting wastes funds, under-budgeting causes a project to fail. 
 
-Here we demonstrate how to calculate (and minimise) expected loss given 3 different loss functions:
+Here we demonstrate how to calculate (and minimise) expected loss given two different loss functions:
 
-1. A symmetric quadratic loss functiion:
-
-$$
-L(\hat{c}, c) = \alpha(c - \hat{c})^2
-$$
-
-The cost prediction that will minimise loss here is the mean.
-
-```{r}
-samples <- mod$predict(dat, scale = "natural")
-
-# for illustration purpose use the recorded 
-# number of visits at each facility
-n_out <- dat$fc_opvisits_TB
-
-alpha <- 1
-
-# multiple each unit cost by the number of annual visits
-samples_total <- sweep(samples, 2, n_out, "*")
-
-# convert each draw into total annual cost across all facilities
-samples_sum_total <- rowSums(samples_total)
-
-# loss minimising prediction
-c_star <- mean(samples_sum_total)
-
-loss_function <- function(c) {
-	alpha * ((c - c_star)^2)
-}
-
-# get expected loss by averaging loss over 
-# all realisations of the total cost
-loss <- sapply(samples_sum_total, loss_function)
-mean_loss <- mean(loss)
-lower_loss <- quantile(loss, 0.025)
-upper_loss <- quantile(loss, 0.975)
-
-plot_data <- data.frame(mean_loss, lower_loss, upper_loss, group = "loss")
-ggplot(plot_data, aes(x = group, y = mean_loss)) +
-	geom_point() +
-  geom_errorbar(aes(ymin = lower_loss, ymax = upper_loss), width = 0.1)
-```
-
-2. An asymmetric linear loss functiion:
+1. An asymmetric linear loss functiion:
 
 $$
 L(\hat{c}, c) =
@@ -181,23 +138,22 @@ Bayesian decision theory shows that the optimal decision under an asymmetric lin
 $\mathop{\mathbb{E}}[L(c*, c)]$. We can estimate this using draws from the posterior. For illustration, suppose our budget includes all facilities in the training data:
 
 ```{r}
-samples <- mod$predict(dat, scale = "natural")
-
-# for illustration purpose use the recorded 
-# number of visits at each facility
+# for illustration purpose look at cost aggregated over
+# all facilities in Kenya, and take the recorded
+# number of visits at each facility as the number of outputs
+# being budgeted for
+dat <- dat |> dplyr::filter(fc_country == "Kenya")
 n_out <- dat$fc_opvisits_TB
 
-alpha <- 4
+# get posterior predictions of total cost 
+samples <- model$predict_total(dat, n_out)
+
+# suppose over-prediction is twice as bad
+alpha <- 2
 beta <- 1
 
-# multiple each unit cost by the number of annual visits
-samples_total <- sweep(samples, 2, n_out, "*")
-
-# convert each draw into total annual cost across all facilities
-samples_sum_total <- rowSums(samples_total)
-
 # loss minimising prediction
-c_star <- quantile(samples_sum_total, alpha/(alpha + beta))
+c_star <- quantile(samples, alpha/(alpha + beta))
 
 loss_function <- function(c) {
 	diff <- abs(c - c_star)
@@ -210,16 +166,17 @@ loss_function <- function(c) {
 
 # get expected loss by averaging loss over 
 # all realisations of the total cost
-loss <- sapply(samples_sum_total, loss_function)
+loss <- sapply(samples, loss_function)
 
 mean_loss <- mean(loss)
 lower_loss <- quantile(loss, 0.025)
 upper_loss <- quantile(loss, 0.975)
 
-plot_data <- data.frame(mean_loss, lower_loss, upper_loss, group = "loss")
-ggplot(plot_data, aes(x = group, y = mean_loss)) +
-	geom_point() +
-  geom_errorbar(aes(ymin = lower_loss, ymax = upper_loss), width = 0.1)
+loss_data <- data.frame(loss_function = "Asymmetric linear",
+		mean_loss,
+	 	lower_loss, 
+	 	upper_loss
+	 )
 ```
 
 3. A symmetric linear loss functiion:
@@ -232,33 +189,31 @@ This is just a special case of the asymmetric loss function where $\alpha = \bet
 
 
 ```{r}
-samples <- mod$predict(dat, scale = "natural")
-
-# for illustration purpose use the recorded 
-# number of visits at each facility
-n_out <- dat$fc_opvisits_TB
-
-alpha <- 0.5
-
-# multiple each unit cost by the number of annual visits
-samples_total <- sweep(samples, 2, n_out, "*")
-
-# convert each draw into total annual cost across all facilities
-samples_sum_total <- rowSums(samples_total)
+alpha <- 2
 
 # loss minimising prediction
-c_star <- quantile(samples_sum_total, 0.5)
+c_star <- quantile(samples, 0.5)
 
 loss_function <- function(c) {
 	diff <- abs(c - c_star)
 	alpha * diff
 }
 
-# get expected loss by averaging loss over 
+# get expected loss by averaging lss over 
 # all realisations of the total cost
-loss <- sapply(samples_sum_total, loss_function)
-plot_data <- data.frame(mean_loss, lower_loss, upper_loss, group = "loss")
-ggplot(plot_data, aes(x = group, y = mean_loss)) +
-	geom_point() +
-  geom_errorbar(aes(ymin = lower_loss, ymax = upper_loss), width = 0.1)
+loss <- sapply(samples, loss_function)
+mean_loss <- mean(loss)
+lower_loss <- quantile(loss, 0.025)
+upper_loss <- quantile(loss, 0.975)
+
+loss_data <- rbind(loss_data, 
+	data.frame(loss_function = "Symmetric linear", 
+		mean_loss,
+	 	lower_loss,
+	  	upper_loss))
+
+rownames(loss_data) <- NULL
+knitr::kable(loss_data)
 ```
+
+These are just illustrative examples, but the same approach can be taken for arbitrary loss functions.
