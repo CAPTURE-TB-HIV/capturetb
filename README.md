@@ -39,7 +39,16 @@ print(expected_unit_cost)
 
 ## Testing
 
+To run tests:
+
 ```r
 devtools::load_all()
 devtools::test()
+```
+
+To build pkgdown documentation locally:
+
+```r
+devtools::load_all()
+pkgdown::build_site()
 ```

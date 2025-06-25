@@ -4,7 +4,7 @@ author: "Alex Hill"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Model Comparisons}
+  %\VignetteIndexEntry{Value of Information Analysis}
   %\VignetteEngine{quarto::html}
   %\VignetteEncoding{UTF-8}
 ---
@@ -24,9 +24,11 @@ library(ggplot2)
 library(dplyr)
 ```
 
-When using model estimates in the context of an HTA, model uncertainty will have a certain cost associated with it. The \link{unitcost} model has a built-in method for calulating the Expected Value of Perfect Information (EVPI) - in other words, the cost of model uncertainty - given a willingness-to-pay threshold for a single treatment visit.
+## Cost-effectiveness analyses
 
-So, for example, we predict costs for an unseen facility:
+When using model estimates in the context of an HTA, model uncertainty will have a certain cost associated with it. The `capturetb::unitcost` model has a built-in method for calulating the Expected Value of Perfect Information (EVPI) - in other words, the cost of model uncertainty - given a willingness-to-pay threshold.
+
+To visualise model uncertainty, we predict costs for an unseen facility:
 
 ```{r}
 model <- capturetb::unitcost()
@@ -103,3 +105,115 @@ lines(lambda, all_evpi_quants[3, ])
 ```
 
 We can see that when a WTP threshold is close to the predicted cost, resolving model uncertainty completely would be worth approximately 20% of the total cost of the intervention. Of couse in practice we can never measure costs "perfectly", but this gives some indication of the magnitude of the value of collecting primary cost data when assessing cost-effectiveness.
+
+As well as calculating EVPI for costs at a single facility, the method can be used to look at EVPI for an intervention that involve $n_i$ visits for facilities $i = ...I$:
+
+```{r}
+# using model training data to demonstrate
+# but works for any inputs
+dat <- mod$training_data()
+n_output <- dat$fc_opvisits_TB
+lambda <- seq(6000000, 12000000, by = 500000)
+evpi <- mod$evpi(dat, lambda, n_output)
+ggplot(data.frame(lambda, evpi)) + geom_line(aes(lambda, evpi))
+```
+
+## Budgeting and strategic planning
+
+A formal EVPI measure can be defined for any decision context that has a loss function associated with it, but there is no single way to think about loss associated with uncertainty in a budgeting or planning context. If under or over-prediction are equally costly, we might still have a linear or a quadratic loss function. Alternatively, there may be an asymmetric loss function - e.g. over-budgeting wastes funds, under-budgeting causes a project to fail. 
+
+Here we demonstrate how to calculate (and minimise) expected loss given two different loss functions:
+
+1. An asymmetric linear loss functiion:
+
+$$
+L(\hat{c}, c) =
+\begin{cases}
+\alpha (c - \hat{c}) & \text{if } \hat{c} < c \\
+\beta (\hat{c} - c) & \text{if } \hat{c} \geq c
+\end{cases}
+$$
+
+Bayesian decision theory shows that the optimal decision under an asymmetric linear function is the $\dfrac{\alpha}{\alpha + \beta}$ quantile of the posterior cost distribution, call it $c*$. The expected loss associated with using this prediction is then 
+$\mathop{\mathbb{E}}[L(c*, c)]$. We can estimate this using draws from the posterior. For illustration, suppose our budget includes all facilities in the training data:
+
+```{r}
+# for illustration purpose look at cost aggregated over
+# all facilities in Kenya, and take the recorded
+# number of visits at each facility as the number of outputs
+# being budgeted for
+dat <- dat |> dplyr::filter(fc_country == "Kenya")
+n_out <- dat$fc_opvisits_TB
+
+# get posterior predictions of total cost 
+samples <- model$predict_total(dat, n_out)
+
+# suppose over-prediction is twice as bad
+alpha <- 2
+beta <- 1
+
+# loss minimising prediction
+c_star <- quantile(samples, alpha/(alpha + beta))
+
+loss_function <- function(c) {
+	diff <- abs(c - c_star)
+	if (c_star < c) {
+		alpha * diff
+	} else {
+		beta * diff
+	}
+}
+
+# get expected loss by averaging loss over 
+# all realisations of the total cost
+loss <- sapply(samples, loss_function)
+
+mean_loss <- mean(loss)
+lower_loss <- quantile(loss, 0.025)
+upper_loss <- quantile(loss, 0.975)
+
+loss_data <- data.frame(loss_function = "Asymmetric linear",
+		mean_loss,
+	 	lower_loss, 
+	 	upper_loss
+	 )
+```
+
+3. A symmetric linear loss functiion:
+
+$$
+L(\hat{c}, c) = \alpha |c - \hat{c}|
+$$
+
+This is just a special case of the asymmetric loss function where $\alpha = \beta$, and the cost minimising prediction is the 50th posterior quantile, i.e. the median. 
+
+
+```{r}
+alpha <- 2
+
+# loss minimising prediction
+c_star <- quantile(samples, 0.5)
+
+loss_function <- function(c) {
+	diff <- abs(c - c_star)
+	alpha * diff
+}
+
+# get expected loss by averaging lss over 
+# all realisations of the total cost
+loss <- sapply(samples, loss_function)
+mean_loss <- mean(loss)
+lower_loss <- quantile(loss, 0.025)
+upper_loss <- quantile(loss, 0.975)
+
+loss_data <- rbind(loss_data, 
+	data.frame(loss_function = "Symmetric linear", 
+		mean_loss,
+	 	lower_loss,
+	  	upper_loss))
+
+rownames(loss_data) <- NULL
+knitr::kable(loss_data)
+```
+
+These are just illustrative examples, but the same approach can be taken for arbitrary loss functions.

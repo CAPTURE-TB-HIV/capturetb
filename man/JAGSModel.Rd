@@ -80,6 +80,8 @@ model$evpi(dat, lambda)
 \item \href{#method-JAGSModel-new}{\code{JAGSModel$new()}}
 \item \href{#method-JAGSModel-fit}{\code{JAGSModel$fit()}}
 \item \href{#method-JAGSModel-predict}{\code{JAGSModel$predict()}}
+\item \href{#method-JAGSModel-baselines}{\code{JAGSModel$baselines()}}
+\item \href{#method-JAGSModel-covariate_correlation}{\code{JAGSModel$covariate_correlation()}}
 \item \href{#method-JAGSModel-target}{\code{JAGSModel$target()}}
 \item \href{#method-JAGSModel-training_data}{\code{JAGSModel$training_data()}}
 \item \href{#method-JAGSModel-samples}{\code{JAGSModel$samples()}}
@@ -97,6 +99,7 @@ model$evpi(dat, lambda)
 \item \href{#method-JAGSModel-plot_fit}{\code{JAGSModel$plot_fit()}}
 \item \href{#method-JAGSModel-k_fold_cv}{\code{JAGSModel$k_fold_cv()}}
 \item \href{#method-JAGSModel-evpi}{\code{JAGSModel$evpi()}}
+\item \href{#method-JAGSModel-predict_total}{\code{JAGSModel$predict_total()}}
 \item \href{#method-JAGSModel-clone}{\code{JAGSModel$clone()}}
 }
 }
@@ -200,6 +203,42 @@ full posterior samples. Default FALSE.}
 If summarised=FALSE, matrix of predicted costs with
 rows = simulations, columns = input rows. If summarised=TRUE,
 data.frame with mean, lower (2.5\%), and upper (97.5\%) quantiles.
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-JAGSModel-baselines"></a>}}
+\if{latex}{\out{\hypertarget{method-JAGSModel-baselines}{}}}
+\subsection{Method \code{baselines()}}{
+View distribution of binary characteristics across countries
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{JAGSModel$baselines()}\if{html}{\out{</div>}}
+}
+
+\subsection{Returns}{
+A data frame with one row per country (\code{fc_country}), including
+the total number of records for that country (\code{n_total}) and the count of
+\code{TRUE} values for each logical covariate.
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-JAGSModel-covariate_correlation"></a>}}
+\if{latex}{\out{\hypertarget{method-JAGSModel-covariate_correlation}{}}}
+\subsection{Method \code{covariate_correlation()}}{
+View correlations between covariates in the training data
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{JAGSModel$covariate_correlation(plot = TRUE)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{plot}}{Logical. If TRUE, return a ggplot2
+object. If FALSE return a correlation matrix. Default TRUE.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+ggplot2 object or correlation matrix
 }
 }
 \if{html}{\out{<hr>}}
@@ -542,7 +581,7 @@ fold assignments and observed values.
 \if{latex}{\out{\hypertarget{method-JAGSModel-evpi}{}}}
 \subsection{Method \code{evpi()}}{
 This function computes the Expected Value of Perfect Information (EVPI)
-for a given set of input data and a vector of willingness-to-pay
+for given facility characteristics and a vector of willingness-to-pay
 thresholds (\code{lambda}).
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{JAGSModel$evpi(dat, lambda, n_outputs = 1)}\if{html}{\out{</div>}}
@@ -551,15 +590,16 @@ thresholds (\code{lambda}).
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{dat}}{A single set of model inputs, provided as a \code{data.frame}
-with one row or as a list.}
+\item{\code{dat}}{\code{data.frame} of model inputs (facility characteristics)}
 
 \item{\code{lambda}}{Numeric vector of willingness-to-pay thresholds
 at which to calculate EVPI.}
 
 \item{\code{n_outputs}}{Numeric scalar. The number of outputs to compare to the
 willingness-to-pay thresholds. If the willingness-to-pay is for a single
-output then leave as the default of 1.}
+output then leave as the default of 1. Should either be length 1, for
+the same number of outputs at each facility, or should have an entry for
+each row in \code{dat}.}
 }
 \if{html}{\out{</div>}}
 }
@@ -580,6 +620,31 @@ model$evpi(dat, lambda)
 
 }
 
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-JAGSModel-predict_total"></a>}}
+\if{latex}{\out{\hypertarget{method-JAGSModel-predict_total}{}}}
+\subsection{Method \code{predict_total()}}{
+Predict the total cost across multiple facilities with arbitrary numbers
+of outputs at each
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{JAGSModel$predict_total(dat, n_outputs)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{dat}}{\code{data.frame} of model inputs (facility characteristics)}
+
+\item{\code{n_outputs}}{Number of outputs at each facility. Should either be
+length 1, for the same number of outputs at each facility, or should
+have an entry for each row in \code{dat}.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+Posterior distribution of predicted total cost, as a vector
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-JAGSModel-clone"></a>}}
