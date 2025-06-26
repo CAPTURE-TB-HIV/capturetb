@@ -697,7 +697,102 @@ JAGSModel <- R6::R6Class("JAGSModel",
       }
 
       # Combine all fold results
-      do.call(rbind, cv_predictions)
+      results_df <- do.call(rbind, cv_predictions)
+
+      # Calculate performance metrics
+      performance_metrics <- results_df |>
+        dplyr::summarise(
+          mae = mean(abs(.data$observed - .data$mean)),
+          rmse = sqrt(mean((.data$observed - .data$mean)^2)),
+          correlation = stats::cor(.data$observed, .data$mean),
+          ci_coverage = mean(.data$observed >= .data$lower &
+            .data$observed <= .data$upper)
+        )
+
+      attr(results_df, "performance") <- performance_metrics
+      results_df
+    },
+    #' @description
+    #' Perform leave-one-country-out cross-validation.
+    #'
+    #' @param scale One of "log" or "natural". Default "log".
+    #' @param seed Integer. Optional random seed for reproducible fold
+    #' assignment and model runs. Default NULL.
+    #' @param ... Additional arguments passed to the fit() method.
+    #'
+    #' @return Data.frame with predictions from cross-validation, including
+    #' country and observed values.
+    leave_one_country_out = function(scale = "log", seed = NULL,...) {
+      if (!is.null(seed)) {
+        set.seed(seed)
+      }
+      dat <- private$.training_data
+      countries <- private$.countries
+
+      cv_predictions <- list()
+
+      for (i in seq_along(countries)) {
+        train_data <- dat |> dplyr::filter(fc_country != countries[[i]])
+        test_data <- dat |> dplyr::filter(fc_country == countries[[i]])
+
+        if (private$.model == "fixedeffects.model") {
+          model_type <- FixedEffects
+        }
+        if (private$.model == "mixedeffects.model") {
+          model_type <- MixedEffects
+        }
+        if (private$.model == "randomslopes.model") {
+          model_type <- RandomSlopes
+        }
+
+        # Create temporary model for this country
+        temp_model <- model_type$new(
+          dat = train_data,
+          covariates = private$.covariates,
+          target = private$.target,
+          priors = private$.priors
+        )
+
+        # Fit model on training data
+        temp_model$fit(seed = seed, ...)
+
+        # Make predictions on test country
+        fold_preds <- temp_model$predict(
+          test_data,
+          scale = scale,
+          summarised = TRUE
+        )
+
+        obs <- test_data[[private$.target]]
+
+        if (scale == "log") {
+          obs <- log(obs)
+        }
+
+        fold_results <- data.frame(
+          country = test_data$fc_country,
+          observed = obs,
+          fold_preds
+        )
+
+        cv_predictions[[i]] <- fold_results
+      }
+
+      # Combine all fold results
+      results_df <- do.call(rbind, cv_predictions)
+
+      # Calculate performance metrics
+      performance_metrics <- results_df |>
+        dplyr::summarise(
+          mae = mean(abs(.data$observed - .data$mean)),
+          rmse = sqrt(mean((.data$observed - .data$mean)^2)),
+          correlation = stats::cor(.data$observed, .data$mean),
+          ci_coverage = mean(.data$observed >= .data$lower &
+            .data$observed <= .data$upper)
+        )
+      
+      attr(results_df, "performance") <- performance_metrics
+      results_df
     },
     #' @description
     #' This function computes the Expected Value of Perfect Information (EVPI)

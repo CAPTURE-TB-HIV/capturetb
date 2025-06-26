@@ -337,3 +337,17 @@ me_country <- cbind(mod = "mixed", mixed_effects$performance(by_country = TRUE))
 re_country <- cbind(mod = "random", random_effects$performance(by_country = TRUE))
 knitr::kable(rbind(fe_country, me_country, re_country))
 ```
+
+Comparing estimated accuracy on new countries, by doing leave-one-country-out cross-validation for each model:
+
+```{r}
+fe_loco <- fixed_effects$leave_one_country_out()
+me_loco <- mixed_effects$leave_one_country_out()
+re_loco <- random_effects$leave_one_country_out()
+
+knitr::kable(rbind(attr(fe_loco, "performance"), 
+	  attr(me_loco, "performance"), 
+      attr(re_loco, "performance")))
+```
+
+Performance on countries outside the training data is significantly worse than for in-sample countries in all 3 models, but no model significantly outperforms the others. If anything, the mixed effects model is the strongest performer here as well, showing the highest correlation, lowest RMSE, and CIs that cover 95% of cases without being unduly wide.
