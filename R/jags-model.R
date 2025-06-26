@@ -405,6 +405,7 @@ JAGSModel <- R6::R6Class("JAGSModel",
     #'   \item rmse: Root Mean Square Error between observed and predicted values
     #'   \item correlation: Pearson correlation between observed and predicted values
     #'   \item ci_coverage: Proportion of observations within 95% credible intervals
+    #'   \item median_ci: The median width of 95% credible intervals
     #' }
     #'
     #' @examples
@@ -451,7 +452,9 @@ JAGSModel <- R6::R6Class("JAGSModel",
           rmse = sqrt(mean((.data$observed - .data$mean)^2)),
           correlation = stats::cor(.data$observed, .data$mean),
           ci_coverage = mean(.data$observed >= .data$lower &
-            .data$observed <= .data$upper)
+            .data$observed <= .data$upper),
+          median_ci = median(.data$upper - .data$lower),
+          .groups = "drop"
         )
 
       performance_metrics
@@ -605,10 +608,11 @@ JAGSModel <- R6::R6Class("JAGSModel",
         ggplot2::theme_minimal()
 
       if (include_ci) {
-        plot <- plot + ggplot2::geom_errorbar(
-          ggplot2::aes(ymin = .data$lower, ymax = .data$upper),
-          alpha = 0.3, width = 0
-        )
+        plot <- plot +
+          ggplot2::geom_errorbar(
+            ggplot2::aes(ymin = .data$lower, ymax = .data$upper),
+            alpha = 0.2, width = 0
+          )
       }
       if (color_by_country) {
         plot <- plot + ggplot2::geom_point(ggplot2::aes(color = .data$country),
@@ -706,7 +710,8 @@ JAGSModel <- R6::R6Class("JAGSModel",
           rmse = sqrt(mean((.data$observed - .data$mean)^2)),
           correlation = stats::cor(.data$observed, .data$mean),
           ci_coverage = mean(.data$observed >= .data$lower &
-            .data$observed <= .data$upper)
+            .data$observed <= .data$upper),
+          median_ci = median(.data$upper - .data$lower)
         )
 
       attr(results_df, "performance") <- performance_metrics
@@ -722,7 +727,7 @@ JAGSModel <- R6::R6Class("JAGSModel",
     #'
     #' @return Data.frame with predictions from cross-validation, including
     #' country and observed values.
-    leave_one_country_out = function(scale = "log", seed = NULL,...) {
+    leave_one_country_out = function(scale = "log", seed = NULL, ...) {
       if (!is.null(seed)) {
         set.seed(seed)
       }
@@ -790,7 +795,7 @@ JAGSModel <- R6::R6Class("JAGSModel",
           ci_coverage = mean(.data$observed >= .data$lower &
             .data$observed <= .data$upper)
         )
-      
+
       attr(results_df, "performance") <- performance_metrics
       results_df
     },

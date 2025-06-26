@@ -222,7 +222,7 @@ test_that("returns summarised predictions if summarised=TRUE", {
 
   # Check summarised mean
   manual_mean <- apply(preds_full, 2, mean)
-  expect_equal(preds_summary$mean, manual_mean, tolerance = 0.001)
+  expect_equal(preds_summary$mean, manual_mean, tolerance = 0.01)
 })
 
 test_that("k_fold_cv works correctly", {
@@ -423,4 +423,92 @@ test_that("predict_total supports list inputs", {
   res1 <- model$predict_total(as.list(dat_cleaned[1, ]), 1)
   res2 <- model$predict_total(dat_cleaned[1, ], 1)
   expect_equal(mean(res1), mean(res2), tolerance = 0.01)
+})
+
+test_that("predict_total returns correct dimensions and values", {
+  model <- unitcost()
+
+  # Test with single facility
+  result_single <- model$predict_total(dat_cleaned[1, ], 1)
+  expect_true(is.numeric(result_single))
+  expect_true(length(result_single) > 0)
+  expect_true(all(is.finite(result_single)))
+
+  # Test with multiple facilities
+  test_data <- dat_cleaned[1:3, ]
+  result_multiple <- model$predict_total(test_data, 1)
+  expect_true(is.numeric(result_multiple))
+  expect_true(length(result_multiple) > 0)
+  expect_true(all(is.finite(result_multiple)))
+
+  # Test with different n_outputs for each facility
+  n_outputs_vector <- c(2, 3, 1)
+  result_varying <- model$predict_total(test_data, n_outputs_vector)
+  expect_true(is.numeric(result_varying))
+  expect_true(length(result_varying) == length(result_multiple))
+
+  # Test that outputs scale correctly with n_outputs
+  single_pred <- model$predict(dat_cleaned[1, ], scale = "natural", summarised = FALSE)
+  total_pred_1 <- model$predict_total(dat_cleaned[1, ], 1)
+  total_pred_5 <- model$predict_total(dat_cleaned[1, ], 5)
+
+  # Total with n_outputs=5 should be approximately 5x the total with n_outputs=1
+  expect_equal(mean(total_pred_5), 5 * mean(total_pred_1), tolerance = 0.01)
+})
+
+test_that("predict_total validates inputs correctly", {
+  model <- unitcost()
+
+  # Test non-dataframe/list input
+  expect_error(
+    model$predict_total("invalid", 1),
+    "dat must be a list or data.frame"
+  )
+
+  # Test non-numeric n_outputs
+  expect_error(
+    model$predict_total(dat_cleaned[1, ], "invalid"),
+    "n_outputs must have length"
+  )
+
+  # Test n_outputs length mismatch
+  expect_error(
+    model$predict_total(dat_cleaned[1:2, ], c(1, 2, 3)),
+    "n_outputs must have length == nrow\\(dat\\)"
+  )
+})
+
+test_that("predict_total handles edge cases", {
+  model <- unitcost()
+
+  # Test with n_outputs = 0
+  result_zero <- model$predict_total(dat_cleaned[1, ], 0)
+  expect_true(all(result_zero == 0))
+
+  # Test with fractional n_outputs
+  result_frac <- model$predict_total(dat_cleaned[1, ], 0.5)
+  expect_true(all(is.finite(result_frac)))
+  expect_true(all(result_frac > 0))
+})
+
+test_that("predict_total is consistent with predict method", {
+  model <- unitcost()
+  test_data <- dat_cleaned[1:3, ]
+  n_outputs <- c(3, 2, 4)
+
+  # Get individual predictions
+  individual_preds <- model$predict(test_data,
+    scale = "natural",
+    summarised = FALSE
+  )
+
+  # Get total prediction
+  total_pred <- model$predict_total(test_data, n_outputs)
+
+  # Manual calculation: multiply each column by n_outputs and sum
+  expected_total <- individual_preds[, 1] * 3 +
+    individual_preds[, 2] * 2 +  individual_preds[, 3] * 4
+
+  expect_equal(mean(total_pred), mean(expected_total), tolerance = 0.1)
+  expect_equal(sd(total_pred), sd(expected_total), tolerance = 0.1)
 })

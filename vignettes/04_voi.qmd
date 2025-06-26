@@ -37,7 +37,7 @@ model <- capturetb::unitcost()
 new_inputs <- list(
   log_USD_p_bldgspace = 1,
   logVisits = 6.9, 
-  logVisitsPP = -1.29, 
+  logVisitsPP_TB = -1.29, 
   secondary = FALSE, 
   urban = FALSE, 
   public = TRUE,
@@ -111,10 +111,9 @@ As well as calculating EVPI for costs at a single facility, the method can be us
 ```{r}
 # using model training data to demonstrate
 # but works for any inputs
-dat <- mod$training_data()
 n_output <- dat$fc_opvisits_TB
 lambda <- seq(6000000, 12000000, by = 500000)
-evpi <- mod$evpi(dat, lambda, n_output)
+evpi <- model$evpi(dat, lambda, n_output)
 ggplot(data.frame(lambda, evpi)) + geom_line(aes(lambda, evpi))
 ```
 
@@ -148,14 +147,15 @@ n_out <- dat$fc_opvisits_TB
 # get posterior predictions of total cost 
 samples <- model$predict_total(dat, n_out)
 
-# suppose over-prediction is twice as bad
-alpha <- 2
-beta <- 1
+# suppose over-prediction is 4 times as bad
+alpha <- 1
+beta <- 0.25
 
 # loss minimising prediction
 c_star <- quantile(samples, alpha/(alpha + beta))
+c_mean <- mean(samples)
 
-loss_function <- function(c) {
+loss_function <- function(c, c_star) {
 	diff <- abs(c - c_star)
 	if (c_star < c) {
 		alpha * diff
@@ -166,17 +166,22 @@ loss_function <- function(c) {
 
 # get expected loss by averaging loss over 
 # all realisations of the total cost
-loss <- sapply(samples, loss_function)
+loss <- sapply(samples, loss_function, c_star)
 
-mean_loss <- mean(loss)
-lower_loss <- quantile(loss, 0.025)
-upper_loss <- quantile(loss, 0.975)
+# loss if we used the mean prediction instead
+loss2 <- sapply(samples, loss_function, c_mean)
 
-loss_data <- data.frame(loss_function = "Asymmetric linear",
-		mean_loss,
-	 	lower_loss, 
-	 	upper_loss
-	 )
+# compare distributions of losses when using 
+# mean vs 80th quantile prediction
+ggplot(data.frame(loss, loss2)) + 
+	geom_density(aes(x = loss)) + 
+	geom_density(aes(x = loss2), color = "grey") + 
+	scale_x_continuous(labels = scales::dollar_format()) + 
+	geom_vline(aes(xintercept = mean(loss)), color = "red", linetype = "dashed") +
+		geom_vline(aes(xintercept = mean(loss2)), color = "grey", linetype = "dashed") +
+	scale_y_continuous(labels = scales::label_comma()) +
+	ylab("") + 
+	xlab("")
 ```
 
 3. A symmetric linear loss functiion:
@@ -189,7 +194,7 @@ This is just a special case of the asymmetric loss function where $\alpha = \bet
 
 
 ```{r}
-alpha <- 2
+alpha <- 1
 
 # loss minimising prediction
 c_star <- quantile(samples, 0.5)
@@ -202,18 +207,14 @@ loss_function <- function(c) {
 # get expected loss by averaging lss over 
 # all realisations of the total cost
 loss <- sapply(samples, loss_function)
-mean_loss <- mean(loss)
-lower_loss <- quantile(loss, 0.025)
-upper_loss <- quantile(loss, 0.975)
 
-loss_data <- rbind(loss_data, 
-	data.frame(loss_function = "Symmetric linear", 
-		mean_loss,
-	 	lower_loss,
-	  	upper_loss))
-
-rownames(loss_data) <- NULL
-knitr::kable(loss_data)
+ggplot(data.frame(loss)) + 
+	geom_density(aes(x = loss)) + 
+	scale_x_continuous(labels = scales::dollar_format()) + 
+	geom_vline(aes(xintercept = mean(loss)), color = "red", linetype = "dashed") +
+	scale_y_continuous(labels = scales::label_comma()) +
+	ylab("") + 
+	xlab("")
 ```
 
 These are just illustrative examples, but the same approach can be taken for arbitrary loss functions.

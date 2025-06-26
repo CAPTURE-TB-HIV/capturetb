@@ -134,7 +134,7 @@ capturetb_covariates <- function() {
   c(
     "log_USD_p_bldgspace",
     "logVisits",
-    "logVisitsPP",
+    "logVisitsPP_TB",
     "secondary",
     "urban",
     "public"

@@ -5,8 +5,8 @@
 #' @description
 #' This class allows the user to fit and use a mixed effects model with
 #' intercepts that vary by country and fixed covariate effects. It is used
-#' for the comparison of different model structures as in the 
-#' `vignette("03_model-comparisons", package = "capturetb")` vignette, and 
+#' for the comparison of different model structures as in the
+#' `vignette("03_model-comparisons", package = "capturetb")` vignette, and
 #' is the class used to generate the [`unitcost`] model.
 #' @export
 #' @importFrom R6 R6Class
@@ -80,7 +80,11 @@ MixedEffects <- R6::R6Class("MixedEffects",
       alpha_new <- rnorm(length(mu_alpha), mu_alpha, sig_alpha)
       alphas <- cbind(alphas, alpha_new)
 
-      beta_cols <- paste0("beta[", seq_along(private$.covariates), "]")
+      if (length(private$.covariates) == 1) {
+        beta_cols <- "beta"
+      } else {
+        beta_cols <- paste0("beta[", seq_along(private$.covariates), "]")
+      }
       betas <- smat[, beta_cols, drop = FALSE]
 
       x <- as.matrix(private$.numeric_to_logical(

@@ -8,6 +8,8 @@ reference:
   desc: "Functions needed to predict costs"
   contents:
     - unitcost
+    - unitcost_fixed
+    - unitcost_ohd
 - title: "Data"
   desc: "Functions for interfacing with ValueTB data"
   contents:
@@ -22,4 +24,5 @@ reference:
     - JAGSModel
     - capturetb_priors
     - plot.capturetbpriors
-    
+figures:
+   dev: grDevices::png

@@ -213,3 +213,40 @@ fit <- res |>
 
 knitr::kable(fit)
 ```
+
+## Reproducing the fitted models installed with the package
+
+There are three pre-fitted models installed with the package:
+
+* `unitcost()`: predicts the cost of a single outpatient treatment visit
+* `unitcost_fixed()`: predicts the fixed costs associated with a single outpatient treatment visit
+* `unitcost_ohd()`: predicts the fixed costs associated with a single outpatient treatment visit
+
+```{r, eval = FALSE}
+mod_unit <- MixedEffects$new(target = "USD_unitcost_total")
+mod_unit$fit(seed = 123)
+samples <- mod_unit$samples()
+saveRDS(samples, "inst/posterior_samples.rds")
+
+mod_unit_fixed <- MixedEffects$new(target = "USD_unitcost_fixed")
+mod_unit_fixed$fit(seed = 123)
+samples_fixed <- mod_unit_fixed$samples()
+saveRDS(samples_fixed, "inst/posterior_samples_fixed.rds")
+
+mod_unit_ohd <- MixedEffects$new(target = "USD_unitcost_ohd")
+mod_unit_ohd$fit(seed = 123)
+samples_ohd <- mod_unit_ohd$samples()
+saveRDS(samples_ohd, "inst/posterior_samples_ohd.rds")
+```
+
+Executing the above code will reproduce exactly the posterior samples installed with 
+this package. The functions `unitcost()`, `unitcost_fixed()` and `unitcost_ohd()` use 
+the saved posteriors to load the models without requiring fitting at runtime. 
+
+```{r}
+df <- rbind(unitcost()$performance(scale = "natural"),
+unitcost_fixed()$performance(scale = "natural"),
+unitcost_ohd()$performance(scale = "natural"))
+rownames(df) <- c("unitcost", "unitcost_fixed", "unitcost_ohd")
+knitr::kable(df)
+```

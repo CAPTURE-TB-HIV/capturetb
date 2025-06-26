@@ -23,7 +23,8 @@ Imports:
 Suggests:
 		gridExtra,
 		knitr,
-    	testthat (>= 3.0.0),
+		scales,
+    testthat (>= 3.0.0),
 		rjags,
 		quarto
 VignetteBuilder: quarto

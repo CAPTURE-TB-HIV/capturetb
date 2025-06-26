@@ -98,6 +98,7 @@ model$evpi(dat, lambda)
 \item \href{#method-JAGSModel-plot_residuals}{\code{JAGSModel$plot_residuals()}}
 \item \href{#method-JAGSModel-plot_fit}{\code{JAGSModel$plot_fit()}}
 \item \href{#method-JAGSModel-k_fold_cv}{\code{JAGSModel$k_fold_cv()}}
+\item \href{#method-JAGSModel-leave_one_country_out}{\code{JAGSModel$leave_one_country_out()}}
 \item \href{#method-JAGSModel-evpi}{\code{JAGSModel$evpi()}}
 \item \href{#method-JAGSModel-predict_total}{\code{JAGSModel$predict_total()}}
 \item \href{#method-JAGSModel-clone}{\code{JAGSModel$clone()}}
@@ -453,6 +454,7 @@ A data.frame with performance metrics:
 \item rmse: Root Mean Square Error between observed and predicted values
 \item correlation: Pearson correlation between observed and predicted values
 \item ci_coverage: Proportion of observations within 95\% credible intervals
+\item median_ci: The median width of 95\% credible intervals
 }
 }
 \subsection{Examples}{
@@ -574,6 +576,32 @@ assignment and model runs. Default NULL.}
 \subsection{Returns}{
 Data.frame with predictions from cross-validation, including
 fold assignments and observed values.
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-JAGSModel-leave_one_country_out"></a>}}
+\if{latex}{\out{\hypertarget{method-JAGSModel-leave_one_country_out}{}}}
+\subsection{Method \code{leave_one_country_out()}}{
+Perform leave-one-country-out cross-validation.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{JAGSModel$leave_one_country_out(scale = "log", seed = NULL, ...)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{scale}}{One of "log" or "natural". Default "log".}
+
+\item{\code{seed}}{Integer. Optional random seed for reproducible fold
+assignment and model runs. Default NULL.}
+
+\item{\code{...}}{Additional arguments passed to the fit() method.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+Data.frame with predictions from cross-validation, including
+country and observed values.
 }
 }
 \if{html}{\out{<hr>}}

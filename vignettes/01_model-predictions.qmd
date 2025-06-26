@@ -160,7 +160,7 @@ Predictions of unit cost for new inputs, not in the training set, are generated 
 new_inputs <- list(
   log_USD_p_bldgspace = 1,
   logVisits = 6.9, 
-  logVisitsPP = -1.29, 
+  logVisitsPP_TB = -1.29, 
   secondary = FALSE, 
   urban = FALSE, 
   public = TRUE,

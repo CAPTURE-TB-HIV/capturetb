@@ -63,7 +63,12 @@ FixedEffects <- R6::R6Class("FixedEffects",
 
       smat <- do.call(rbind, lapply(private$.samples, as.matrix))
 
-      beta_cols <- paste0("beta[", seq_along(private$.covariates), "]")
+      if (length(private$.covariates) == 1) {
+        beta_cols <- "beta"
+      } else {
+        beta_cols <- paste0("beta[", seq_along(private$.covariates), "]")
+      }
+			
       betas <- smat[, beta_cols, drop = FALSE]
 
       alpha <- smat[, "alpha", drop = FALSE]
