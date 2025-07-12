@@ -27,7 +27,7 @@ RandomSlopes <- R6::R6Class("RandomSlopes",
     initialize = function(dat = get_data("OP treatment visit"),
                           covariates = capturetb_covariates(),
                           target = "USD_unitcost_total",
-                          priors = capturetb_priors()) {
+                          priors = NULL) {
       super$initialize(dat, covariates, target, priors, "randomslopes.model")
     },
     #' Generate predictions from the fitted model.

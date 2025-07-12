@@ -54,6 +54,17 @@ lambda <- c(10000, 20000, 30000)
 model$evpi(dat, lambda)
 }
 
+
+## ------------------------------------------------
+## Method `JAGSModel$fitted_parameters`
+## ------------------------------------------------
+
+model <- unitcost()
+params <- model$fitted_parameters()
+print(params)
+
+# 90\% credible intervals
+params_90 <- model$fitted_parameters(prob = 0.9)
 }
 \seealso{
 \code{\link{FixedEffects}}
@@ -101,6 +112,7 @@ model$evpi(dat, lambda)
 \item \href{#method-JAGSModel-leave_one_country_out}{\code{JAGSModel$leave_one_country_out()}}
 \item \href{#method-JAGSModel-evpi}{\code{JAGSModel$evpi()}}
 \item \href{#method-JAGSModel-predict_total}{\code{JAGSModel$predict_total()}}
+\item \href{#method-JAGSModel-fitted_parameters}{\code{JAGSModel$fitted_parameters()}}
 \item \href{#method-JAGSModel-clone}{\code{JAGSModel$clone()}}
 }
 }
@@ -114,7 +126,7 @@ Initialize a new model instance.
   dat = get_data("OP treatment visit"),
   covariates = capturetb_covariates(),
   target = "USD_unitcost_total",
-  priors = capturetb_priors(),
+  priors = NULL,
   model
 )}\if{html}{\out{</div>}}
 }
@@ -673,6 +685,51 @@ have an entry for each row in \code{dat}.}
 \subsection{Returns}{
 Posterior distribution of predicted total cost, as a vector
 }
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-JAGSModel-fitted_parameters"></a>}}
+\if{latex}{\out{\hypertarget{method-JAGSModel-fitted_parameters}{}}}
+\subsection{Method \code{fitted_parameters()}}{
+Extract fitted model parameters with credible intervals.
+
+This method extracts parameter estimates from the fitted MCMC samples,
+including both coefficient estimates (beta parameters) and other model
+parameters (sigma, mu_alpha, etc.). Returns posterior means and credible
+intervals for all parameters.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{JAGSModel$fitted_parameters(prob = 0.95)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{prob}}{Numeric. Probability mass for credible intervals. Default 0.95
+for 95\% credible intervals.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+A data.frame with columns:
+\itemize{
+\item mean: Posterior mean of each parameter
+\item lower: Lower bound of credible interval
+\item upper: Upper bound of credible interval
+}
+Row names correspond to parameter names from the JAGS model.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{model <- unitcost()
+params <- model$fitted_parameters()
+print(params)
+
+# 90\% credible intervals
+params_90 <- model$fitted_parameters(prob = 0.9)
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-JAGSModel-clone"></a>}}

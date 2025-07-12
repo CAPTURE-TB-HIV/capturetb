@@ -30,7 +30,7 @@ When using model estimates in the context of an HTA, model uncertainty will have
 
 To visualise model uncertainty, we predict costs for an unseen facility:
 
-```{r}
+```{r, predict}
 model <- capturetb::unitcost()
 
 # Include all covariates and facility country `fc_country`
@@ -53,14 +53,14 @@ knitr::kable(pred)
 
 As well as the point estimates, the model actually gives a full probability distribution for predicted costs:
 
-```{r}
+```{r, plot-pred}
 pred <- model$predict(new_inputs, scale = "natural", summarised = FALSE)
 ggplot(data.frame(cost = pred), aes(x = cost)) + geom_density()
 ```
 
 We can use this to calculate the EVPI given various WTP thresholds:
 
-```{r}
+```{r, plot-evpi}
 lambda <- c(2:10)
 evpi <- model$evpi(new_inputs, lambda)
 ggplot(data.frame(lambda, evpi)) + 
@@ -73,7 +73,7 @@ Notice that EVPI peaks when the WTP threshold $\lambda$ is equal to the expected
 
 To get a general sense of the cost of model uncertainty, we can average over the input vectors in the training set and look at EVPI relative to predicted costs.
 
-```{r}
+```{r, all-evpi}
 lambda <- seq(0, 2.5, by = 0.25)
 dat <- model$training_data()
 pred <- model$predict(dat, summarise = TRUE, scale = "natural")[, "mean"]
@@ -108,7 +108,7 @@ We can see that when a WTP threshold is close to the predicted cost, resolving m
 
 As well as calculating EVPI for costs at a single facility, the method can be used to look at EVPI for an intervention that involve $n_i$ visits for facilities $i = ...I$:
 
-```{r}
+```{r, total-evpi}
 # using model training data to demonstrate
 # but works for any inputs
 n_output <- dat$fc_opvisits_TB
@@ -136,7 +136,7 @@ $$
 Bayesian decision theory shows that the optimal decision under an asymmetric linear function is the $\dfrac{\alpha}{\alpha + \beta}$ quantile of the posterior cost distribution, call it $c*$. The expected loss associated with using this prediction is then 
 $\mathop{\mathbb{E}}[L(c*, c)]$. We can estimate this using draws from the posterior. For illustration, suppose our budget includes all facilities in the training data:
 
-```{r}
+```{r, loss-asymmetric}
 # for illustration purpose look at cost aggregated over
 # all facilities in Kenya, and take the recorded
 # number of visits at each facility as the number of outputs
@@ -193,7 +193,7 @@ $$
 This is just a special case of the asymmetric loss function where $\alpha = \beta$, and the cost minimising prediction is the 50th posterior quantile, i.e. the median. 
 
 
-```{r}
+```{r, loss-symmetric}
 alpha <- 1
 
 # loss minimising prediction

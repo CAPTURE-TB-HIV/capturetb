@@ -1,3 +1,28 @@
+priors <- function() {
+  capturetb_priors(
+    beta.mean = rep(0, 5),
+    beta.precision = rep(0.01, 5)
+  )
+}
+
+#' @importFrom stats median
+cleaned_data <- function() {
+  # where facilities have multiple rows, take the median of the target variable
+  get_data("OP treatment visit") |>
+    dplyr::filter(is.na(.data$output_pop2) | .data$output_pop2 != "collecting meds") |>
+    dplyr::group_by(
+      .data$fc_code,
+      dplyr::across(dplyr::all_of(capturetb_covariates())), .data$fc_country
+    ) |>
+    dplyr::summarise(
+      USD_unitcost_total = median(.data$USD_unitcost_total, na.rm = TRUE),
+      USD_unitcost_variable = median(.data$USD_unitcost_variable, na.rm = TRUE),
+      USD_unitcost_fixed = median(.data$USD_unitcost_fixed, na.rm = TRUE),
+      USD_unitcost_ohd = median(.data$USD_unitcost_ohd, na.rm = TRUE),
+      .groups = "drop"
+    )
+}
+
 #' CaptureTB outpatient treatment visit cost model
 #'
 #' This function loads a [`MixedEffects`] model object
@@ -18,18 +43,8 @@ unitcost <- function() {
     package = "capturetb"
   ))
 
-  # where facilities have multiple rows, take the median of the target variable
-  data <- get_data("OP treatment visit") |>
-    dplyr::filter(is.na(output_pop2) | output_pop2 != "collecting meds") |>
-    dplyr::group_by(fc_code, dplyr::across(all_of(capturetb_covariates())), fc_country) |>
-    dplyr::summarise(
-      USD_unitcost_total = median(.data$USD_unitcost_total, na.rm = TRUE),
-      USD_unitcost_fixed = median(.data$USD_unitcost_fixed, na.rm = TRUE),
-      USD_unitcost_ohd = median(.data$USD_unitcost_ohd, na.rm = TRUE),
-      .groups = "drop"
-    )
-
-  mod <- MixedEffects$new(data)
+  data <- cleaned_data()
+  mod <- MixedEffects$new(data, priors = priors())
   mod$.__enclos_env__$private$.samples <- samples
   mod
 }
@@ -54,18 +69,8 @@ unitcost_ohd <- function() {
     package = "capturetb"
   ))
 
-  # where facilities have multiple rows, take the median of the target variable
-  data <- get_data("OP treatment visit") |>
-    dplyr::filter(is.na(output_pop2) | output_pop2 != "collecting meds") |>
-    dplyr::group_by(fc_code, dplyr::across(all_of(capturetb_covariates())), fc_country) |>
-    dplyr::summarise(
-      USD_unitcost_total = median(.data$USD_unitcost_total, na.rm = TRUE),
-      USD_unitcost_fixed = median(.data$USD_unitcost_fixed, na.rm = TRUE),
-      USD_unitcost_ohd = median(.data$USD_unitcost_ohd, na.rm = TRUE),
-      .groups = "drop"
-    )
-
-  mod <- MixedEffects$new(data, target = "USD_unitcost_ohd")
+  data <- cleaned_data()
+  mod <- MixedEffects$new(data, priors = priors(), target = "USD_unitcost_ohd")
   mod$.__enclos_env__$private$.samples <- samples
   mod
 }
@@ -91,18 +96,8 @@ unitcost_fixed <- function() {
     package = "capturetb"
   ))
 
-  # where facilities have multiple rows, take the median of the target variable
-  data <- get_data("OP treatment visit") |>
-    dplyr::filter(is.na(output_pop2) | output_pop2 != "collecting meds") |>
-    dplyr::group_by(fc_code, dplyr::across(all_of(capturetb_covariates())), fc_country) |>
-    dplyr::summarise(
-      USD_unitcost_total = median(.data$USD_unitcost_total, na.rm = TRUE),
-      USD_unitcost_fixed = median(.data$USD_unitcost_fixed, na.rm = TRUE),
-      USD_unitcost_ohd = median(.data$USD_unitcost_ohd, na.rm = TRUE),
-      .groups = "drop"
-    )
-
-  mod <- MixedEffects$new(data, target = "USD_unitcost_fixed")
+  data <- cleaned_data()
+  mod <- MixedEffects$new(data, priors = priors(), target = "USD_unitcost_fixed")
   mod$.__enclos_env__$private$.samples <- samples
   mod
 }

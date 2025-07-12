@@ -26,11 +26,17 @@ JAGSModel <- R6::R6Class("JAGSModel",
     initialize = function(dat = get_data("OP treatment visit"),
                           covariates = capturetb_covariates(),
                           target = "USD_unitcost_total",
-                          priors = capturetb_priors(),
+                          priors = NULL,
                           model) {
-      # Validate inputs
-      n_priors <- length(priors$prior.beta.mean)
       n_cov <- length(covariates)
+      if (is.null(priors)) {
+        priors <- capturetb_priors(
+          beta.mean = rep(0, n_cov),
+          beta.precision = rep(0.01, n_cov)
+        )
+        warning(sprintf("Priors not provided. Vague priors assumed for each covariate coefficient with mu 0 and precision 0.01."))
+      }
+      n_priors <- length(priors$prior.beta.mean)
       stopifnot(
         "dat must be a data.frame" = is.data.frame(dat),
         "covariates must be a character vector" = is.character(covariates),
@@ -95,6 +101,21 @@ JAGSModel <- R6::R6Class("JAGSModel",
       if (n_dupes > 0) {
         warning(sprintf("Excluded %d rows with duplicate facility codes.", n_dupes))
       }
+
+      params <- c(
+        "alpha",
+        "beta",
+        "sigma"
+      )
+
+      if (model != "fixedeffects.model") {
+        params <- c(params, "mu_alpha", "sigma_alpha")
+      }
+      if (model == "randomslopes.model") {
+        params <- c(params, "mu_beta", "sigma_beta")
+      }
+
+      private$.params <- params
 
       private$.training_data <- dat_unique
       private$.target <- target
@@ -173,20 +194,9 @@ JAGSModel <- R6::R6Class("JAGSModel",
         )
       }
       update(jags_mod, n.iter = n.burnin)
-      vars <- c(
-        "alpha",
-        "beta",
-        "sigma"
-      )
-      model_type <- private$.model
-      if (model_type != "fixedeffects.model") {
-        vars <- c(vars, "mu_alpha", "sigma_alpha")
-      }
-      if (model_type == "randomslopes.model") {
-        vars <- c(vars, "mu_beta", "sigma_beta")
-      }
+
       samples <- rjags::coda.samples(jags_mod,
-        variable.names = vars,
+        variable.names = private$.params,
         n.iter = n.iter,
         thin = n.thin
       )
@@ -225,7 +235,7 @@ JAGSModel <- R6::R6Class("JAGSModel",
     #' the total number of records for that country (`n_total`) and the count of
     #' `TRUE` values for each logical covariate.
     baselines = function() {
-      logical_cols <- names(private$.training_data[, covariates] |>
+      logical_cols <- names(private$.training_data[, private$.covariates] |>
         dplyr::select_if(is.logical))
 
       private$.training_data |>
@@ -246,9 +256,11 @@ JAGSModel <- R6::R6Class("JAGSModel",
     #' object. If FALSE return a correlation matrix. Default TRUE.
     #' @return ggplot2 object or correlation matrix
     covariate_correlation = function(plot = TRUE) {
-      cor_mat <- cor(private$.training_data[, covariates])
+      stopifnot("plot must be TRUE or FALSE" = 
+      (length(plot) == 1 && is.logical(plot)))
+      cor_mat <- cor(private$.training_data[, private$.covariates])
       if (plot) {
-        return(ggcorrplot::ggcorrplot())
+        return(ggcorrplot::ggcorrplot(cor_mat))
       } else {
         return(cor_mat)
       }
@@ -885,10 +897,76 @@ JAGSModel <- R6::R6Class("JAGSModel",
       samples <- self$predict(dat, scale = "natural", summarised = FALSE)
       samples_total <- sweep(samples, 2, n_outputs, "*")
       rowSums(samples_total)
+    },
+    #' @description
+    #' Extract fitted model parameters with credible intervals.
+    #'
+    #' This method extracts parameter estimates from the fitted MCMC samples,
+    #' including both coefficient estimates (beta parameters) and other model
+    #' parameters (sigma, mu_alpha, etc.). Returns posterior means and credible
+    #' intervals for all parameters.
+    #'
+    #' @param prob Numeric. Probability mass for credible intervals. Default 0.95
+    #' for 95% credible intervals.
+    #'
+    #' @return A data.frame with columns:
+    #' \itemize{
+    #'   \item mean: Posterior mean of each parameter
+    #'   \item lower: Lower bound of credible interval
+    #'   \item upper: Upper bound of credible interval
+    #' }
+    #' Row names correspond to parameter names from the JAGS model.
+    #'
+    #' @examples
+    #' model <- unitcost()
+    #' params <- model$fitted_parameters()
+    #' print(params)
+    #' 
+    #' # 90% credible intervals
+    #' params_90 <- model$fitted_parameters(prob = 0.9)
+    fitted_parameters = function(prob = 0.95) {
+      private$.check_fitted()
+      
+      stopifnot(
+        "prob must be numeric" = is.numeric(prob),
+        "prob must be between 0 and 1" = prob > 0 && prob < 1,
+        "prob must be a scalar" = length(prob) == 1
+      )
+      
+      smat <- do.call(rbind, lapply(private$.samples, as.matrix))
+
+      if (length(private$.covariates) == 1) {
+        beta_cols <- "beta"
+      } else {
+        beta_cols <- paste0("beta[", seq_along(private$.covariates), "]")
+      }
+
+      betas <- smat[, beta_cols, drop = FALSE]
+
+      other_params <- private$.params[!(private$.params %in% c("alpha", "beta"))]
+
+      means <- sapply(
+        other_params,
+        function(p_name) mean(smat[, p_name])
+      )
+      lower <- sapply(
+        other_params,
+        function(p_name) quantile(smat[, p_name], (1 - prob) / 2)
+      )
+      upper <- sapply(
+        other_params,
+        function(p_name) quantile(smat[, p_name], 1 - ((1 - prob) / 2))
+      )
+      data.frame(
+        mean = c(apply(betas, 2, mean), means),
+        lower = c(apply(betas, 2, quantile, probs = (1 - prob) / 2), lower),
+        upper = c(apply(betas, 2, quantile, probs = 1 - ((1 - prob) / 2)), upper)
+      )
     }
   ),
   private = list(
     .model = NULL,
+    .params = NULL,
     .covariates = NULL,
     .countries = NULL,
     .training_data = NULL,

@@ -1,6 +1,10 @@
 test_that("can plot posteriors once fitted", {
-    model <- MixedEffects$new(dat_cleaned)
-
+    model <- MixedEffects$new(dat_cleaned,
+        priors = capturetb_priors(
+            beta.mean = rep(0, 5),
+            beta.precision = rep(0.01, 5)
+        )
+    )
     expect_error(
         model$plot_posteriors(),
         "Model must be fitted"
@@ -13,7 +17,12 @@ test_that("can plot posteriors once fitted", {
 })
 
 test_that("can plot trace once fitted", {
-    model <- MixedEffects$new(dat_cleaned)
+    model <- MixedEffects$new(dat_cleaned,
+        priors = capturetb_priors(
+            beta.mean = rep(0, 5),
+            beta.precision = rep(0.01, 5)
+        )
+    )
 
     expect_error(
         model$mcmc_trace(),
@@ -26,7 +35,12 @@ test_that("can plot trace once fitted", {
 })
 
 test_that("can plot rhat once fitted", {
-    model <- MixedEffects$new(dat_cleaned)
+    model <- MixedEffects$new(dat_cleaned,
+        priors = capturetb_priors(
+            beta.mean = rep(0, 5),
+            beta.precision = rep(0.01, 5)
+        )
+    )
 
     expect_error(
         model$mcmc_rhat(),
@@ -39,7 +53,12 @@ test_that("can plot rhat once fitted", {
 })
 
 test_that("can plot acf once fitted", {
-    model <- MixedEffects$new(dat_cleaned)
+    model <- MixedEffects$new(dat_cleaned,
+        priors = capturetb_priors(
+            beta.mean = rep(0, 5),
+            beta.precision = rep(0.01, 5)
+        )
+    )
 
     expect_error(
         model$mcmc_acf(),
@@ -52,7 +71,12 @@ test_that("can plot acf once fitted", {
 })
 
 test_that("can plot fit once fitted", {
-    model <- MixedEffects$new(dat_cleaned)
+    model <- MixedEffects$new(dat_cleaned,
+        priors = capturetb_priors(
+            beta.mean = rep(0, 5),
+            beta.precision = rep(0.01, 5)
+        )
+    )
 
     expect_error(
         model$plot_fit(),
@@ -66,7 +90,12 @@ test_that("can plot fit once fitted", {
 
 
 test_that("can plot residuals once fitted", {
-    model <- MixedEffects$new(dat_cleaned)
+    model <- MixedEffects$new(dat_cleaned,
+        priors = capturetb_priors(
+            beta.mean = rep(0, 5),
+            beta.precision = rep(0.01, 5)
+        )
+    )
 
     expect_error(
         model$plot_residuals(),

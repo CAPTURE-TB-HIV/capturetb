@@ -32,6 +32,7 @@ An R6 class for fitting and predicting costs using a fixed effects model.
 <li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="covariates"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-covariates'><code>capturetb::JAGSModel$covariates()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="evpi"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-evpi'><code>capturetb::JAGSModel$evpi()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="fit"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-fit'><code>capturetb::JAGSModel$fit()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="fitted_parameters"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-fitted_parameters'><code>capturetb::JAGSModel$fitted_parameters()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="is_fitted"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-is_fitted'><code>capturetb::JAGSModel$is_fitted()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="k_fold_cv"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-k_fold_cv'><code>capturetb::JAGSModel$k_fold_cv()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="leave_one_country_out"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-leave_one_country_out'><code>capturetb::JAGSModel$leave_one_country_out()</code></a></span></li>
@@ -61,7 +62,7 @@ Initialize a new model instance.
   dat = get_data("OP treatment visit"),
   covariates = capturetb_covariates(),
   target = "USD_unitcost_total",
-  priors = capturetb_priors()
+  priors = NULL
 )}\if{html}{\out{</div>}}
 }
 

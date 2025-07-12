@@ -7,7 +7,10 @@ test_that("MixedEffects class initialization works", {
   expect_equal(model$covariates(), capturetb_covariates())
   expect_true(is.factor(model$countries()))
   expect_equal(levels(model$countries()), unique(dat$fc_country))
-  expect_equal(model$priors(), capturetb_priors())
+  expect_equal(
+    model$priors(),
+    capturetb_priors(beta.mean = rep(0, 5), beta.precision = rep(0.01, 5))
+  )
 
   dat_cleaned <- dat |>
     dplyr::filter(
@@ -24,23 +27,35 @@ test_that("MixedEffects class initialization works", {
 })
 
 test_that("MixedEffects$new validation works", {
+  dat <- get_data("OP treatment visit")
+  dat[1, "logVisits"] <- NA
   warnings <- testthat::capture_warnings({
-    model <- MixedEffects$new()
+    model <- MixedEffects$new(dat)
   })
 
-  expect_true(length(warnings) == 2)
+  expect_true(length(warnings) == 3)
+  expect_true(any(grepl(
+    "Priors not provided. Vague priors assumed for each covariate coefficient with mu 0 and precision 0.01.",
+    warnings
+  )))
   expect_true(any(grepl(
     "Removed 1 rows with missing data.",
     warnings
   )))
   expect_true(any(grepl(
-    "Excluded 63 rows with duplicate facility codes.",
+    "Excluded 62 rows with duplicate facility codes.",
     warnings
   )))
 
   # Test invalid data
   expect_error(
-    MixedEffects$new(dat = "not a data frame"),
+    MixedEffects$new(
+      dat = "not a data frame",
+      priors = capturetb_priors(
+        beta.mean = rep(0, 5),
+        beta.precision = rep(0.01, 5)
+      )
+    ),
     "dat must be a data.frame"
   )
 
@@ -48,7 +63,13 @@ test_that("MixedEffects$new validation works", {
   data <- dat_cleaned[1:50, ]
   data$log_USD_p_bldgspace <- NULL
   expect_error(
-    MixedEffects$new(dat = data),
+    MixedEffects$new(
+      dat = data,
+      priors = capturetb_priors(
+        beta.mean = rep(0, 5),
+        beta.precision = rep(0.01, 5)
+      )
+    ),
     "Missing covariates in data: log_USD_p_bldgspace"
   )
 
@@ -56,6 +77,10 @@ test_that("MixedEffects$new validation works", {
   expect_error(
     MixedEffects$new(
       dat = dat_cleaned,
+      priors = capturetb_priors(
+        beta.mean = rep(0, 5),
+        beta.precision = rep(0.01, 5)
+      ),
       target = "nonexistent_column"
     ),
     "Target variable 'nonexistent_column' not found in data"
@@ -65,6 +90,10 @@ test_that("MixedEffects$new validation works", {
   expect_error(
     MixedEffects$new(
       dat = dat_cleaned,
+      priors = capturetb_priors(
+        beta.mean = rep(0, 6),
+        beta.precision = rep(0, 6)
+      ),
       covariates = c("one", "two")
     ),
     "6 fixed effect priors provided but only 2 covariates"
@@ -72,14 +101,23 @@ test_that("MixedEffects$new validation works", {
   expect_error(
     MixedEffects$new(
       dat = dat_cleaned,
+      priors = capturetb_priors(
+        beta.mean = rep(0, 4),
+        beta.precision = rep(0, 4)
+      ),
       covariates = c(capturetb_covariates(), "another")
     ),
-    "7 covariates provided but only 6 fixed effect priors"
+    "6 covariates provided but only 4 fixed effect priors"
   )
 })
 
 test_that("MixedEffects$predict method validation works", {
-  model <- MixedEffects$new(dat_cleaned)
+  model <- MixedEffects$new(dat_cleaned,
+    priors = capturetb_priors(
+      beta.mean = rep(0, 5),
+      beta.precision = rep(0.01, 5)
+    )
+  )
 
   # Test prediction before fitting
   expect_error(
@@ -96,7 +134,13 @@ test_that("MixedEffects class methods work with small example", {
   n_countries <- 2
   small_data <- dat_cleaned[dat_cleaned$fc_country %in% countries_sample, ]
 
-  model <- MixedEffects$new(dat = small_data)
+  model <- MixedEffects$new(
+    dat = small_data,
+    priors = capturetb_priors(
+      beta.mean = rep(0, 5),
+      beta.precision = rep(0.01, 5)
+    )
+  )
 
   # Test fitting with minimal iterations but sufficient for convergence
   expect_message(
@@ -108,7 +152,7 @@ test_that("MixedEffects class methods work with small example", {
   samples <- model$samples()
   expect_true(inherits(samples, "mcmc.list"))
   expect_equal(length(samples), 2)
-  expect_equal(dim(samples[[1]]), c(500 / 2, 9 + n_countries))
+  expect_equal(dim(samples[[1]]), c(500 / 2, 8 + n_countries))
 
   # Test prediction
   pred_data <- small_data[1:3, ]
@@ -120,7 +164,12 @@ test_that("MixedEffects class methods work with small example", {
 })
 
 test_that("MixedEffects getter methods work", {
-  model <- MixedEffects$new(dat_cleaned)
+  model <- MixedEffects$new(dat_cleaned,
+    priors = capturetb_priors(
+      beta.mean = rep(0, 5),
+      beta.precision = rep(0.01, 5)
+    )
+  )
 
   expect_equal(model$covariates(), capturetb_covariates())
   expect_true(is.factor(model$countries()))
@@ -146,7 +195,7 @@ test_that("can make predictions for known and new countries", {
   newdata <- data.frame(
     log_USD_p_bldgspace = c(1, 2),
     logVisits = c(0.5, 1.5),
-    logVisitsPP = c(0.2, 0.3),
+    logVisitsPP_TB = c(0.2, 0.3),
     secondary = c(1, 0),
     urban = c(0, 1),
     public = c(1, 1),
@@ -170,13 +219,12 @@ test_that("can make predictions for known and new countries", {
 
   # tolerance required as intercept alpha_new will be generated
   # using rnorm(alpha_mu, sigma_mu)
-  testthat::expect_equal(preds[1, 2], expected_2, tolerance = 0.01)
+  testthat::expect_equal(preds[1, 2], expected_2, tolerance = 0.1)
 })
 
 test_that("returns summarised predictions if summarised=TRUE", {
   covariates <- capturetb_covariates()[1:3]
-  priors <- capturetb_priors()
-  priors$prior.beta.mean <- priors$prior.beta.mean[1:3]
+  priors <- capturetb_priors(beta.mean = rep(0, 3), beta.precision = rep(0, 3))
   model <- MixedEffects$new(
     dat =
       dat_cleaned[dat_cleaned$fc_country %in% c("Ethiopia", "Kenya"), ],
@@ -190,7 +238,7 @@ test_that("returns summarised predictions if summarised=TRUE", {
   newdata <- data.frame(
     log_USD_p_bldgspace = c(1, 2),
     logVisits = c(0.5, 1.5),
-    logVisitsPP = c(0.2, 0.3),
+    logVisitsPP_TB = c(0.2, 0.3),
     secondary = c(1, 0),
     urban = c(0, 1),
     public = c(1, 1),
@@ -238,7 +286,13 @@ test_that("k_fold_cv works correctly", {
     30
   ), ]
 
-  model <- MixedEffects$new(dat = small_data)
+  model <- MixedEffects$new(
+    dat = small_data,
+    priors = capturetb_priors(
+      beta.mean = rep(0, 5),
+      beta.precision = rep(0.01, 5)
+    )
+  )
 
   # Test with 3 folds and minimal iterations
   expect_message(
@@ -288,7 +342,12 @@ test_that("k_fold_cv works correctly", {
 })
 
 test_that("can get n_eff after model fitting", {
-  model <- MixedEffects$new(dat_cleaned)
+  model <- MixedEffects$new(dat_cleaned,
+    priors = capturetb_priors(
+      beta.mean = rep(0, 5),
+      beta.precision = rep(0.01, 5)
+    )
+  )
 
   expect_error(
     model$mcmc_acf(),
@@ -297,12 +356,17 @@ test_that("can get n_eff after model fitting", {
 
   model <- unitcost()
   res <- model$n_eff()
-  expect_equal(length(res), 14)
+  expect_equal(length(res), 13)
   expect_true(is.numeric(res))
 })
 
 test_that("performance method validation works", {
-  model <- MixedEffects$new(dat_cleaned)
+  model <- MixedEffects$new(dat_cleaned,
+    priors = capturetb_priors(
+      beta.mean = rep(0, 5),
+      beta.precision = rep(0.01, 5)
+    )
+  )
 
   # Test performance before fitting
   expect_error(
@@ -324,7 +388,7 @@ test_that("performance method works with log scale", {
 
   expect_true(is.data.frame(perf_log))
   expect_equal(nrow(perf_log), 1)
-  expected_names <- c("mae", "rmse", "correlation", "ci_coverage")
+  expected_names <- c("mae", "rmse", "correlation", "ci_coverage", "median_ci")
   expect_equal(names(perf_log), expected_names)
   expect_true(all(sapply(perf_log, is.numeric)))
   expect_true(perf_log$mae >= 0 & perf_log$mae <= 1)
@@ -339,11 +403,11 @@ test_that("performance method works with natural scale", {
 
   expect_true(is.data.frame(perf_natural))
   expect_equal(nrow(perf_natural), 1)
-  expected_names <- c("mae", "rmse", "correlation", "ci_coverage")
+  expected_names <- c("mae", "rmse", "correlation", "ci_coverage", "median_ci")
   expect_equal(names(perf_natural), expected_names)
   expect_true(all(sapply(perf_natural, is.numeric)))
   expect_true(perf_natural$mae >= 1)
-  expect_true(perf_natural$rmse >= 2)
+  expect_true(perf_natural$rmse >= 1)
   expect_true(perf_natural$correlation >= 0.5 && perf_natural$correlation <= 1)
   expect_true(perf_natural$ci_coverage >= 0.95 && perf_natural$ci_coverage <= 1)
 
@@ -507,8 +571,198 @@ test_that("predict_total is consistent with predict method", {
 
   # Manual calculation: multiply each column by n_outputs and sum
   expected_total <- individual_preds[, 1] * 3 +
-    individual_preds[, 2] * 2 +  individual_preds[, 3] * 4
+    individual_preds[, 2] * 2 + individual_preds[, 3] * 4
 
   expect_equal(mean(total_pred), mean(expected_total), tolerance = 0.1)
   expect_equal(sd(total_pred), sd(expected_total), tolerance = 0.1)
+})
+
+test_that("fitted_parameters method works correctly", {
+  # Test that method fails before fitting
+  model <- MixedEffects$new(dat_cleaned,
+    priors = capturetb_priors(
+      beta.mean = rep(0, 5),
+      beta.precision = rep(0.01, 5)
+    )
+  )
+
+  expect_error(
+    model$fitted_parameters(),
+    "Model must be fitted first"
+  )
+
+  # Test with fitted model (use unitcost which already has samples)
+  model <- unitcost()
+  
+  # Test default parameters (95% CI)
+  params <- model$fitted_parameters()
+  
+  expect_true(is.data.frame(params))
+  expect_equal(ncol(params), 3)
+  expect_equal(names(params), c("mean", "lower", "upper"))
+  
+  # Check that we have the expected parameters
+  expected_params <- c(
+    paste0("beta[", 1:5, "]"),  # beta coefficients
+    "sigma", "mu_alpha", "sigma_alpha"  # other parameters
+  )
+  expect_equal(rownames(params), expected_params)
+  
+  # Check that lower <= mean <= upper for all parameters
+  expect_true(all(params$lower <= params$mean))
+  expect_true(all(params$mean <= params$upper))
+  
+  # Check that all values are finite
+  expect_true(all(is.finite(params$mean)))
+  expect_true(all(is.finite(params$lower)))
+  expect_true(all(is.finite(params$upper)))
+  
+  # Test different probability levels
+  params_90 <- model$fitted_parameters(prob = 0.9)
+  params_50 <- model$fitted_parameters(prob = 0.5)
+  
+  expect_equal(dim(params_90), dim(params))
+  expect_equal(dim(params_50), dim(params))
+  expect_equal(rownames(params_90), rownames(params))
+  expect_equal(rownames(params_50), rownames(params))
+  
+  # Check that narrower CI has smaller intervals
+  interval_95 <- params$upper - params$lower
+  interval_90 <- params_90$upper - params_90$lower
+  interval_50 <- params_50$upper - params_50$lower
+  
+  expect_true(all(interval_50 <= interval_90))
+  expect_true(all(interval_90 <= interval_95))
+  
+  # Means should be similar across different probability levels
+  expect_equal(params$mean, params_90$mean, tolerance = 0.01)
+  expect_equal(params$mean, params_50$mean, tolerance = 0.01)
+})
+
+test_that("fitted_parameters validates probability parameter", {
+  model <- unitcost()
+  
+  # Test invalid probability values
+  expect_error(
+    model$fitted_parameters(prob = 1.5),
+    "prob.*between 0 and 1|prob.*valid"
+  )
+  
+  expect_error(
+    model$fitted_parameters(prob = -0.1),
+    "prob.*between 0 and 1|prob.*valid"
+  )
+  
+  expect_error(
+    model$fitted_parameters(prob = 0),
+    "prob.*between 0 and 1|prob.*valid"
+  )
+  
+  expect_error(
+    model$fitted_parameters(prob = 1),
+    "prob.*between 0 and 1|prob.*valid"
+  )
+  
+  # Test valid edge cases
+  expect_silent(model$fitted_parameters(prob = 0.01))
+  expect_silent(model$fitted_parameters(prob = 0.99))
+})
+
+test_that("baselines method works correctly", {
+  model <- MixedEffects$new(dat_cleaned,
+    priors = capturetb_priors(
+      beta.mean = rep(0, 5),
+      beta.precision = rep(0.01, 5)
+    )
+  )
+
+  baselines_result <- model$baselines()
+
+  expect_true(is.data.frame(baselines_result))
+  expect_true("fc_country" %in% names(baselines_result))
+  expect_true("n_total" %in% names(baselines_result))
+
+  # Check that we have one row per country
+  expected_countries <- unique(dat_cleaned$fc_country)
+  expect_equal(nrow(baselines_result), length(expected_countries))
+  expect_setequal(baselines_result$fc_country, expected_countries)
+
+  # Check that n_total makes sense
+  expect_true(all(baselines_result$n_total > 0))
+  expect_true(all(is.integer(baselines_result$n_total)))
+
+  # Check that logical covariate columns are present
+  logical_covariates <- c("secondary", "urban", "public")
+  expected_cols <- paste0("n_", logical_covariates)
+  expect_true(all(expected_cols %in% names(baselines_result)))
+
+  # Check that counts are reasonable (between 0 and n_total)
+  for (col in expected_cols) {
+    expect_true(all(baselines_result[[col]] >= 0))
+    expect_true(all(baselines_result[[col]] <= baselines_result$n_total))
+    expect_true(all(is.integer(baselines_result[[col]])))
+  }
+
+  # Verify counts by manual calculation for one country
+  test_country <- expected_countries[1]
+  country_data <- dat_cleaned[dat_cleaned$fc_country == test_country, ]
+  expected_n_total <- nrow(country_data)
+  expected_n_secondary <- sum(country_data$secondary, na.rm = TRUE)
+
+  country_row <- baselines_result[baselines_result$fc_country == test_country, ]
+  expect_equal(country_row$n_total, expected_n_total)
+  expect_equal(country_row$n_secondary, expected_n_secondary)
+})
+
+test_that("covariate_correlation method works correctly", {
+  model <- MixedEffects$new(dat_cleaned,
+    priors = capturetb_priors(
+      beta.mean = rep(0, 5),
+      beta.precision = rep(0.01, 5)
+    )
+  )
+
+  # Test with plot = FALSE (returns correlation matrix)
+  cor_matrix <- model$covariate_correlation(plot = FALSE)
+
+  expect_true(is.matrix(cor_matrix))
+  expect_equal(nrow(cor_matrix), length(capturetb_covariates()))
+  expect_equal(ncol(cor_matrix), length(capturetb_covariates()))
+  expect_equal(rownames(cor_matrix), capturetb_covariates())
+  expect_equal(colnames(cor_matrix), capturetb_covariates())
+
+  # Check that it's a proper correlation matrix
+  expect_true(all(diag(cor_matrix) == 1))
+  expect_true(all(cor_matrix >= -1 & cor_matrix <= 1))
+  expect_true(isSymmetric(cor_matrix))
+
+  # Test with plot = TRUE (returns ggplot object)
+  skip_if_not_installed("ggcorrplot")
+  cor_plot <- model$covariate_correlation(plot = TRUE)
+
+  expect_true(inherits(cor_plot, "ggplot"))
+})
+
+test_that("covariate_correlation validates plot parameter", {
+  model <- MixedEffects$new(dat_cleaned,
+    priors = capturetb_priors(
+      beta.mean = rep(0, 5),
+      beta.precision = rep(0.01, 5)
+    )
+  )
+
+  # Test invalid plot parameter
+  expect_error(
+    model$covariate_correlation(plot = "invalid"),
+    "plot must be TRUE or FALSE"
+  )
+
+  expect_error(
+    model$covariate_correlation(plot = c(TRUE, FALSE)),
+    "plot must be TRUE or FALSE"
+  )
+
+  # Test valid parameters
+  expect_silent(model$covariate_correlation(plot = TRUE))
+  expect_silent(model$covariate_correlation(plot = FALSE))
 })

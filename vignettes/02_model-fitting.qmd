@@ -223,17 +223,50 @@ There are three pre-fitted models installed with the package:
 * `unitcost_ohd()`: predicts the fixed costs associated with a single outpatient treatment visit
 
 ```{r, eval = FALSE}
-mod_unit <- MixedEffects$new(target = "USD_unitcost_total")
+training_data <- get_data("OP treatment visit") |>
+    dplyr::filter(is.na(.data$output_pop2) | .data$output_pop2 != "collecting meds") |>
+    dplyr::group_by(
+      .data$fc_code,
+      dplyr::across(dplyr::all_of(capturetb_covariates())), .data$fc_country
+    ) |>
+    dplyr::summarise(
+      USD_unitcost_total = median(.data$USD_unitcost_total, na.rm = TRUE),
+      USD_unitcost_fixed = median(.data$USD_unitcost_fixed, na.rm = TRUE),
+      USD_unitcost_ohd = median(.data$USD_unitcost_ohd, na.rm = TRUE),
+      USD_unitcost_variable = median(.data$USD_unitcost_variable, na.rm = TRUE),
+      .groups = "drop"
+    )
+priors <- capturetb_priors(
+    beta.mean = rep(0, 5),
+    beta.precision = rep(0.01, 5)
+  )
+covariates <- c(
+    "log_USD_p_bldgspace",
+    "logVisits",
+    "logVisitsPP_TB",
+    "secondary",
+    "public"
+  )
+mod_unit <- MixedEffects$new(training_data, 
+                          covariates = covariates, 
+                          priors = priors,
+                          target = "USD_unitcost_total")
 mod_unit$fit(seed = 123)
 samples <- mod_unit$samples()
 saveRDS(samples, "inst/posterior_samples.rds")
 
-mod_unit_fixed <- MixedEffects$new(target = "USD_unitcost_fixed")
+mod_unit_fixed <- MixedEffects$new(training_data, 
+                            covariates = covariates, 
+                            priors = priors,
+                            target = "USD_unitcost_fixed")
 mod_unit_fixed$fit(seed = 123)
 samples_fixed <- mod_unit_fixed$samples()
 saveRDS(samples_fixed, "inst/posterior_samples_fixed.rds")
 
-mod_unit_ohd <- MixedEffects$new(target = "USD_unitcost_ohd")
+mod_unit_ohd <- MixedEffects$new(training_data, 
+                            covariates = covariates, 
+                            priors = priors,
+                            target = "USD_unitcost_ohd")
 mod_unit_ohd$fit(seed = 123)
 samples_ohd <- mod_unit_ohd$samples()
 saveRDS(samples_ohd, "inst/posterior_samples_ohd.rds")
