@@ -17,16 +17,17 @@ unitcost <- function() {
   samples <- readRDS(system.file("posterior_samples.rds",
     package = "capturetb"
   ))
+
+  # where facilities have multiple rows, take the median of the target variable
   data <- get_data("OP treatment visit") |>
-    dplyr::filter(
-      dplyr::if_all(
-        dplyr::all_of(capturetb_covariates()),
-        ~ !is.na(.) & !is.nan(.) & is.finite(.)
-      )
-    ) |>
-    dplyr::group_by(.data$fc_code) |>
-    dplyr::slice(1) |>
-    dplyr::ungroup()
+    dplyr::filter(is.na(output_pop2) | output_pop2 != "collecting meds") |>
+    dplyr::group_by(fc_code, dplyr::across(all_of(capturetb_covariates())), fc_country) |>
+    dplyr::summarise(
+      USD_unitcost_total = median(.data$USD_unitcost_total, na.rm = TRUE),
+      USD_unitcost_fixed = median(.data$USD_unitcost_fixed, na.rm = TRUE),
+      USD_unitcost_ohd = median(.data$USD_unitcost_ohd, na.rm = TRUE),
+      .groups = "drop"
+    )
 
   mod <- MixedEffects$new(data)
   mod$.__enclos_env__$private$.samples <- samples
@@ -52,16 +53,17 @@ unitcost_ohd <- function() {
   samples <- readRDS(system.file("posterior_samples_ohd.rds",
     package = "capturetb"
   ))
+
+  # where facilities have multiple rows, take the median of the target variable
   data <- get_data("OP treatment visit") |>
-    dplyr::filter(
-      dplyr::if_all(
-        dplyr::all_of(capturetb_covariates()),
-        ~ !is.na(.) & !is.nan(.) & is.finite(.)
-      )
-    ) |>
-    dplyr::group_by(.data$fc_code) |>
-    dplyr::slice(1) |>
-    dplyr::ungroup()
+    dplyr::filter(is.na(output_pop2) | output_pop2 != "collecting meds") |>
+    dplyr::group_by(fc_code, dplyr::across(all_of(capturetb_covariates())), fc_country) |>
+    dplyr::summarise(
+      USD_unitcost_total = median(.data$USD_unitcost_total, na.rm = TRUE),
+      USD_unitcost_fixed = median(.data$USD_unitcost_fixed, na.rm = TRUE),
+      USD_unitcost_ohd = median(.data$USD_unitcost_ohd, na.rm = TRUE),
+      .groups = "drop"
+    )
 
   mod <- MixedEffects$new(data, target = "USD_unitcost_ohd")
   mod$.__enclos_env__$private$.samples <- samples
@@ -88,16 +90,17 @@ unitcost_fixed <- function() {
   samples <- readRDS(system.file("posterior_samples_fixed.rds",
     package = "capturetb"
   ))
+
+  # where facilities have multiple rows, take the median of the target variable
   data <- get_data("OP treatment visit") |>
-    dplyr::filter(
-      dplyr::if_all(
-        dplyr::all_of(capturetb_covariates()),
-        ~ !is.na(.) & !is.nan(.) & is.finite(.)
-      )
-    ) |>
-    dplyr::group_by(.data$fc_code) |>
-    dplyr::slice(1) |>
-    dplyr::ungroup()
+    dplyr::filter(is.na(output_pop2) | output_pop2 != "collecting meds") |>
+    dplyr::group_by(fc_code, dplyr::across(all_of(capturetb_covariates())), fc_country) |>
+    dplyr::summarise(
+      USD_unitcost_total = median(.data$USD_unitcost_total, na.rm = TRUE),
+      USD_unitcost_fixed = median(.data$USD_unitcost_fixed, na.rm = TRUE),
+      USD_unitcost_ohd = median(.data$USD_unitcost_ohd, na.rm = TRUE),
+      .groups = "drop"
+    )
 
   mod <- MixedEffects$new(data, target = "USD_unitcost_fixed")
   mod$.__enclos_env__$private$.samples <- samples
