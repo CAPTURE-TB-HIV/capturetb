@@ -64,7 +64,14 @@ params <- model$fitted_parameters()
 print(params)
 
 # 90\% credible intervals
-params_90 <- model$fitted_parameters(prob = 0.9)
+params_90 <- model$fitted_parameters(ci = 0.9)
+
+## ------------------------------------------------
+## Method `JAGSModel$mcmc_DIC`
+## ------------------------------------------------
+
+mod <- unitcost()
+mod$mcmc_DIC()
 }
 \seealso{
 \code{\link{FixedEffects}}
@@ -84,6 +91,10 @@ params_90 <- model$fitted_parameters(prob = 0.9)
 \link[bayesplot:MCMC-intervals]{bayesplot::mcmc_areas}
 
 \code{\link[=predict]{predict()}}
+
+bayestestR describe_posterior
+
+rjags dic.samples
 }
 \section{Methods}{
 \subsection{Public methods}{
@@ -113,6 +124,7 @@ params_90 <- model$fitted_parameters(prob = 0.9)
 \item \href{#method-JAGSModel-evpi}{\code{JAGSModel$evpi()}}
 \item \href{#method-JAGSModel-predict_total}{\code{JAGSModel$predict_total()}}
 \item \href{#method-JAGSModel-fitted_parameters}{\code{JAGSModel$fitted_parameters()}}
+\item \href{#method-JAGSModel-mcmc_DIC}{\code{JAGSModel$mcmc_DIC()}}
 \item \href{#method-JAGSModel-clone}{\code{JAGSModel$clone()}}
 }
 }
@@ -172,7 +184,7 @@ Fit the model using JAGS. Requires JAGS and rjags to be installed.
 \item{\code{n.chains}}{Integer. Number of MCMC chains. Default is 3.}
 
 \item{\code{n.iter}}{Integer. Number of total iterations per chain.
-Default is 100000.}
+Default is 1000000.}
 
 \item{\code{n.burnin}}{Integer. Number of burn-in iterations. Default is 5000.}
 
@@ -442,8 +454,8 @@ Calculate model performance metrics on training data.
 
 This method evaluates the fitted model's performance by making predictions
 on the training data and computing mean absolute error (MAE),
-root mean square error (RMSE), correlation between observed
-and predicted values, and credible interval coverage.
+root mean square error (RMSE), Bayesian R2, credible interval coverage and
+median credible interval width.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{JAGSModel$performance(scale = "log", by_country = FALSE)}\if{html}{\out{</div>}}
 }
@@ -464,7 +476,7 @@ A data.frame with performance metrics:
 \item country: Only present if by_country = TRUE
 \item mae: Mean Absolute Error between observed and predicted values
 \item rmse: Root Mean Square Error between observed and predicted values
-\item correlation: Pearson correlation between observed and predicted values
+\item bayesian_r2: Mean Bayesian r2 estimate.
 \item ci_coverage: Proportion of observations within 95\% credible intervals
 \item median_ci: The median width of 95\% credible intervals
 }
@@ -692,30 +704,39 @@ Posterior distribution of predicted total cost, as a vector
 \subsection{Method \code{fitted_parameters()}}{
 Extract fitted model parameters with credible intervals.
 
-This method extracts parameter estimates from the fitted MCMC samples,
-including both coefficient estimates (beta parameters) and other model
-parameters (sigma, mu_alpha, etc.). Returns posterior means and credible
-intervals for all parameters.
+This method summarises fitted parameters using
+\link[bayestestR:describe_posterior]{bayestestR::describe_posterior}. See \link[bayestestR:describe_posterior]{bayestestR::describe_posterior}
+for full documentation of available argument.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{JAGSModel$fitted_parameters(prob = 0.95)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{JAGSModel$fitted_parameters(
+  centrality = "mean",
+  ci = 0.95,
+  ci_method = "eti",
+  test = NULL,
+  ...
+)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{prob}}{Numeric. Probability mass for credible intervals. Default 0.95
-for 95\% credible intervals.}
+\item{\code{centrality}}{The point-estimates (centrality indices) to compute.
+Default "mean".}
+
+\item{\code{ci}}{Value or vector of probability of the CI (between 0 and 1)
+to be estimated. Default \code{0.95} (\verb{95\%}).}
+
+\item{\code{ci_method}}{The type of index used for Credible Interval.
+Default ETI.}
+
+\item{\code{test}}{The indices of effect existence to compute. Default NULL.}
+
+\item{\code{...}}{Other arguments that will be passed to \link[bayestestR:describe_posterior]{bayestestR::describe_posterior}.}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-A data.frame with columns:
-\itemize{
-\item mean: Posterior mean of each parameter
-\item lower: Lower bound of credible interval
-\item upper: Upper bound of credible interval
-}
-Row names correspond to parameter names from the JAGS model.
+A data.frame of parameter summaries
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -724,7 +745,37 @@ params <- model$fitted_parameters()
 print(params)
 
 # 90\% credible intervals
-params_90 <- model$fitted_parameters(prob = 0.9)
+params_90 <- model$fitted_parameters(ci = 0.9)
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-JAGSModel-mcmc_DIC"></a>}}
+\if{latex}{\out{\hypertarget{method-JAGSModel-mcmc_DIC}{}}}
+\subsection{Method \code{mcmc_DIC()}}{
+Retrieve penalized deviance statistics.
+
+This method returns cached penalized deviance statistics created
+at the time of model fitting using \code{\link[rjags:dic.samples]{rjags::dic.samples()}}.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{JAGSModel$mcmc_DIC(summarised = TRUE)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{summarised}}{Logical indicating whether to return the full
+sample or the summarised DIC. Default TRUE.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{mod <- unitcost()
+mod$mcmc_DIC()
 }
 \if{html}{\out{</div>}}
 

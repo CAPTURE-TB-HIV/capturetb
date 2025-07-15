@@ -144,7 +144,7 @@ test_that("MixedEffects class methods work with small example", {
 
   # Test fitting with minimal iterations but sufficient for convergence
   expect_message(
-    model$fit(n.chains = 2, n.iter = 500, n.burnin = 50, n.thin = 2),
+    suppressWarnings(model$fit(n.chains = 2, n.iter = 500, n.burnin = 50, n.thin = 2)),
     "Model fitted successfully"
   )
 
@@ -296,14 +296,16 @@ test_that("k_fold_cv works correctly", {
 
   # Test with 3 folds and minimal iterations
   expect_message(
-    cv_results <- model$k_fold_cv(
-      k_folds = 3,
-      scale = "log",
-      seed = 123,
-      n.chains = 2,
-      n.iter = 200,
-      n.burnin = 50,
-      n.thin = 2
+    suppressWarnings(
+      cv_results <- model$k_fold_cv(
+        k_folds = 3,
+        scale = "log",
+        seed = 123,
+        n.chains = 2,
+        n.iter = 200,
+        n.burnin = 50,
+        n.thin = 2
+      )
     ),
     "Processing fold"
   )
@@ -327,7 +329,7 @@ test_that("k_fold_cv works correctly", {
   expect_true(all(cv_results$mean <= cv_results$upper))
 
   # Test with natural scale
-  cv_results_natural <- model$k_fold_cv(
+  cv_results_natural <- suppressWarnings(model$k_fold_cv(
     k_folds = 2,
     scale = "natural",
     seed = 123,
@@ -335,7 +337,7 @@ test_that("k_fold_cv works correctly", {
     n.iter = 200,
     n.burnin = 50,
     n.thin = 2
-  )
+  ))
 
   expect_true(all(cv_results_natural$mean > 0))
   expect_true(all(cv_results_natural$observed > 0))
@@ -388,12 +390,15 @@ test_that("performance method works with log scale", {
 
   expect_true(is.data.frame(perf_log))
   expect_equal(nrow(perf_log), 1)
-  expected_names <- c("mae", "rmse", "correlation", "ci_coverage", "median_ci")
+  expected_names <- c(
+    "mae", "rmse", "bayesian_r2",
+    "ci_coverage", "median_ci"
+  )
   expect_equal(names(perf_log), expected_names)
   expect_true(all(sapply(perf_log, is.numeric)))
   expect_true(perf_log$mae >= 0 & perf_log$mae <= 1)
   expect_true(perf_log$rmse >= 0 & perf_log$rmse <= 1)
-  expect_true(perf_log$correlation >= 0.5 && perf_log$correlation <= 1)
+  expect_true(perf_log$bayesian_r2 >= 0.5 && perf_log$bayesian_r2 <= 1)
   expect_true(perf_log$ci_coverage >= 0.95 && perf_log$ci_coverage <= 1)
 })
 
@@ -403,12 +408,15 @@ test_that("performance method works with natural scale", {
 
   expect_true(is.data.frame(perf_natural))
   expect_equal(nrow(perf_natural), 1)
-  expected_names <- c("mae", "rmse", "correlation", "ci_coverage", "median_ci")
+  expected_names <- c(
+    "mae", "rmse", "bayesian_r2",
+    "ci_coverage", "median_ci"
+  )
   expect_equal(names(perf_natural), expected_names)
   expect_true(all(sapply(perf_natural, is.numeric)))
   expect_true(perf_natural$mae >= 1)
   expect_true(perf_natural$rmse >= 1)
-  expect_true(perf_natural$correlation >= 0.5 && perf_natural$correlation <= 1)
+  expect_true(perf_natural$bayesian_r2 >= 0.5 && perf_natural$bayesian_r2 <= 1)
   expect_true(perf_natural$ci_coverage >= 0.95 && perf_natural$ci_coverage <= 1)
 
   perf_log <- model$performance(scale = "log")
@@ -593,79 +601,37 @@ test_that("fitted_parameters method works correctly", {
 
   # Test with fitted model (use unitcost which already has samples)
   model <- unitcost()
-  
+
   # Test default parameters (95% CI)
   params <- model$fitted_parameters()
-  
+
   expect_true(is.data.frame(params))
-  expect_equal(ncol(params), 3)
-  expect_equal(names(params), c("mean", "lower", "upper"))
-  
+  expect_equal(ncol(params), 5)
+  expect_equal(names(params), c("Parameter", "Mean", "CI", "CI_low", "CI_high"))
+
   # Check that we have the expected parameters
   expected_params <- c(
-    paste0("beta[", 1:5, "]"),  # beta coefficients
-    "sigma", "mu_alpha", "sigma_alpha"  # other parameters
+    paste0("alpha[", 1:5, "]"), # intercepts
+    paste0("beta[", 1:5, "]"), # beta coefficients
+    "mu_alpha", "sigma", "sigma_alpha" # other parameters
   )
-  expect_equal(rownames(params), expected_params)
-  
+  expect_equal(params$Parameter, expected_params)
+
   # Check that lower <= mean <= upper for all parameters
-  expect_true(all(params$lower <= params$mean))
-  expect_true(all(params$mean <= params$upper))
-  
-  # Check that all values are finite
-  expect_true(all(is.finite(params$mean)))
-  expect_true(all(is.finite(params$lower)))
-  expect_true(all(is.finite(params$upper)))
-  
+  expect_true(all(params$CI_low <= params$Mean))
+  expect_true(all(params$Mean <= params$CI_high))
+
   # Test different probability levels
-  params_90 <- model$fitted_parameters(prob = 0.9)
-  params_50 <- model$fitted_parameters(prob = 0.5)
-  
-  expect_equal(dim(params_90), dim(params))
-  expect_equal(dim(params_50), dim(params))
-  expect_equal(rownames(params_90), rownames(params))
-  expect_equal(rownames(params_50), rownames(params))
-  
+  params_90 <- model$fitted_parameters(ci = 0.9)
+  params_50 <- model$fitted_parameters(ci = 0.5)
+
   # Check that narrower CI has smaller intervals
-  interval_95 <- params$upper - params$lower
-  interval_90 <- params_90$upper - params_90$lower
-  interval_50 <- params_50$upper - params_50$lower
-  
+  interval_95 <- params$CI_high - params$CI_low
+  interval_90 <- params_90$CI_high - params_90$CI_low
+  interval_50 <- params_50$CI_high - params_50$CI_low
+
   expect_true(all(interval_50 <= interval_90))
   expect_true(all(interval_90 <= interval_95))
-  
-  # Means should be similar across different probability levels
-  expect_equal(params$mean, params_90$mean, tolerance = 0.01)
-  expect_equal(params$mean, params_50$mean, tolerance = 0.01)
-})
-
-test_that("fitted_parameters validates probability parameter", {
-  model <- unitcost()
-  
-  # Test invalid probability values
-  expect_error(
-    model$fitted_parameters(prob = 1.5),
-    "prob.*between 0 and 1|prob.*valid"
-  )
-  
-  expect_error(
-    model$fitted_parameters(prob = -0.1),
-    "prob.*between 0 and 1|prob.*valid"
-  )
-  
-  expect_error(
-    model$fitted_parameters(prob = 0),
-    "prob.*between 0 and 1|prob.*valid"
-  )
-  
-  expect_error(
-    model$fitted_parameters(prob = 1),
-    "prob.*between 0 and 1|prob.*valid"
-  )
-  
-  # Test valid edge cases
-  expect_silent(model$fitted_parameters(prob = 0.01))
-  expect_silent(model$fitted_parameters(prob = 0.99))
 })
 
 test_that("baselines method works correctly", {
@@ -689,10 +655,10 @@ test_that("baselines method works correctly", {
 
   # Check that n_total makes sense
   expect_true(all(baselines_result$n_total > 0))
-  expect_true(all(is.integer(baselines_result$n_total)))
+  expect_true(all(is.numeric(baselines_result$n_total)))
 
   # Check that logical covariate columns are present
-  logical_covariates <- c("secondary", "urban", "public")
+  logical_covariates <- c("secondary", "public")
   expected_cols <- paste0("n_", logical_covariates)
   expect_true(all(expected_cols %in% names(baselines_result)))
 
@@ -700,7 +666,7 @@ test_that("baselines method works correctly", {
   for (col in expected_cols) {
     expect_true(all(baselines_result[[col]] >= 0))
     expect_true(all(baselines_result[[col]] <= baselines_result$n_total))
-    expect_true(all(is.integer(baselines_result[[col]])))
+    expect_true(all(is.numeric(baselines_result[[col]])))
   }
 
   # Verify counts by manual calculation for one country
@@ -765,4 +731,55 @@ test_that("covariate_correlation validates plot parameter", {
   # Test valid parameters
   expect_silent(model$covariate_correlation(plot = TRUE))
   expect_silent(model$covariate_correlation(plot = FALSE))
+})
+
+test_that("Can perform loco validation", {
+  model <- unitcost()
+  res <- suppressWarnings(model$leave_one_country_out(n.iter = 500))
+  expect_equal(nrow(res), nrow(model$training_data()))
+  expect_equal(names(res), c("country", "observed", "mean", "lower", "upper"))
+
+  perf <- attr(res, "performance")
+  expect_equal(
+    names(perf),
+    c("mae", "rmse", "bayesian_r2", "ci_coverage", "median_ci")
+  )
+  expect_true(perf$bayesian_r2 > 0.4)
+  expect_true(perf$bayesian_r2 < 0.5)
+  expect_true(perf$mae < 0.6)
+  mods <- attr(res, "models")
+  expect_true(inherits(mods[[1]], "MixedEffects"))
+  expect_equal(length(mods), 5)
+})
+
+test_that("Can get loco validation results on natural scale", {
+  model <- unitcost()
+  res <- suppressWarnings(model$leave_one_country_out(n.iter = 500, scale = "natural"))
+  expect_equal(nrow(res), nrow(model$training_data()))
+  expect_equal(names(res), c("country", "observed", "mean", "lower", "upper"))
+
+  perf <- attr(res, "performance")
+  expect_equal(
+    names(perf),
+    c("mae", "rmse", "bayesian_r2", "ci_coverage", "median_ci")
+  )
+  expect_true(perf$bayesian_r2 > 0.4)
+  expect_true(perf$bayesian_r2 < 0.6)
+  expect_true(perf$mae > 1)
+  mods <- attr(res, "models")
+  expect_true(inherits(mods[[1]], "MixedEffects"))
+  expect_equal(length(mods), 5)
+})
+
+test_that("can get DIC", {
+  mod <- suppressWarnings(MixedEffects$new())
+  expect_error(mod$mcmc_DIC(), "Model must be fitted first.")
+
+  suppressWarnings(mod$fit(n.chains = 2, n.iter = 500, n.burnin = 50, n.thin = 2))
+
+  unsummarised <- mod$mcmc_DIC(summarised = FALSE)
+  expect_true(inherits(unsummarised, "dic"))
+
+  summarised <- mod$mcmc_DIC(summarised = TRUE)
+  expect_true(inherits(summarised, "numeric"))
 })

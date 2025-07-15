@@ -130,7 +130,7 @@ JAGSModel <- R6::R6Class("JAGSModel",
     #'
     #' @param n.chains Integer. Number of MCMC chains. Default is 3.
     #' @param n.iter Integer. Number of total iterations per chain.
-    #' Default is 100000.
+    #' Default is 1000000.
     #' @param n.burnin Integer. Number of burn-in iterations. Default is 5000.
     #' @param n.adapt Integer. Number of adaptation iterations. Default is 5000.
     #' @param n.thin Integer. Thinning interval. Default is 100.
@@ -164,10 +164,13 @@ JAGSModel <- R6::R6Class("JAGSModel",
         N = nrow(dat),
         K = length(private$.covariates),
         x = x,
-        log_cost = log(dat[[private$.target]]),
-        NC = length(unique(dat$fc_country)),
-        country = as.numeric(as.factor(dat$fc_country))
+        log_cost = log(dat[[private$.target]])
       )
+
+      if (private$.model != "fixedeffects.model") {
+        jags_data$NC <- length(unique(dat$fc_country))
+        jags_data$country <- as.numeric(as.factor(dat$fc_country))
+      }
 
       jags_data <- c(jags_data, as.list(private$.priors))
 
@@ -203,6 +206,23 @@ JAGSModel <- R6::R6Class("JAGSModel",
 
       # Store samples
       private$.samples <- samples
+
+      dic_samples <- rjags::dic.samples(
+        model = jags_mod,
+        n.iter = n.iter,
+        thin = n.thin,
+        type = "pD"
+      )
+
+      private$.dic_samples <- dic_samples
+
+      rhat <- coda::gelman.diag(samples, autoburnin = FALSE)
+      if (any(rhat$psrf > 1.1)) {
+        warning(sprintf(
+          "Model may not have converged. Max rhat is %s",
+          max(rhat$psrf)
+        ))
+      }
 
       message(
         "Model fitted successfully with ", n.chains, " chains and ",
@@ -241,7 +261,7 @@ JAGSModel <- R6::R6Class("JAGSModel",
       private$.training_data |>
         dplyr::group_by(fc_country) |>
         dplyr::summarise(
-          n_total = n(),
+          n_total = dplyr::n(),
           dplyr::across(
             all_of(logical_cols),
             ~ sum(.x == 1),
@@ -254,10 +274,13 @@ JAGSModel <- R6::R6Class("JAGSModel",
     #'
     #' @param plot Logical. If TRUE, return a ggplot2
     #' object. If FALSE return a correlation matrix. Default TRUE.
+    #' @import ggcorrplot ggcorrplot
     #' @return ggplot2 object or correlation matrix
     covariate_correlation = function(plot = TRUE) {
-      stopifnot("plot must be TRUE or FALSE" = 
-      (length(plot) == 1 && is.logical(plot)))
+      stopifnot(
+        "plot must be TRUE or FALSE" =
+          (length(plot) == 1 && is.logical(plot))
+      )
       cor_mat <- cor(private$.training_data[, private$.covariates])
       if (plot) {
         return(ggcorrplot::ggcorrplot(cor_mat))
@@ -318,7 +341,7 @@ JAGSModel <- R6::R6Class("JAGSModel",
     #'
     #' @return Logical indicating if model is fitted.
     is_fitted = function() {
-      !is.null(private$.samples)
+      !is.null(private$.samples) & !is.null(private$.dic_samples) 
     },
 
     #' @description
@@ -403,8 +426,8 @@ JAGSModel <- R6::R6Class("JAGSModel",
     #'
     #' This method evaluates the fitted model's performance by making predictions
     #' on the training data and computing mean absolute error (MAE),
-    #' root mean square error (RMSE), correlation between observed
-    #' and predicted values, and credible interval coverage.
+    #' root mean square error (RMSE), Bayesian R2, credible interval coverage and
+    #' median credible interval width.
     #'
     #' @param scale One of "log" or "natural". Default "log".
     #'
@@ -415,7 +438,7 @@ JAGSModel <- R6::R6Class("JAGSModel",
     #'  \item country: Only present if by_country = TRUE
     #'   \item mae: Mean Absolute Error between observed and predicted values
     #'   \item rmse: Root Mean Square Error between observed and predicted values
-    #'   \item correlation: Pearson correlation between observed and predicted values
+    #'   \item bayesian_r2: Mean Bayesian r2 estimate.
     #'   \item ci_coverage: Proportion of observations within 95% credible intervals
     #'   \item median_ci: The median width of 95% credible intervals
     #' }
@@ -435,9 +458,15 @@ JAGSModel <- R6::R6Class("JAGSModel",
 
       private$.check_fitted()
       dat <- private$.training_data
-      predictions <- self$predict(dat,
+      preds <- self$predict(dat,
         scale = scale,
-        summarised = TRUE
+        summarised = FALSE
+      )
+
+      pred_summary <- data.frame(
+        mean = apply(preds, 2, mean),
+        lower = apply(preds, 2, quantile, probs = 0.025),
+        upper = apply(preds, 2, quantile, probs = 0.975)
       )
 
       # Get observed values in the correct scale
@@ -450,19 +479,24 @@ JAGSModel <- R6::R6Class("JAGSModel",
       results_df <- data.frame(
         observed = observed_values,
         country = dat$fc_country,
-        predictions
+        pred_summary
       )
 
       if (by_country) {
         results_df <- results_df |> dplyr::group_by(country)
       }
 
+      var_yhat <- apply(preds, 1, var)
+      resid_mat <- preds - rep(observed_values, each = nrow(preds))
+      var_resid <- apply(resid_mat, 1, var)
+      r2_draws <- var_yhat / (var_yhat + var_resid)
+
       # Calculate performance metrics
       performance_metrics <- results_df |>
         dplyr::summarise(
           mae = mean(abs(.data$observed - .data$mean)),
           rmse = sqrt(mean((.data$observed - .data$mean)^2)),
-          correlation = stats::cor(.data$observed, .data$mean),
+          bayesian_r2 = mean(r2_draws),
           ci_coverage = mean(.data$observed >= .data$lower &
             .data$observed <= .data$upper),
           median_ci = median(.data$upper - .data$lower),
@@ -661,6 +695,7 @@ JAGSModel <- R6::R6Class("JAGSModel",
       dat$fold <- fold_ids
 
       cv_predictions <- list()
+      all_predictions <- list()
 
       for (fold in 1:k_folds) {
         message("Processing fold ", fold, " of ", k_folds)
@@ -690,11 +725,21 @@ JAGSModel <- R6::R6Class("JAGSModel",
         # Fit model on training fold
         temp_model$fit(seed = seed, ...)
 
-        # Make predictions on test fold
-        fold_preds <- temp_model$predict(
+        # Make full predictions on test fold (not summarised)
+        fold_preds_full <- temp_model$predict(
           test_data,
           scale = scale,
-          summarised = TRUE
+          summarised = FALSE
+        )
+
+        # Store full predictions for Bayesian R² calculation
+        all_predictions[[fold]] <- fold_preds_full
+
+        # Calculate summary statistics for results dataframe
+        fold_preds_summary <- data.frame(
+          mean = apply(fold_preds_full, 2, mean),
+          lower = apply(fold_preds_full, 2, quantile, probs = 0.025),
+          upper = apply(fold_preds_full, 2, quantile, probs = 0.975)
         )
 
         obs <- test_data[[private$.target]]
@@ -706,7 +751,7 @@ JAGSModel <- R6::R6Class("JAGSModel",
         fold_results <- data.frame(
           fold = fold,
           observed = obs,
-          fold_preds
+          fold_preds_summary
         )
 
         cv_predictions[[fold]] <- fold_results
@@ -715,12 +760,23 @@ JAGSModel <- R6::R6Class("JAGSModel",
       # Combine all fold results
       results_df <- do.call(rbind, cv_predictions)
 
+      # Combine all predictions for Bayesian R² calculation
+      all_preds_matrix <- do.call(cbind, all_predictions)
+      observed_values <- results_df$observed
+
+      # Calculate Bayesian R²
+      var_yhat <- apply(all_preds_matrix, 1, var)
+      resid_mat <- all_preds_matrix - rep(observed_values, each = nrow(all_preds_matrix))
+      var_resid <- apply(resid_mat, 1, var)
+      r2_draws <- var_yhat / (var_yhat + var_resid)
+      bayesian_r2 <- mean(r2_draws)
+
       # Calculate performance metrics
       performance_metrics <- results_df |>
         dplyr::summarise(
           mae = mean(abs(.data$observed - .data$mean)),
           rmse = sqrt(mean((.data$observed - .data$mean)^2)),
-          correlation = stats::cor(.data$observed, .data$mean),
+          bayesian_r2 = bayesian_r2,
           ci_coverage = mean(.data$observed >= .data$lower &
             .data$observed <= .data$upper),
           median_ci = median(.data$upper - .data$lower)
@@ -747,6 +803,8 @@ JAGSModel <- R6::R6Class("JAGSModel",
       countries <- private$.countries
 
       cv_predictions <- list()
+      all_predictions <- list()
+      all_models <- list()
 
       for (i in seq_along(countries)) {
         train_data <- dat |> dplyr::filter(fc_country != countries[[i]])
@@ -770,14 +828,26 @@ JAGSModel <- R6::R6Class("JAGSModel",
           priors = private$.priors
         )
 
+        all_models[[i]] <- temp_model
+
         # Fit model on training data
         temp_model$fit(seed = seed, ...)
 
-        # Make predictions on test country
-        fold_preds <- temp_model$predict(
+        # Make full predictions on test country (not summarised)
+        fold_preds_full <- temp_model$predict(
           test_data,
           scale = scale,
-          summarised = TRUE
+          summarised = FALSE
+        )
+
+        # Store full predictions for Bayesian R² calculation
+        all_predictions[[i]] <- fold_preds_full
+
+        # Calculate summary statistics for results dataframe
+        fold_preds_summary <- data.frame(
+          mean = apply(fold_preds_full, 2, mean),
+          lower = apply(fold_preds_full, 2, quantile, probs = 0.025),
+          upper = apply(fold_preds_full, 2, quantile, probs = 0.975)
         )
 
         obs <- test_data[[private$.target]]
@@ -789,7 +859,7 @@ JAGSModel <- R6::R6Class("JAGSModel",
         fold_results <- data.frame(
           country = test_data$fc_country,
           observed = obs,
-          fold_preds
+          fold_preds_summary
         )
 
         cv_predictions[[i]] <- fold_results
@@ -798,16 +868,28 @@ JAGSModel <- R6::R6Class("JAGSModel",
       # Combine all fold results
       results_df <- do.call(rbind, cv_predictions)
 
+      # Combine all predictions for Bayesian R² calculation
+      all_preds_matrix <- do.call(cbind, all_predictions)
+      observed_values <- results_df$observed
+
+      # Calculate Bayesian R²
+      var_yhat <- apply(all_preds_matrix, 1, var)
+      resid_mat <- all_preds_matrix - rep(observed_values, each = nrow(all_preds_matrix))
+      var_resid <- apply(resid_mat, 1, var)
+      r2_draws <- var_yhat / (var_yhat + var_resid)
+      bayesian_r2 <- mean(r2_draws)
+
       # Calculate performance metrics
       performance_metrics <- results_df |>
         dplyr::summarise(
           mae = mean(abs(.data$observed - .data$mean)),
           rmse = sqrt(mean((.data$observed - .data$mean)^2)),
-          correlation = stats::cor(.data$observed, .data$mean),
+          bayesian_r2 = bayesian_r2,
           ci_coverage = mean(.data$observed >= .data$lower &
-            .data$observed <= .data$upper)
+            .data$observed <= .data$upper),
+          median_ci = median(.data$upper - .data$lower)
         )
-
+      attr(results_df, "models") <- all_models
       attr(results_df, "performance") <- performance_metrics
       results_df
     },
@@ -901,71 +983,61 @@ JAGSModel <- R6::R6Class("JAGSModel",
     #' @description
     #' Extract fitted model parameters with credible intervals.
     #'
-    #' This method extracts parameter estimates from the fitted MCMC samples,
-    #' including both coefficient estimates (beta parameters) and other model
-    #' parameters (sigma, mu_alpha, etc.). Returns posterior means and credible
-    #' intervals for all parameters.
-    #'
-    #' @param prob Numeric. Probability mass for credible intervals. Default 0.95
-    #' for 95% credible intervals.
-    #'
-    #' @return A data.frame with columns:
-    #' \itemize{
-    #'   \item mean: Posterior mean of each parameter
-    #'   \item lower: Lower bound of credible interval
-    #'   \item upper: Upper bound of credible interval
-    #' }
-    #' Row names correspond to parameter names from the JAGS model.
-    #'
+    #' This method summarises fitted parameters using
+    #' [bayestestR::describe_posterior]. See [bayestestR::describe_posterior]
+    #' for full documentation of available argument.
+    #' @param centrality The point-estimates (centrality indices) to compute.
+    #' Default "mean".
+    #' @param ci Value or vector of probability of the CI (between 0 and 1)
+    #' to be estimated. Default `0.95` (`95%`).
+    #' @param ci_method The type of index used for Credible Interval.
+    #' Default ETI.
+    #' @param test The indices of effect existence to compute. Default NULL.
+    #' @param ... Other arguments that will be passed to [bayestestR::describe_posterior].
+    #' @seealso bayestestR describe_posterior
+    #' @return A data.frame of parameter summaries
     #' @examples
     #' model <- unitcost()
     #' params <- model$fitted_parameters()
     #' print(params)
-    #' 
+    #'
     #' # 90% credible intervals
-    #' params_90 <- model$fitted_parameters(prob = 0.9)
-    fitted_parameters = function(prob = 0.95) {
+    #' params_90 <- model$fitted_parameters(ci = 0.9)
+    fitted_parameters = function(centrality = "mean",
+                                 ci = 0.95,
+                                 ci_method = "eti",
+                                 test = NULL, ...) {
       private$.check_fitted()
-      
-      stopifnot(
-        "prob must be numeric" = is.numeric(prob),
-        "prob must be between 0 and 1" = prob > 0 && prob < 1,
-        "prob must be a scalar" = length(prob) == 1
+      bayestestR::describe_posterior(private$.samples,
+        centrality = centrality,
+        ci = ci,
+        ci_method = ci_method,
+        test = test, ...
       )
-      
-      smat <- do.call(rbind, lapply(private$.samples, as.matrix))
-
-      if (length(private$.covariates) == 1) {
-        beta_cols <- "beta"
+    },
+    #' @description Retrieve penalized deviance statistics.
+    #'
+    #' This method returns cached penalized deviance statistics created
+    #' at the time of model fitting using [rjags::dic.samples()].
+    #' @param summarised Logical indicating whether to return the full
+    #' sample or the summarised DIC. Default TRUE.
+    #' @seealso rjags dic.samples
+    #' @examples
+    #' mod <- unitcost()
+    #' mod$mcmc_DIC()
+    #' @export
+    mcmc_DIC = function(summarised = TRUE) {
+      private$.check_fitted()
+      if (summarised) {
+        sum(private$.dic_samples$deviance) + mean(sum(private$.dic_samples[[2]]))
       } else {
-        beta_cols <- paste0("beta[", seq_along(private$.covariates), "]")
+        private$.dic_samples
       }
-
-      betas <- smat[, beta_cols, drop = FALSE]
-
-      other_params <- private$.params[!(private$.params %in% c("alpha", "beta"))]
-
-      means <- sapply(
-        other_params,
-        function(p_name) mean(smat[, p_name])
-      )
-      lower <- sapply(
-        other_params,
-        function(p_name) quantile(smat[, p_name], (1 - prob) / 2)
-      )
-      upper <- sapply(
-        other_params,
-        function(p_name) quantile(smat[, p_name], 1 - ((1 - prob) / 2))
-      )
-      data.frame(
-        mean = c(apply(betas, 2, mean), means),
-        lower = c(apply(betas, 2, quantile, probs = (1 - prob) / 2), lower),
-        upper = c(apply(betas, 2, quantile, probs = 1 - ((1 - prob) / 2)), upper)
-      )
     }
   ),
   private = list(
     .model = NULL,
+    .dic_samples = NULL,
     .params = NULL,
     .covariates = NULL,
     .countries = NULL,

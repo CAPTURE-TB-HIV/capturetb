@@ -253,7 +253,9 @@ mod_unit <- MixedEffects$new(training_data,
                           target = "USD_unitcost_total")
 mod_unit$fit(seed = 123)
 samples <- mod_unit$samples()
+dic_samples <- mod_unit$mcmc_DIC(summarised = FALSE)
 saveRDS(samples, "inst/posterior_samples.rds")
+saveRDS(dic_samples, "inst/posterior_dic_samples.rds")
 
 mod_unit_fixed <- MixedEffects$new(training_data, 
                             covariates = covariates, 
@@ -261,7 +263,9 @@ mod_unit_fixed <- MixedEffects$new(training_data,
                             target = "USD_unitcost_fixed")
 mod_unit_fixed$fit(seed = 123)
 samples_fixed <- mod_unit_fixed$samples()
+dic_samples_fixed <- mod_unit_fixed$mcmc_DIC(summarised = FALSE)
 saveRDS(samples_fixed, "inst/posterior_samples_fixed.rds")
+saveRDS(dic_samples_fixed, "inst/posterior_dic_samples_fixed.rds")
 
 mod_unit_ohd <- MixedEffects$new(training_data, 
                             covariates = covariates, 
@@ -269,7 +273,9 @@ mod_unit_ohd <- MixedEffects$new(training_data,
                             target = "USD_unitcost_ohd")
 mod_unit_ohd$fit(seed = 123)
 samples_ohd <- mod_unit_ohd$samples()
+dic_samples_ohd <- mod_unit_ohd$mcmc_DIC(summarised = FALSE)
 saveRDS(samples_ohd, "inst/posterior_samples_ohd.rds")
+saveRDS(dic_samples_ohd, "inst/posterior_dic_samples_ohd.rds")
 ```
 
 Executing the above code will reproduce exactly the posterior samples installed with 

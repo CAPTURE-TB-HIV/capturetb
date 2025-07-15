@@ -116,7 +116,7 @@ capturetb_priors <- function(mu_alpha.mean = 0,
 #'   \itemize{
 #'     \item \code{log_USD_p_bldgspace}: Log of USD per m2 of building space
 #'     \item \code{logVisits}: Log of outpatient visits per annum
-#'     \item \code{logVisitsPP}: Log of daily TB visits per TB FTE
+#'     \item \code{logVisitsPP_TB}: Log of daily TB visits per TB FTE
 #'     \item \code{secondary}: Indicator for secondary health system level
 #'     \item \code{public}: Indicator for public owernship
 #'   }
@@ -129,18 +129,4 @@ capturetb_covariates <- function() {
     "secondary",
     "public"
   )
-}
-
-#' Create Normal power prior from mean, sd and power
-#' @param mu Mean estimate from historic data
-#' @param lower Lower estimate from historic data
-#' @param upper Upper estimate from historic data
-#' @param a0 Power between 0 and 1 to raise historic likelihood to
-#' @return Named list of mu and precision of power prior
-#' @keywords internal
-power_prior <- function(mu, upper, lower, a0) {
-  se <- (upper - lower) / (1.96 * 2)
-  var_adjusted <- se^2 / a0
-  precision <- 1 / var_adjusted
-  list(mu = mu, precision = precision)
 }

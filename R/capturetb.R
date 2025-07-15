@@ -42,10 +42,14 @@ unitcost <- function() {
   samples <- readRDS(system.file("posterior_samples.rds",
     package = "capturetb"
   ))
+  dic_samples <- readRDS(system.file("posterior_dic_samples.rds",
+    package = "capturetb"
+  ))
 
   data <- cleaned_data()
   mod <- MixedEffects$new(data, priors = priors())
   mod$.__enclos_env__$private$.samples <- samples
+  mod$.__enclos_env__$private$.dic_samples <- dic_samples
   mod
 }
 
@@ -68,10 +72,17 @@ unitcost_ohd <- function() {
   samples <- readRDS(system.file("posterior_samples_ohd.rds",
     package = "capturetb"
   ))
+  dic_samples <- readRDS(system.file("posterior_dic_samples_ohd.rds",
+    package = "capturetb"
+  ))
 
   data <- cleaned_data()
-  mod <- MixedEffects$new(data, priors = priors(), target = "USD_unitcost_ohd")
+  mod <- MixedEffects$new(data,
+    priors = priors(),
+    target = "USD_unitcost_ohd"
+  )
   mod$.__enclos_env__$private$.samples <- samples
+  mod$.__enclos_env__$private$.dic_samples <- dic_samples
   mod
 }
 
@@ -95,9 +106,16 @@ unitcost_fixed <- function() {
   samples <- readRDS(system.file("posterior_samples_fixed.rds",
     package = "capturetb"
   ))
+  dic_samples <- readRDS(system.file("posterior_dic_samples_fixed.rds",
+    package = "capturetb"
+  ))
 
   data <- cleaned_data()
-  mod <- MixedEffects$new(data, priors = priors(), target = "USD_unitcost_fixed")
+  mod <- MixedEffects$new(data,
+    priors = priors(),
+    target = "USD_unitcost_fixed"
+  )
   mod$.__enclos_env__$private$.samples <- samples
+  mod$.__enclos_env__$private$.dic_samples <- dic_samples
   mod
 }

@@ -10,9 +10,7 @@ test_that("can plot posteriors once fitted", {
         "Model must be fitted"
     )
 
-    model$fit(n.iter = 1000, n.chain = 2, n.thin = 1, n.burnin = 100)
-
-    res <- model$plot_posteriors()
+    res <- unitcost()$plot_posteriors()
     expect_true(inherits(res, "ggplot"))
 })
 

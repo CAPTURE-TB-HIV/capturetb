@@ -75,7 +75,7 @@ To get a general sense of the cost of model uncertainty, we can average over the
 
 ```{r, all-evpi}
 lambda <- seq(0, 2.5, by = 0.25)
-dat <- model$training_data()
+dat <- get_data("OP treatment visit")
 pred <- model$predict(dat, summarise = TRUE, scale = "natural")[, "mean"]
 all_evpi <- lapply(1:nrow(dat),
 		function(ind) sapply(lambda * pred[ind],

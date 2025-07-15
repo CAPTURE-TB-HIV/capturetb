@@ -1,6 +1,6 @@
 #' RandomSlopes R6 Class
 #'
-#' An R6 class for fitting and predicting costs using a model with 
+#' An R6 class for fitting and predicting costs using a model with
 #' random slopes.
 #'
 #' @description
@@ -83,25 +83,29 @@ RandomSlopes <- R6::R6Class("RandomSlopes",
 
       # Extract country-specific beta coefficients
       # beta[k, j] where k is covariate index, j is country index
-      n_countries_total <- length(private$.countries) + 1  # +1 for new countries
+      n_countries_total <- length(private$.countries) + 1 # +1 for new countries
       beta_arrays <- array(NA, dim = c(nrow(smat), length(private$.covariates), n_countries_total))
-      
+
       # Extract known country beta coefficients
       for (k in seq_along(private$.covariates)) {
         for (j in seq_along(private$.countries)) {
-          beta_col <- paste0("beta[", k, ",", j, "]")
-          beta_arrays[, k, j] <- smat[, beta_col]
+          beta_cols <- paste0("beta[", k, ",", j, "]")
+          beta_arrays[, k, j] <- smat[, beta_cols]
         }
       }
-      
+
       # Generate new beta coefficients for unknown countries using hyper-parameters
-      mu_beta <- smat[, paste0("mu_beta[", seq_along(private$.covariates), "]"), drop = FALSE]
-      sigma_beta <- smat[, paste0("sigma_beta[", seq_along(private$.covariates), "]"), drop = FALSE]
-      
+      if (length(private$.covariates) == 1) {
+        mu_beta <- smat[, "mu_beta", drop = FALSE]
+        sigma_beta <- smat[, "sigma_beta", drop = FALSE]
+      } else {
+        mu_beta <- smat[, paste0("mu_beta[", seq_along(private$.covariates), "]"), drop = FALSE]
+        sigma_beta <- smat[, paste0("sigma_beta[", seq_along(private$.covariates), "]"), drop = FALSE]
+      }
       for (k in seq_along(private$.covariates)) {
         beta_arrays[, k, n_countries_total] <- rnorm(nrow(smat), mu_beta[, k], sigma_beta[, k])
       }
-      
+
       betas <- beta_arrays
 
       x <- as.matrix(private$.numeric_to_logical(
@@ -140,8 +144,10 @@ RandomSlopes <- R6::R6Class("RandomSlopes",
         beta_i <- betas[, , country_idx]
 
         # Calculate prediction: alpha + sum(x * beta)
-        x_rep <- matrix(x[i, ], nrow = S, ncol = length(private$.covariates),
-                        byrow = TRUE)
+        x_rep <- matrix(x[i, ],
+          nrow = S, ncol = length(private$.covariates),
+          byrow = TRUE
+        )
         pred_means[, i] <- alpha_i + rowSums(beta_i * x_rep)
       }
 

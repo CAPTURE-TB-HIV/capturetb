@@ -60,3 +60,9 @@ test_that("can load ohd unitcost model", {
     expect_equal(mod$target(), "USD_unitcost_ohd")
     expect_true(all(mod$n_eff() > 10000))
 })
+
+test_that("can get DIC", {
+    expect_silent(unitcost()$mcmc_DIC())
+    expect_silent(unitcost_fixed()$mcmc_DIC())
+    expect_silent(unitcost_ohd()$mcmc_DIC())
+})

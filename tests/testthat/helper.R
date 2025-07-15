@@ -27,7 +27,13 @@ mock_samples <- function(n_sim) {
 dat_cleaned <- get_data("OP treatment visit") |>
   dplyr::filter(
     dplyr::if_all(
-      dplyr::all_of(capturetb_covariates()),
+      dplyr::all_of(c(
+        "log_USD_p_bldgspace",
+        "logVisits",
+        "logVisitsPP_TB",
+        "secondary",
+        "public"
+      )),
       ~ !is.na(.) & !is.nan(.) & is.finite(.)
     )
   ) |>
