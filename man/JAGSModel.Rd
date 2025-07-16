@@ -4,16 +4,13 @@
 \alias{JAGSModel}
 \title{JAGSModel R6 Class}
 \description{
-JAGSModel R6 Class
-
-JAGSModel R6 Class
-}
-\details{
-Base R6 class for fitting and predicting costs using a JAGS model.
 Contains functionality that is shared across model classes.
 Should not be instantiated directly, rather one of its children
 classes should be used:  \code{\link{FixedEffects}},
 \code{\link{MixedEffects}},  \code{\link{RandomSlopes}}
+}
+\details{
+Base R6 class for fitting and predicting costs using a JAGS model.
 }
 \examples{
 
@@ -81,7 +78,6 @@ mod$mcmc_DIC()
 \code{\link{RandomSlopes}}
 
 \link[rjags:jags.model]{rjags::jags.model}.
-Generate predictions from the fitted model.
 
 bayestestR describe_posterior
 
@@ -210,6 +206,7 @@ Self (invisibly) for method chaining.
 \if{html}{\out{<a id="method-JAGSModel-predict"></a>}}
 \if{latex}{\out{\hypertarget{method-JAGSModel-predict}{}}}
 \subsection{Method \code{predict()}}{
+Generate predictions from the fitted model.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{JAGSModel$predict(
   dat,

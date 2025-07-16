@@ -118,11 +118,11 @@ test_that("fit snapshot test", {
     set.seed(1)
     vdiffr::expect_doppelganger(
         "fit with CI",
-        model$plot_fit(include_ci = TRUE)
+         unitcost()$plot_fit(include_ci = TRUE)
     )
     vdiffr::expect_doppelganger(
         "fit without CI",
-        model$plot_fit(include_ci = FALSE)
+         unitcost()$plot_fit(include_ci = FALSE)
     )
 })
 
@@ -151,6 +151,6 @@ test_that("residuals snapshot test", {
     set.seed(1)
     vdiffr::expect_doppelganger(
         "residuals",
-        model$plot_residuals()
+        unitcost()$plot_residuals()
     )
 })

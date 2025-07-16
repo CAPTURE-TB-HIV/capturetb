@@ -126,7 +126,6 @@ JAGSModel <- R6::R6Class("JAGSModel",
       private$.samples <- NULL
       private$.model <- model
     },
-
     #' @description
     #' Fit the model using JAGS. Requires JAGS and rjags to be installed.
     #'
@@ -233,6 +232,7 @@ JAGSModel <- R6::R6Class("JAGSModel",
 
       invisible(self)
     },
+    #' @description
     #' Generate predictions from the fitted model.
     #'
     #' @param dat Data.frame. New input data for predictions.
@@ -253,6 +253,7 @@ JAGSModel <- R6::R6Class("JAGSModel",
     #' rows = simulations, columns = input rows. If summarised=TRUE,
     #' data.frame with central point estimate and confidence interval(s).
     #' @seealso bayestestR describe_posterior
+    #' @importFrom bayestestR describe_posterior
     predict = function(dat,
                        scale = "log",
                        summarised = FALSE,
@@ -330,7 +331,7 @@ JAGSModel <- R6::R6Class("JAGSModel",
     #'
     #' @param plot Logical. If TRUE, return a ggplot2
     #' object. If FALSE return a correlation matrix. Default TRUE.
-    #' @import ggcorrplot ggcorrplot
+    #' @importFrom ggcorrplot ggcorrplot
     #' @return ggplot2 object or correlation matrix
     covariate_correlation = function(plot = TRUE) {
       stopifnot(
