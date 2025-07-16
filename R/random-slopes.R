@@ -1,6 +1,6 @@
 #' RandomSlopes R6 Class
 #'
-#' An R6 class for fitting and predicting costs using a model with 
+#' An R6 class for fitting and predicting costs using a model with
 #' random slopes.
 #'
 #' @description
@@ -27,46 +27,12 @@ RandomSlopes <- R6::R6Class("RandomSlopes",
     initialize = function(dat = get_data("OP treatment visit"),
                           covariates = capturetb_covariates(),
                           target = "USD_unitcost_total",
-                          priors = capturetb_priors()) {
+                          priors = NULL) {
       super$initialize(dat, covariates, target, priors, "randomslopes.model")
-    },
-    #' Generate predictions from the fitted model.
-    #'
-    #' @param dat Data.frame. New input data for predictions.
-    #'
-    #' @param scale One of "log" or "natural". Default "log".
-    #'
-    #' @param summarised Logical. If TRUE, returns mean and 95% CI instead of
-    #' full posterior samples. Default FALSE.
-    #'
-    #' @return If summarised=FALSE, matrix of predicted costs with
-    #' rows = simulations, columns = input rows. If summarised=TRUE,
-    #' data.frame with mean, lower (2.5%), and upper (97.5%) quantiles.
-    predict = function(dat, scale = "log", summarised = FALSE) {
-      stopifnot(
-        "scale must be 'log' or 'natural'" =
-          (scale == "log" || scale == "natural")
-      )
-
-      if (is.null(private$.samples)) {
-        stop("Model must be fitted before making predictions. Call $fit() first.")
-      }
-
-      # Validate prediction data
-      stopifnot("dat must be a list or data.frame" = is.list(dat))
-      dat <- as.data.frame(dat)
-      missing_covs <- setdiff(private$.covariates, names(dat))
-      if (length(missing_covs) > 0) {
-        stop(
-          "Missing covariates in prediction data: ",
-          paste(missing_covs, collapse = ", ")
-        )
-      }
-
-      if (!"fc_country" %in% names(dat)) {
-        stop("Column 'fc_country' required in prediction data")
-      }
-
+    }
+  ),
+  private = list(
+    .predict = function(dat) {
       smat <- do.call(rbind, lapply(private$.samples, as.matrix))
 
       # known country intercepts
@@ -83,25 +49,29 @@ RandomSlopes <- R6::R6Class("RandomSlopes",
 
       # Extract country-specific beta coefficients
       # beta[k, j] where k is covariate index, j is country index
-      n_countries_total <- length(private$.countries) + 1  # +1 for new countries
+      n_countries_total <- length(private$.countries) + 1 # +1 for new countries
       beta_arrays <- array(NA, dim = c(nrow(smat), length(private$.covariates), n_countries_total))
-      
+
       # Extract known country beta coefficients
       for (k in seq_along(private$.covariates)) {
         for (j in seq_along(private$.countries)) {
-          beta_col <- paste0("beta[", k, ",", j, "]")
-          beta_arrays[, k, j] <- smat[, beta_col]
+          beta_cols <- paste0("beta[", k, ",", j, "]")
+          beta_arrays[, k, j] <- smat[, beta_cols]
         }
       }
-      
+
       # Generate new beta coefficients for unknown countries using hyper-parameters
-      mu_beta <- smat[, paste0("mu_beta[", seq_along(private$.covariates), "]"), drop = FALSE]
-      sigma_beta <- smat[, paste0("sigma_beta[", seq_along(private$.covariates), "]"), drop = FALSE]
-      
+      if (length(private$.covariates) == 1) {
+        mu_beta <- smat[, "mu_beta", drop = FALSE]
+        sigma_beta <- smat[, "sigma_beta", drop = FALSE]
+      } else {
+        mu_beta <- smat[, paste0("mu_beta[", seq_along(private$.covariates), "]"), drop = FALSE]
+        sigma_beta <- smat[, paste0("sigma_beta[", seq_along(private$.covariates), "]"), drop = FALSE]
+      }
       for (k in seq_along(private$.covariates)) {
         beta_arrays[, k, n_countries_total] <- rnorm(nrow(smat), mu_beta[, k], sigma_beta[, k])
       }
-      
+
       betas <- beta_arrays
 
       x <- as.matrix(private$.numeric_to_logical(
@@ -140,28 +110,16 @@ RandomSlopes <- R6::R6Class("RandomSlopes",
         beta_i <- betas[, , country_idx]
 
         # Calculate prediction: alpha + sum(x * beta)
-        x_rep <- matrix(x[i, ], nrow = S, ncol = length(private$.covariates),
-                        byrow = TRUE)
+        x_rep <- matrix(x[i, ],
+          nrow = S, ncol = length(private$.covariates),
+          byrow = TRUE
+        )
         pred_means[, i] <- alpha_i + rowSums(beta_i * x_rep)
       }
 
       epsilon <- matrix(rnorm(S * N), nrow = S)
       preds <- pred_means + epsilon * sig
-
-      if (scale == "natural") {
-        preds <- exp(preds)
-      }
-
-      if (summarised) {
-        pred_summary <- data.frame(
-          mean = apply(preds, 2, mean),
-          lower = apply(preds, 2, quantile, probs = 0.025),
-          upper = apply(preds, 2, quantile, probs = 0.975)
-        )
-        return(pred_summary)
-      } else {
-        return(preds)
-      }
+      preds
     }
   )
 )

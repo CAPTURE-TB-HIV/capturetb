@@ -5,8 +5,8 @@
 #' @description
 #' This class allows the user to fit and use a mixed effects model with
 #' intercepts that vary by country and fixed covariate effects. It is used
-#' for the comparison of different model structures as in the 
-#' `vignette("03_model-comparisons", package = "capturetb")` vignette, and 
+#' for the comparison of different model structures as in the
+#' `vignette("03_model-comparisons", package = "capturetb")` vignette, and
 #' is the class used to generate the [`unitcost`] model.
 #' @export
 #' @importFrom R6 R6Class
@@ -26,46 +26,12 @@ MixedEffects <- R6::R6Class("MixedEffects",
     initialize = function(dat = get_data("OP treatment visit"),
                           covariates = capturetb_covariates(),
                           target = "USD_unitcost_total",
-                          priors = capturetb_priors()) {
+                          priors = NULL) {
       super$initialize(dat, covariates, target, priors, "mixedeffects.model")
-    },
-    #' Generate predictions from the fitted model.
-    #'
-    #' @param dat Data.frame. New input data for predictions.
-    #'
-    #' @param scale One of "log" or "natural". Default "log".
-    #'
-    #' @param summarised Logical. If TRUE, returns mean and 95% CI instead of
-    #' full posterior samples. Default FALSE.
-    #'
-    #' @return If summarised=FALSE, matrix of predicted costs with
-    #' rows = simulations, columns = input rows. If summarised=TRUE,
-    #' data.frame with mean, lower (2.5%), and upper (97.5%) quantiles.
-    predict = function(dat, scale = "log", summarised = FALSE) {
-      stopifnot(
-        "scale must be 'log' or 'natural'" =
-          (scale == "log" || scale == "natural")
-      )
-
-      if (is.null(private$.samples)) {
-        stop("Model must be fitted before making predictions. Call $fit() first.")
-      }
-
-      # Validate prediction data
-      stopifnot("dat must be a list or data.frame" = is.list(dat))
-      dat <- as.data.frame(dat)
-      missing_covs <- setdiff(private$.covariates, names(dat))
-      if (length(missing_covs) > 0) {
-        stop(
-          "Missing covariates in prediction data: ",
-          paste(missing_covs, collapse = ", ")
-        )
-      }
-
-      if (!"fc_country" %in% names(dat)) {
-        stop("Column 'fc_country' required in prediction data")
-      }
-
+    }
+  ),
+  private = list(
+    .predict = function(dat) {
       smat <- do.call(rbind, lapply(private$.samples, as.matrix))
 
       # known country intercepts
@@ -80,7 +46,11 @@ MixedEffects <- R6::R6Class("MixedEffects",
       alpha_new <- rnorm(length(mu_alpha), mu_alpha, sig_alpha)
       alphas <- cbind(alphas, alpha_new)
 
-      beta_cols <- paste0("beta[", seq_along(private$.covariates), "]")
+      if (length(private$.covariates) == 1) {
+        beta_cols <- "beta"
+      } else {
+        beta_cols <- paste0("beta[", seq_along(private$.covariates), "]")
+      }
       betas <- smat[, beta_cols, drop = FALSE]
 
       x <- as.matrix(private$.numeric_to_logical(
@@ -108,21 +78,7 @@ MixedEffects <- R6::R6Class("MixedEffects",
       N <- ncol(pred_means)
       epsilon <- matrix(rnorm(S * N), nrow = S)
       preds <- pred_means + epsilon * sig
-
-      if (scale == "natural") {
-        preds <- exp(preds)
-      }
-
-      if (summarised) {
-        pred_summary <- data.frame(
-          mean = apply(preds, 2, mean),
-          lower = apply(preds, 2, quantile, probs = 0.025),
-          upper = apply(preds, 2, quantile, probs = 0.975)
-        )
-        return(pred_summary)
-      } else {
-        return(preds)
-      }
+      preds
     }
   )
 )

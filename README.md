@@ -17,14 +17,14 @@ model <- capturetb::unitcost()
 # View covariates
 covariates <- model$covariates()
 print(covariates)
-# [1] "log_USD_p_bldgspace" "logVisits"           "logVisitsPP"        
+# [1] "log_USD_p_bldgspace" "logVisits"           "logVisitsPP_TB"        
 # [4] "secondary"           "urban"               "public"    
 
 # Generate predictions from posterior
 pred <- model$predict(list(
   log_USD_p_bldgspace = 1,
   logVisits = 6.9, 
-  logVisitsPP = -1.29, 
+  logVisitsPP_TB = -1.29, 
   secondary = FALSE, 
   urban = FALSE, 
   public = TRUE,
@@ -32,9 +32,9 @@ pred <- model$predict(list(
 ), scale = "natural", summarised = TRUE)
 
 # Expected unit cost is mean prediction
-expected_unit_cost <- pred$mean
+expected_unit_cost <- pred$Mean
 print(expected_unit_cost)
-[1] 4.745807
+[1] 8.659947
 ```
 
 ## Testing

@@ -1,19 +1,32 @@
 test_that("can plot posteriors once fitted", {
-    model <- MixedEffects$new(dat_cleaned)
-
+    model <- MixedEffects$new(dat_cleaned,
+        priors = capturetb_priors(
+            beta.mean = rep(0, 5),
+            beta.precision = rep(0.01, 5)
+        )
+    )
     expect_error(
         model$plot_posteriors(),
         "Model must be fitted"
     )
 
-    model$fit(n.iter = 1000, n.chain = 2, n.thin = 1, n.burnin = 100)
-
-    res <- model$plot_posteriors()
+    res <- unitcost()$plot_posteriors()
     expect_true(inherits(res, "ggplot"))
 })
 
+test_that("posterior snapshot test", {
+    skip_on_ci()
+    set.seed(1)
+    vdiffr::expect_doppelganger("posteriors", unitcost()$plot_posteriors())
+})
+
 test_that("can plot trace once fitted", {
-    model <- MixedEffects$new(dat_cleaned)
+    model <- MixedEffects$new(dat_cleaned,
+        priors = capturetb_priors(
+            beta.mean = rep(0, 5),
+            beta.precision = rep(0.01, 5)
+        )
+    )
 
     expect_error(
         model$mcmc_trace(),
@@ -25,8 +38,19 @@ test_that("can plot trace once fitted", {
     expect_true(inherits(res, "ggplot"))
 })
 
+test_that("trace snapshot test", {
+    skip_on_ci()
+    set.seed(1)
+    vdiffr::expect_doppelganger("trace", unitcost()$mcmc_trace())
+})
+
 test_that("can plot rhat once fitted", {
-    model <- MixedEffects$new(dat_cleaned)
+    model <- MixedEffects$new(dat_cleaned,
+        priors = capturetb_priors(
+            beta.mean = rep(0, 5),
+            beta.precision = rep(0.01, 5)
+        )
+    )
 
     expect_error(
         model$mcmc_rhat(),
@@ -38,8 +62,19 @@ test_that("can plot rhat once fitted", {
     expect_true(inherits(res, "ggplot"))
 })
 
+test_that("rhat snapshot test", {
+    skip_on_ci()
+    set.seed(1)
+    vdiffr::expect_doppelganger("rhat", unitcost()$mcmc_rhat())
+})
+
 test_that("can plot acf once fitted", {
-    model <- MixedEffects$new(dat_cleaned)
+    model <- MixedEffects$new(dat_cleaned,
+        priors = capturetb_priors(
+            beta.mean = rep(0, 5),
+            beta.precision = rep(0.01, 5)
+        )
+    )
 
     expect_error(
         model$mcmc_acf(),
@@ -51,8 +86,19 @@ test_that("can plot acf once fitted", {
     expect_true(inherits(res, "ggplot"))
 })
 
+test_that("acf snapshot test", {
+    skip_on_ci()
+    set.seed(1)
+    vdiffr::expect_doppelganger("acf", unitcost()$mcmc_acf())
+})
+
 test_that("can plot fit once fitted", {
-    model <- MixedEffects$new(dat_cleaned)
+    model <- MixedEffects$new(dat_cleaned,
+        priors = capturetb_priors(
+            beta.mean = rep(0, 5),
+            beta.precision = rep(0.01, 5)
+        )
+    )
 
     expect_error(
         model$plot_fit(),
@@ -62,11 +108,33 @@ test_that("can plot fit once fitted", {
     model <- unitcost()
     res <- model$plot_fit()
     expect_true(inherits(res, "ggplot"))
+
+    res <- model$plot_fit(include_ci = TRUE)
+    expect_true(inherits(res, "ggplot"))
 })
 
+test_that("fit snapshot test", {
+    skip_on_ci()
+    set.seed(1)
+    vdiffr::expect_doppelganger(
+        "fit with CI",
+         unitcost()$plot_fit(include_ci = TRUE)
+    )
+    vdiffr::expect_doppelganger(
+        "fit without CI",
+         unitcost()$plot_fit(include_ci = FALSE)
+    )
+})
 
 test_that("can plot residuals once fitted", {
-    model <- MixedEffects$new(dat_cleaned)
+    skip_on_ci()
+    set.seed(1)
+    model <- MixedEffects$new(dat_cleaned,
+        priors = capturetb_priors(
+            beta.mean = rep(0, 5),
+            beta.precision = rep(0.01, 5)
+        )
+    )
 
     expect_error(
         model$plot_residuals(),
@@ -76,4 +144,13 @@ test_that("can plot residuals once fitted", {
     model <- unitcost()
     res <- model$plot_residuals()
     expect_true(inherits(res, "ggplot"))
+})
+
+test_that("residuals snapshot test", {
+    skip_on_ci()
+    set.seed(1)
+    vdiffr::expect_doppelganger(
+        "residuals",
+        unitcost()$plot_residuals()
+    )
 })

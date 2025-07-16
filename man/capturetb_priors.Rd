@@ -9,8 +9,8 @@ capturetb_priors(
   mu_alpha.precision = 0.01,
   sigma.rate = 1,
   sigma_alpha.rate = 1,
-  beta.mean = c(0, -0.0142, -0.0412, 0.348, 0.352, -0.29),
-  beta.precision = c(0.01, 22.7, 13.9, 8.08, 5.5, 23.45)
+  beta.mean = 0,
+  beta.precision = 0.1
 )
 }
 \arguments{
@@ -32,13 +32,11 @@ Default is 10.}
 
 \item{beta.mean}{Numeric vector. Means of the priors for the \code{beta}
 coefficients in a \code{\link{FixedEffects}} or \code{\link{MixedEffects}} model,
-or the \code{mu_beta} hyper-parameters in a \code{\link{RandomSlopes}} model.
-Default is \code{c(0, -0.0142, -0.0412, 0.348, 0.352, -0.29)}.}
+or the \code{mu_beta} hyper-parameters in a \code{\link{RandomSlopes}} model.}
 
 \item{beta.precision}{Numeric vector. Precision of the priors for the
 \code{beta} coefficients in a \code{\link{FixedEffects}} or \code{\link{MixedEffects}} model,
-or the \code{mu_beta} hyper-parameters in a \code{\link{RandomSlopes}} model.
-Default is \code{c(0.01, 22.7, 13.9, 8.08, 5.5, 23.45)}.}
+or the \code{mu_beta} hyper-parameters in a \code{\link{RandomSlopes}} model.}
 }
 \value{
 A list of prior parameters with class \code{capturetbpriors}.

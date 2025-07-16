@@ -63,11 +63,9 @@ get_data <- function(output_name = NULL) {
 #' @param beta.mean Numeric vector. Means of the priors for the `beta`
 #' coefficients in a [`FixedEffects`] or [`MixedEffects`] model,
 #' or the `mu_beta` hyper-parameters in a [`RandomSlopes`] model.
-#' Default is `c(0, -0.0142, -0.0412, 0.348, 0.352, -0.29)`.
 #' @param beta.precision Numeric vector. Precision of the priors for the
 #' `beta` coefficients in a [`FixedEffects`] or [`MixedEffects`] model,
 #' or the `mu_beta` hyper-parameters in a [`RandomSlopes`] model.
-#' Default is `c(0.01, 22.7, 13.9, 8.08, 5.5, 23.45)`.
 #'
 #' @return A list of prior parameters with class `capturetbpriors`.
 #' @export
@@ -75,14 +73,8 @@ capturetb_priors <- function(mu_alpha.mean = 0,
                              mu_alpha.precision = 0.01,
                              sigma.rate = 1,
                              sigma_alpha.rate = 1,
-                             beta.mean = c(
-                               0, -0.0142, -0.0412,
-                               0.348, 0.352, -0.29
-                             ),
-                             beta.precision = c(
-                               0.01, 22.7, 13.9,
-                               8.08, 5.5, 23.45
-                             )) {
+                             beta.mean = 0,
+                             beta.precision = 0.1) {
   stopifnot(
     "mu_alpha.mean must be numeric" = is.numeric(mu_alpha.mean),
     "mu_alpha.mean must be scalar" = length(mu_alpha.mean) == 1,
@@ -122,21 +114,19 @@ capturetb_priors <- function(mu_alpha.mean = 0,
 #'
 #' @return A character vector containing the names of covariates:
 #'   \itemize{
-#'     \item \code{log_USD_p_bldgspace}: Log of USD per building space
-#'     \item \code{logVisits}: Log of visits
-#'     \item \code{logVisitsPP}: Log of visits per person
-#'     \item \code{secondary}: Indicator for secondary variable
-#'     \item \code{urban}: Indicator for urban location
-#'     \item \code{public}: Indicator for public status
+#'     \item \code{log_USD_p_bldgspace}: Log of USD per m2 of building space
+#'     \item \code{logVisits}: Log of outpatient visits per annum
+#'     \item \code{logVisitsPP_TB}: Log of daily TB visits per TB FTE
+#'     \item \code{secondary}: Indicator for secondary health system level
+#'     \item \code{public}: Indicator for public owernship
 #'   }
 #' @keywords internal
 capturetb_covariates <- function() {
   c(
     "log_USD_p_bldgspace",
     "logVisits",
-    "logVisitsPP",
+    "logVisitsPP_TB",
     "secondary",
-    "urban",
     "public"
   )
 }

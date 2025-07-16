@@ -21,7 +21,6 @@ random slopes.
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-RandomSlopes-new}{\code{RandomSlopes$new()}}
-\item \href{#method-RandomSlopes-predict}{\code{RandomSlopes$predict()}}
 \item \href{#method-RandomSlopes-clone}{\code{RandomSlopes$clone()}}
 }
 }
@@ -34,8 +33,11 @@ random slopes.
 <li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="covariates"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-covariates'><code>capturetb::JAGSModel$covariates()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="evpi"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-evpi'><code>capturetb::JAGSModel$evpi()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="fit"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-fit'><code>capturetb::JAGSModel$fit()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="fitted_parameters"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-fitted_parameters'><code>capturetb::JAGSModel$fitted_parameters()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="is_fitted"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-is_fitted'><code>capturetb::JAGSModel$is_fitted()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="k_fold_cv"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-k_fold_cv'><code>capturetb::JAGSModel$k_fold_cv()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="leave_one_country_out"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-leave_one_country_out'><code>capturetb::JAGSModel$leave_one_country_out()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="mcmc_DIC"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-mcmc_DIC'><code>capturetb::JAGSModel$mcmc_DIC()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="mcmc_acf"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-mcmc_acf'><code>capturetb::JAGSModel$mcmc_acf()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="mcmc_rhat"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-mcmc_rhat'><code>capturetb::JAGSModel$mcmc_rhat()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="mcmc_trace"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-mcmc_trace'><code>capturetb::JAGSModel$mcmc_trace()</code></a></span></li>
@@ -44,6 +46,7 @@ random slopes.
 <li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="plot_fit"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-plot_fit'><code>capturetb::JAGSModel$plot_fit()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="plot_posteriors"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-plot_posteriors'><code>capturetb::JAGSModel$plot_posteriors()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="plot_residuals"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-plot_residuals'><code>capturetb::JAGSModel$plot_residuals()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="predict"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-predict'><code>capturetb::JAGSModel$predict()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="predict_total"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-predict_total'><code>capturetb::JAGSModel$predict_total()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="priors"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-priors'><code>capturetb::JAGSModel$priors()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="samples"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-samples'><code>capturetb::JAGSModel$samples()</code></a></span></li>
@@ -62,7 +65,7 @@ Initialize a new model instance.
   dat = get_data("OP treatment visit"),
   covariates = capturetb_covariates(),
   target = "USD_unitcost_total",
-  priors = capturetb_priors()
+  priors = NULL
 )}\if{html}{\out{</div>}}
 }
 
@@ -77,36 +80,9 @@ from the ValueTB dataset installed with this package.}
 \item{\code{target}}{Character. Name of the target variable.}
 
 \item{\code{priors}}{List of class 'capturetbpriors'. Should be created using
-\code{\link[=capturetb_priors]{capturetb_priors()}}.
-Generate predictions from the fitted model.}
+\code{\link[=capturetb_priors]{capturetb_priors()}}.}
 }
 \if{html}{\out{</div>}}
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-RandomSlopes-predict"></a>}}
-\if{latex}{\out{\hypertarget{method-RandomSlopes-predict}{}}}
-\subsection{Method \code{predict()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RandomSlopes$predict(dat, scale = "log", summarised = FALSE)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{dat}}{Data.frame. New input data for predictions.}
-
-\item{\code{scale}}{One of "log" or "natural". Default "log".}
-
-\item{\code{summarised}}{Logical. If TRUE, returns mean and 95\% CI instead of
-full posterior samples. Default FALSE.}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-If summarised=FALSE, matrix of predicted costs with
-rows = simulations, columns = input rows. If summarised=TRUE,
-data.frame with mean, lower (2.5\%), and upper (97.5\%) quantiles.
 }
 }
 \if{html}{\out{<hr>}}

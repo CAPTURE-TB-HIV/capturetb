@@ -9,12 +9,11 @@ capturetb_covariates()
 \value{
 A character vector containing the names of covariates:
 \itemize{
-\item \code{log_USD_p_bldgspace}: Log of USD per building space
-\item \code{logVisits}: Log of visits
-\item \code{logVisitsPP}: Log of visits per person
-\item \code{secondary}: Indicator for secondary variable
-\item \code{urban}: Indicator for urban location
-\item \code{public}: Indicator for public status
+\item \code{log_USD_p_bldgspace}: Log of USD per m2 of building space
+\item \code{logVisits}: Log of outpatient visits per annum
+\item \code{logVisitsPP_TB}: Log of daily TB visits per TB FTE
+\item \code{secondary}: Indicator for secondary health system level
+\item \code{public}: Indicator for public owernship
 }
 }
 \description{
