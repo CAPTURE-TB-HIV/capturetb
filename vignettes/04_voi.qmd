@@ -58,7 +58,7 @@ pred <- model$predict(new_inputs, scale = "natural", summarised = FALSE)
 ggplot(data.frame(cost = pred), aes(x = cost)) + geom_density()
 ```
 
-We can use this to calculate the EVPI given various WTP thresholds:
+We can use this to calculate the EVPI given various WTP thresholds for a single output:
 
 ```{r, plot-evpi}
 lambda <- c(2:10)
@@ -69,14 +69,14 @@ ggplot(data.frame(lambda, evpi)) +
 
 In this case, the maximum EVPI is about $1 per OP treatment visit - this scales linearly with the number of visits, so if an intervention includes 1000 visits, the EVPI will be $1000. 
 
-Notice that EVPI peaks when the WTP threshold $\lambda$ is equal to the expected cost; this is because in the case, even a tiny under-prediction of costs will lead to the wrong decision being made. 
+Notice that EVPI peaks when the WTP threshold $\lambda$ is equal to the expected cost; this is because in this case, even a tiny under-prediction of costs will lead to the wrong decision being made. 
 
 To get a general sense of the cost of model uncertainty, we can average over the input vectors in the training set and look at EVPI relative to predicted costs.
 
 ```{r, all-evpi}
 lambda <- seq(0, 2.5, by = 0.25)
 dat <- get_data("OP treatment visit")
-pred <- model$predict(dat, summarise = TRUE, scale = "natural")[, "mean"]
+pred <- model$predict(dat, summarise = TRUE, scale = "natural")[, "Mean"]
 all_evpi <- lapply(1:nrow(dat),
 		function(ind) sapply(lambda * pred[ind],
 		function(l) model$evpi(dat[ind, ], l)))

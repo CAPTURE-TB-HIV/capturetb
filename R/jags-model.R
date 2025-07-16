@@ -1,6 +1,8 @@
 #' JAGSModel R6 Class
 #'
 #' Base R6 class for fitting and predicting costs using a JAGS model.
+#' 
+#' @description
 #' Contains functionality that is shared across model classes.
 #' Should not be instantiated directly, rather one of its children
 #' classes should be used:  [`FixedEffects`],
@@ -231,22 +233,76 @@ JAGSModel <- R6::R6Class("JAGSModel",
 
       invisible(self)
     },
-
-    #' @description
     #' Generate predictions from the fitted model.
     #'
     #' @param dat Data.frame. New input data for predictions.
-    #'
     #' @param scale One of "log" or "natural". Default "log".
-    #'
-    #' @param summarised Logical. If TRUE, returns mean and 95% CI instead of
-    #' full posterior samples. Default FALSE.
+    #' @param summarised Logical. If TRUE, summarises predictions using
+    #' [bayestestR::describe_posterior]. See [bayestestR::describe_posterior]
+    #' for full documentation of available arguments. Default FALSE.
+    #' @param centrality The point-estimates (centrality indices) to compute.
+    #' Default "mean".
+    #' @param ci Value or vector of probability of the CI (between 0 and 1)
+    #' to be estimated. Default `0.95` (`95%`).
+    #' @param ci_method The type of index used for Credible Interval.
+    #' Default ETI.
+    #' @param test The indices of effect existence to compute. Default NULL.
+    #' @param ... Other arguments that will be passed to [bayestestR::describe_posterior].
     #'
     #' @return If summarised=FALSE, matrix of predicted costs with
     #' rows = simulations, columns = input rows. If summarised=TRUE,
-    #' data.frame with mean, lower (2.5%), and upper (97.5%) quantiles.
-    predict = function(dat, scale = "log", summarised = FALSE) {
-      stop("Method not implemented on the base Model class. Use one of FixedEffects, MixedEffects or RandomSlopes")
+    #' data.frame with central point estimate and confidence interval(s).
+    #' @seealso bayestestR describe_posterior
+    predict = function(dat,
+                       scale = "log",
+                       summarised = FALSE,
+                       centrality = "mean",
+                       ci = 0.95,
+                       test = NULL,
+                       ...) {
+      stopifnot(
+        "scale must be 'log' or 'natural'" =
+          (scale == "log" || scale == "natural")
+      )
+
+      if (is.null(private$.samples)) {
+        stop("Model must be fitted before making predictions. Call $fit() first.")
+      }
+
+      # Validate prediction data
+      stopifnot("dat must be a list or data.frame" = is.list(dat))
+      dat <- as.data.frame(dat)
+      missing_covs <- setdiff(private$.covariates, names(dat))
+      if (length(missing_covs) > 0) {
+        stop(
+          "Missing covariates in prediction data: ",
+          paste(missing_covs, collapse = ", ")
+        )
+      }
+
+      if (!"fc_country" %in% names(dat)) {
+        stop("Column 'fc_country' required in prediction data")
+      }
+
+      preds <- private$.predict(dat)
+
+      if (scale == "natural") {
+        preds <- exp(preds)
+      }
+
+      if (summarised) {
+        pred_summary <- bayestestR::describe_posterior(as.data.frame(preds),
+          test = test,
+          ci = ci,
+          centrality = centrality,
+          ...
+        )
+        names(pred_summary)[[1]] <- "Observation"
+        pred_summary$Observation <- sub("V", "", pred_summary$Observation)
+        return(pred_summary)
+      } else {
+        return(preds)
+      }
     },
     #' @description
     #' View distribution of binary characteristics across countries
@@ -341,7 +397,7 @@ JAGSModel <- R6::R6Class("JAGSModel",
     #'
     #' @return Logical indicating if model is fitted.
     is_fitted = function() {
-      !is.null(private$.samples) & !is.null(private$.dic_samples) 
+      !is.null(private$.samples) & !is.null(private$.dic_samples)
     },
 
     #' @description
@@ -432,7 +488,7 @@ JAGSModel <- R6::R6Class("JAGSModel",
     #' @param scale One of "log" or "natural". Default "log".
     #'
     #' @param by_country Logical. If TRUE, returns metrics calculated
-    #' on country sub-grpups. Default FALSE.
+    #' on country sub-groups. Default FALSE.
     #' @return A data.frame with performance metrics:
     #' \itemize{
     #'  \item country: Only present if by_country = TRUE
@@ -482,28 +538,44 @@ JAGSModel <- R6::R6Class("JAGSModel",
         pred_summary
       )
 
-      if (by_country) {
-        results_df <- results_df |> dplyr::group_by(country)
-      }
 
-      var_yhat <- apply(preds, 1, var)
       resid_mat <- preds - rep(observed_values, each = nrow(preds))
-      var_resid <- apply(resid_mat, 1, var)
-      r2_draws <- var_yhat / (var_yhat + var_resid)
+
+      if (by_country) {
+        countries <- private$.countries
+
+        results_df <- results_df |>
+          dplyr::group_by(country)
+
+        bayesian_r2 <- c()
+
+        for (i in seq_along(countries)) {
+          ctry_indices <- which(dat$fc_country == countries[[i]])
+          var_yhat <- apply(preds[, ctry_indices], 1, var)
+          var_resid <- apply(resid_mat[, ctry_indices], 1, var)
+          bayesian_r2[[i]] <- mean(var_yhat / (var_yhat + var_resid))
+        }
+
+        bayesian_r2 <- unlist(bayesian_r2)
+
+      } else {
+        var_yhat <- apply(preds, 1, var)
+        var_resid <- apply(resid_mat, 1, var)
+        bayesian_r2 <- mean(var_yhat / (var_yhat + var_resid))
+      }
 
       # Calculate performance metrics
       performance_metrics <- results_df |>
         dplyr::summarise(
           mae = mean(abs(.data$observed - .data$mean)),
           rmse = sqrt(mean((.data$observed - .data$mean)^2)),
-          bayesian_r2 = mean(r2_draws),
           ci_coverage = mean(.data$observed >= .data$lower &
             .data$observed <= .data$upper),
           median_ci = median(.data$upper - .data$lower),
           .groups = "drop"
         )
 
-      performance_metrics
+      cbind(performance_metrics, bayesian_r2)
     },
     #' @description
     #' Create a residual plot for for diagnosing model fit.
@@ -534,10 +606,10 @@ JAGSModel <- R6::R6Class("JAGSModel",
       pred <- self$predict(dat, scale = "log", summarised = TRUE)
       observed <- dat[[private$.target]]
 
-      residuals <- log(observed) - pred$mean
+      residuals <- log(observed) - pred$Mean
 
       res_df <- data.frame(
-        fitted = pred$mean,
+        fitted = pred$Mean,
         country = dat$fc_country,
         residuals = residuals
       )
@@ -638,14 +710,13 @@ JAGSModel <- R6::R6Class("JAGSModel",
 
       plot <- ggplot2::ggplot(results_df, ggplot2::aes(
         x = .data$observed,
-        y = .data$mean
+        y = .data$Mean
       )) +
         ggplot2::geom_abline(
           slope = 1, intercept = 0, linetype = "dashed",
           color = "red"
         ) +
         ggplot2::labs(
-          title = "Observed vs Predicted Values",
           subtitle = "Dashed line shows perfect predictions",
           x = x_lab,
           y = y_lab,
@@ -656,7 +727,7 @@ JAGSModel <- R6::R6Class("JAGSModel",
       if (include_ci) {
         plot <- plot +
           ggplot2::geom_errorbar(
-            ggplot2::aes(ymin = .data$lower, ymax = .data$upper),
+            ggplot2::aes(ymin = .data$CI_low, ymax = .data$CI_high),
             alpha = 0.2, width = 0
           )
       }
@@ -884,10 +955,10 @@ JAGSModel <- R6::R6Class("JAGSModel",
         dplyr::summarise(
           mae = mean(abs(.data$observed - .data$mean)),
           rmse = sqrt(mean((.data$observed - .data$mean)^2)),
-          bayesian_r2 = bayesian_r2,
           ci_coverage = mean(.data$observed >= .data$lower &
             .data$observed <= .data$upper),
-          median_ci = median(.data$upper - .data$lower)
+          median_ci = median(.data$upper - .data$lower),
+          bayesian_r2 = bayesian_r2
         )
       attr(results_df, "models") <- all_models
       attr(results_df, "performance") <- performance_metrics
@@ -1063,6 +1134,9 @@ JAGSModel <- R6::R6Class("JAGSModel",
           "Call $fit() first."
         )
       }
+    },
+    .predict = function(dat) {
+      stop("Method not implemented on the base Model class. Use one of FixedEffects, MixedEffects or RandomSlopes")
     }
   )
 )

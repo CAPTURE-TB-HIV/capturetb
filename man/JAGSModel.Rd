@@ -81,6 +81,9 @@ mod$mcmc_DIC()
 \code{\link{RandomSlopes}}
 
 \link[rjags:jags.model]{rjags::jags.model}.
+Generate predictions from the fitted model.
+
+bayestestR describe_posterior
 
 \link[bayesplot:MCMC-traces]{bayesplot::mcmc_trace}
 
@@ -207,9 +210,16 @@ Self (invisibly) for method chaining.
 \if{html}{\out{<a id="method-JAGSModel-predict"></a>}}
 \if{latex}{\out{\hypertarget{method-JAGSModel-predict}{}}}
 \subsection{Method \code{predict()}}{
-Generate predictions from the fitted model.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{JAGSModel$predict(dat, scale = "log", summarised = FALSE)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{JAGSModel$predict(
+  dat,
+  scale = "log",
+  summarised = FALSE,
+  centrality = "mean",
+  ci = 0.95,
+  test = NULL,
+  ...
+)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -219,15 +229,29 @@ Generate predictions from the fitted model.
 
 \item{\code{scale}}{One of "log" or "natural". Default "log".}
 
-\item{\code{summarised}}{Logical. If TRUE, returns mean and 95\% CI instead of
-full posterior samples. Default FALSE.}
+\item{\code{summarised}}{Logical. If TRUE, summarises predictions using
+\link[bayestestR:describe_posterior]{bayestestR::describe_posterior}. See \link[bayestestR:describe_posterior]{bayestestR::describe_posterior}
+for full documentation of available arguments. Default FALSE.}
+
+\item{\code{centrality}}{The point-estimates (centrality indices) to compute.
+Default "mean".}
+
+\item{\code{ci}}{Value or vector of probability of the CI (between 0 and 1)
+to be estimated. Default \code{0.95} (\verb{95\%}).}
+
+\item{\code{test}}{The indices of effect existence to compute. Default NULL.}
+
+\item{\code{...}}{Other arguments that will be passed to \link[bayestestR:describe_posterior]{bayestestR::describe_posterior}.}
+
+\item{\code{ci_method}}{The type of index used for Credible Interval.
+Default ETI.}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
 If summarised=FALSE, matrix of predicted costs with
 rows = simulations, columns = input rows. If summarised=TRUE,
-data.frame with mean, lower (2.5\%), and upper (97.5\%) quantiles.
+data.frame with central point estimate and confidence interval(s).
 }
 }
 \if{html}{\out{<hr>}}
@@ -466,7 +490,7 @@ median credible interval width.
 \item{\code{scale}}{One of "log" or "natural". Default "log".}
 
 \item{\code{by_country}}{Logical. If TRUE, returns metrics calculated
-on country sub-grpups. Default FALSE.}
+on country sub-groups. Default FALSE.}
 }
 \if{html}{\out{</div>}}
 }

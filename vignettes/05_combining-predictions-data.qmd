@@ -18,7 +18,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r setup}
+```{r setup, message = FALSE, warning = FALSE}
 library(capturetb)
 library(ggplot2)
 library(dplyr)
@@ -46,7 +46,10 @@ mod_uc$plot_fit(include_ci = TRUE, scale = "natural")
 pred_ohd <- mod_uc_ohd$predict(dat, scale = "natural", summarised = TRUE)
 
 # add observed non-ohd costs to get the total unit cost
-pred_total <- pred_ohd + (dat$USD_unitcost_total - dat$USD_unitcost_ohd)
+non_ohd <- (dat$USD_unitcost_total - dat$USD_unitcost_ohd)
+pred_total <- pred_ohd %>% mutate(Mean = Mean + non_ohd,
+									CI_low = CI_low + non_ohd,
+									CI_high = CI_high + non_ohd)
 
 observed <- dat$USD_unitcost_total
 
@@ -58,7 +61,7 @@ results_df <- data.frame(
 
 ggplot2::ggplot(results_df, ggplot2::aes(
 	x = .data$observed,
-	y = .data$mean
+	y = .data$Mean
 )) +
 	ggplot2::geom_abline(
 		slope = 1, intercept = 0, linetype = "dashed",
@@ -73,7 +76,7 @@ ggplot2::ggplot(results_df, ggplot2::aes(
 	) +
 	ggplot2::theme_minimal() + 
 	ggplot2::geom_errorbar(
-		ggplot2::aes(ymin = .data$lower, ymax = .data$upper),
+		ggplot2::aes(ymin = .data$CI_low, ymax = .data$CI_high),
 		alpha = 0.2, width = 0
 	) + ggplot2::geom_point(ggplot2::aes(color = .data$country),
 		alpha = 0.7
@@ -85,7 +88,9 @@ ggplot2::ggplot(results_df, ggplot2::aes(
 pred_fixed <- mod_uc_fixed$predict(dat, scale = "natural", summarised = TRUE)
 
 # add observed variable costs to get the total unit cost
-pred_total <- pred_fixed + dat$USD_unitcost_variable
+pred_total <- pred_fixed %>% mutate(Mean = Mean + dat$USD_unitcost_variable,
+									CI_low = CI_low + dat$USD_unitcost_variable,
+									CI_high = CI_high + dat$USD_unitcost_variable)
 
 observed <- dat$USD_unitcost_total
 
@@ -97,7 +102,7 @@ results_df <- data.frame(
 
 ggplot2::ggplot(results_df, ggplot2::aes(
 	x = .data$observed,
-	y = .data$mean
+	y = .data$Mean
 )) +
 	ggplot2::geom_abline(
 		slope = 1, intercept = 0, linetype = "dashed",
@@ -112,7 +117,7 @@ ggplot2::ggplot(results_df, ggplot2::aes(
 	) +
 	ggplot2::theme_minimal() + 
 	ggplot2::geom_errorbar(
-		ggplot2::aes(ymin = .data$lower, ymax = .data$upper),
+		ggplot2::aes(ymin = .data$CI_low, ymax = .data$CI_high),
 		alpha = 0.2, width = 0
 	) + ggplot2::geom_point(ggplot2::aes(color = .data$country),
 		alpha = 0.7
@@ -122,19 +127,11 @@ ggplot2::ggplot(results_df, ggplot2::aes(
 As would be expected, measuring a subset of costs improves accuracy of final estimates and somewhat reduces uncertainty, although uncertainty remains high, especially for the predictions of overheads.
 
 ```{r, uncertainty}
-#| fig-cap: Median width of credible intervals
+#| tab-cap: Performance metrics of each model
 
-pred_total <- mod_uc$predict(dat, scale = "natural", summarised = TRUE)
-pred_total_from_ohd <- pred_ohd + (dat$USD_unitcost_total - dat$USD_unitcost_ohd)
-pred_total_from_fixed <- pred_fixed + dat$USD_unitcost_variable
-observed <- dat$USD_unitcost_total
+perf_total <- mod_uc$performance(scale = "natural")
+perf_ohd <- mod_uc_ohd$performance(scale = "natural")
+perf_fixed <- mod_uc_fixed$performance(scale = "natural")
 
-uncertainty <- (pred_total$upper - pred_total$lower)
-uncertainty_ohd <- (pred_total_from_ohd$upper - pred_total_from_ohd$lower)
-uncertainty_fixed <- (pred_total_from_fixed$upper - pred_total_from_fixed$lower)
-
-knitr::kable(data.frame(
-	uc = median(uncertainty), 
-	uc_ohd = median(uncertainty_ohd), 
-	uc_fixed = median(uncertainty_fixed)))
+knitr::kable(rbind("uc" = perf_total, "uc_fixed" = perf_ohd, "uc_ohd" = perf_fixed))
 ```

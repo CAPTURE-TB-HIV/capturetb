@@ -20,7 +20,6 @@ An R6 class for fitting and predicting costs using a mixed effects model.
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-MixedEffects-new}{\code{MixedEffects$new()}}
-\item \href{#method-MixedEffects-predict}{\code{MixedEffects$predict()}}
 \item \href{#method-MixedEffects-clone}{\code{MixedEffects$clone()}}
 }
 }
@@ -46,6 +45,7 @@ An R6 class for fitting and predicting costs using a mixed effects model.
 <li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="plot_fit"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-plot_fit'><code>capturetb::JAGSModel$plot_fit()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="plot_posteriors"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-plot_posteriors'><code>capturetb::JAGSModel$plot_posteriors()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="plot_residuals"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-plot_residuals'><code>capturetb::JAGSModel$plot_residuals()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="predict"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-predict'><code>capturetb::JAGSModel$predict()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="predict_total"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-predict_total'><code>capturetb::JAGSModel$predict_total()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="priors"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-priors'><code>capturetb::JAGSModel$priors()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="samples"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-samples'><code>capturetb::JAGSModel$samples()</code></a></span></li>
@@ -79,36 +79,9 @@ from the ValueTB dataset installed with this package.}
 \item{\code{target}}{Character. Name of the target variable.}
 
 \item{\code{priors}}{List of class "capturetbpriors". Should be created using
-\code{\link[=capturetb_priors]{capturetb_priors()}}].
-Generate predictions from the fitted model.}
+\code{\link[=capturetb_priors]{capturetb_priors()}}].}
 }
 \if{html}{\out{</div>}}
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-MixedEffects-predict"></a>}}
-\if{latex}{\out{\hypertarget{method-MixedEffects-predict}{}}}
-\subsection{Method \code{predict()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{MixedEffects$predict(dat, scale = "log", summarised = FALSE)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{dat}}{Data.frame. New input data for predictions.}
-
-\item{\code{scale}}{One of "log" or "natural". Default "log".}
-
-\item{\code{summarised}}{Logical. If TRUE, returns mean and 95\% CI instead of
-full posterior samples. Default FALSE.}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-If summarised=FALSE, matrix of predicted costs with
-rows = simulations, columns = input rows. If summarised=TRUE,
-data.frame with mean, lower (2.5\%), and upper (97.5\%) quantiles.
 }
 }
 \if{html}{\out{<hr>}}

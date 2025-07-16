@@ -108,8 +108,7 @@ summarised <- data |>
 knitr::kable(summarised)
 ```
 
-The fitted model predicts the cost of one outpatient treatment visit, given key cost drivers. In the dataset this output is coded as "OP treatment visit". In the raw data some facilities have multiple entries; one of each of these was chosen at random 
-to include in the training data to avoid biasing the estimates with highly correlated errors.
+The fitted model predicts the cost of one outpatient treatment visit, given key cost drivers. In the dataset this output is coded as "OP treatment visit". In the raw data some facilities have multiple entries; these were collapsed into a single observation per facility by taking the median.
 
 The final training data can be seen by calling `model$training_data`:
 
@@ -129,7 +128,7 @@ To see how the model performs on the training data:
 
 ```{r predictions}
 # Various measures of fit
-performance <- model$performance(scale = "log")
+performance <- model$performance(scale = "natural")
 knitr::kable(performance)
 ```
 
@@ -139,7 +138,7 @@ and by country:
 # Performance by country
 country_performance <- model$performance(by_country = TRUE)
 colnames(country_performance) <- c("Country", "MAE",
- "RMSE", "Correlation", "95% CI Coverage")
+ "RMSE", "95% CI Coverage", "Median CI width", "Bayesian R-squ")
 
 knitr::kable(country_performance)
 ```
@@ -167,10 +166,14 @@ new_inputs <- list(
   fc_country = "Ethiopia"
 )
 
-pred <- model$predict(new_inputs, scale = "natural", summarised = TRUE)
+pred <- model$predict(new_inputs,
+ scale = "natural",
+ summarised = TRUE,
+ centrality = c("mean", "median"),
+ ci = c(0.95, 0.9, 0.8))
 
 # Expected unit cost is mean prediction
-expected_unit_cost <- pred$mean
+expected_unit_cost <- pred$Mean
 print(expected_unit_cost)
 
 knitr::kable(pred)

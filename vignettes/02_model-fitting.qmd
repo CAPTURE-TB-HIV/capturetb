@@ -183,9 +183,7 @@ model$plot_residuals(add_smooth = TRUE, color_by_country = TRUE)
 # Performance by country
 country_performance <- model$performance(by_country = TRUE)
 colnames(country_performance) <- c("Country", "MAE",
- "RMSE", "Correlation", "95% CI Coverage")
-
-knitr::kable(country_performance)
+ "RMSE", "95% CI Coverage", "Median CI Width", "Bayesian R-squ")
 
 knitr::kable(country_performance)
 ```

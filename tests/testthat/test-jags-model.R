@@ -249,19 +249,21 @@ test_that("returns summarised predictions if summarised=TRUE", {
   preds_summary <- model$predict(newdata, summarised = TRUE)
 
   expect_true(is.data.frame(preds_summary))
+  expect_true(inherits(preds_summary, "describe_posterior"))
   expect_equal(nrow(preds_summary), nrow(newdata))
-  expect_equal(names(preds_summary), c("mean", "lower", "upper"))
-  expect_true(all(preds_summary$lower <= preds_summary$mean))
-  expect_true(all(preds_summary$mean <= preds_summary$upper))
+  expect_equal(names(preds_summary),
+   c("Observation", "Mean", "CI", "CI_low", "CI_high"))
+  expect_true(all(preds_summary$CI_low <= preds_summary$Mean))
+  expect_true(all(preds_summary$Mean <= preds_summary$CI_high))
 
   # Test with natural scale
   preds_natural <- model$predict(newdata,
     scale = "natural",
     summarised = TRUE
   )
-  expect_true(all(preds_natural$mean > 0))
-  expect_true(all(preds_natural$lower > 0))
-  expect_true(all(preds_natural$upper > 0))
+  expect_true(all(preds_natural$Mean > 0))
+  expect_true(all(preds_natural$CI_low > 0))
+  expect_true(all(preds_natural$Ci_high > 0))
 
   # Compare with non-summarised predictions
   preds_full <- model$predict(newdata, summarised = FALSE)
@@ -270,7 +272,7 @@ test_that("returns summarised predictions if summarised=TRUE", {
 
   # Check summarised mean
   manual_mean <- apply(preds_full, 2, mean)
-  expect_equal(preds_summary$mean, manual_mean, tolerance = 0.01)
+  expect_equal(preds_summary$Mean, manual_mean, tolerance = 0.01)
 })
 
 test_that("k_fold_cv works correctly", {
@@ -390,10 +392,10 @@ test_that("performance method works with log scale", {
 
   expect_true(is.data.frame(perf_log))
   expect_equal(nrow(perf_log), 1)
-  expected_names <- c(
-    "mae", "rmse", "bayesian_r2",
-    "ci_coverage", "median_ci"
-  )
+  expected_names <-  c(
+      "mae", "rmse", "ci_coverage",
+      "median_ci", "bayesian_r2"
+    )
   expect_equal(names(perf_log), expected_names)
   expect_true(all(sapply(perf_log, is.numeric)))
   expect_true(perf_log$mae >= 0 & perf_log$mae <= 1)
@@ -409,8 +411,8 @@ test_that("performance method works with natural scale", {
   expect_true(is.data.frame(perf_natural))
   expect_equal(nrow(perf_natural), 1)
   expected_names <- c(
-    "mae", "rmse", "bayesian_r2",
-    "ci_coverage", "median_ci"
+    "mae", "rmse", "ci_coverage",
+    "median_ci", "bayesian_r2"
   )
   expect_equal(names(perf_natural), expected_names)
   expect_true(all(sapply(perf_natural, is.numeric)))
@@ -742,7 +744,10 @@ test_that("Can perform loco validation", {
   perf <- attr(res, "performance")
   expect_equal(
     names(perf),
-    c("mae", "rmse", "bayesian_r2", "ci_coverage", "median_ci")
+    c(
+      "mae", "rmse", "ci_coverage",
+      "median_ci", "bayesian_r2"
+    )
   )
   expect_true(perf$bayesian_r2 > 0.4)
   expect_true(perf$bayesian_r2 < 0.5)
@@ -761,7 +766,7 @@ test_that("Can get loco validation results on natural scale", {
   perf <- attr(res, "performance")
   expect_equal(
     names(perf),
-    c("mae", "rmse", "bayesian_r2", "ci_coverage", "median_ci")
+    c("mae", "rmse", "ci_coverage", "median_ci", "bayesian_r2")
   )
   expect_true(perf$bayesian_r2 > 0.4)
   expect_true(perf$bayesian_r2 < 0.6)
