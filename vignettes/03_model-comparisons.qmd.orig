@@ -18,7 +18,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r setup}
+```{r setup, message = FALSE, warning = FALSE}
 library(capturetb)
 library(ggplot2)
 library(dplyr)
@@ -65,7 +65,7 @@ $$
 
 We compare the estimated effects of each covariate when fit using the different model structures:
 
-```{r, mods}
+```{r, mods, message = FALSE, warning = FALSE}
 library(coda)
 # get samples from pre-fitted model
 mixed_effects <- capturetb::unitcost()
@@ -287,9 +287,11 @@ gridExtra::grid.arrange(grobs = list(
     random_effects$plot_fit(scale = "natural")))
 ```
 
-Checking each for over-fitting:
+## Out of sample predictions
 
-```{r, kfold}
+Checking each for over-fitting using k-fold cross-validation:
+
+```{r, kfold, message = FALSE, warning = FALSE}
 library(dplyr)
 kfold_fixed <- fixed_effects$k_fold_cv(k_folds = 10, 
   n.iter = n_iter,
@@ -355,9 +357,11 @@ re_country <- cbind(mod = "random", random_effects$performance(by_country = TRUE
 knitr::kable(rbind(fe_country, me_country, re_country))
 ```
 
+## Out of sample country predictions
+
 Comparing estimated accuracy on new countries, by doing leave-one-country-out cross-validation for each model:
 
-```{r, loco}
+```{r, loco, message = FALSE, warning = FALSE}
 fe_loco <- fixed_effects$leave_one_country_out(seed = 123, n.iter = n_iter, quiet = TRUE, scale = "natural")
 me_loco <- mixed_effects$leave_one_country_out(seed = 123, n.iter = n_iter, quiet = TRUE, scale = "natural")
 re_loco <- random_effects$leave_one_country_out(seed = 123, n.iter = n_iter, quiet = TRUE, scale = "natural")

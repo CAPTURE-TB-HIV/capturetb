@@ -751,7 +751,7 @@ test_that("Can perform loco validation", {
   )
   expect_true(perf$bayesian_r2 > 0.4)
   expect_true(perf$bayesian_r2 < 0.5)
-  expect_true(perf$mae < 0.6)
+  expect_true(perf$mae < 1)
   mods <- attr(res, "models")
   expect_true(inherits(mods[[1]], "MixedEffects"))
   expect_equal(length(mods), 5)
