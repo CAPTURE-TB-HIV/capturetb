@@ -5,7 +5,8 @@
 #'
 #' @description
 #' This class allows the user to fit and use a random slopes model with
-#' coyntry specific intercepts and country specific covariate effects.
+#' country, facility and output specific intercepts and country specific
+#' covariate effects.
 #' Its primary purpose is for the comparison of different model structures
 #' as per the `vignette("03_model-comparisons", package = "capturetb")`
 #' vignette.
@@ -35,17 +36,25 @@ RandomSlopes <- R6::R6Class("RandomSlopes",
     .predict = function(dat) {
       smat <- do.call(rbind, lapply(private$.samples, as.matrix))
 
-      # known country intercepts
-      alpha_cols <- paste0("alpha[", as.numeric(private$.countries), "]")
-      alphas <- smat[, alpha_cols, drop = FALSE]
+      # shared intercept
+      alpha <- smat[, "alpha"]
 
-      # if country not known, or not in training data
-      # generate intercept using hyper-parameters
-      mu_alpha <- smat[, "mu_alpha"] # hyper-means
-      sig_alpha <- smat[, "sigma_alpha"] # hyper-sds
+      # population standard deviations
+      sig <- smat[, "sigma"]
+      sig_fc <- smat[, "sigma_fc"]
+      sig_country <- smat[, "sigma_country"]
 
-      alpha_new <- rnorm(length(mu_alpha), mu_alpha, sig_alpha)
-      alphas <- cbind(alphas, alpha_new)
+      # output intercepts
+      output_cols <- paste0("output_effect[", as.numeric(private$.outputs), "]")
+      outputs <- smat[, output_cols, drop = FALSE]
+
+      # country effects
+      country_cols <- paste0("country_effect[", as.numeric(private$.countries), "]")
+      countries <- smat[, country_cols, drop = FALSE]
+
+      # use sig_country to generate country effects for unseen countries
+      country_new <- rnorm(length(alpha), 0, sig_country)
+      countries <- cbind(countries, country_new)
 
       # Extract country-specific beta coefficients
       # beta[k, j] where k is covariate index, j is country index
@@ -74,7 +83,11 @@ RandomSlopes <- R6::R6Class("RandomSlopes",
 
       betas <- beta_arrays
 
-      x <- as.matrix(private$.numeric_to_logical(
+
+      S <- nrow(smat)
+      N <- nrow(dat)
+
+      x <- as.matrix(private$.logical_to_numeric(
         dat[, private$.covariates, drop = FALSE]
       ))
       x_country <- dat[, "fc_country", drop = FALSE]
@@ -92,19 +105,22 @@ RandomSlopes <- R6::R6Class("RandomSlopes",
         length(private$.countries) + 1
       ] <- 1
 
-      sig <- smat[, "sigma"]
+      x_output <- dat[, "output", drop = FALSE]
+      x_output_matrix <- as.data.frame(lapply(
+        private$.outputs,
+        function(output) as.character(output) == x_output
+      ))
+      x_output_matrix[, ] <- lapply(
+        x_output_matrix[, , drop = FALSE],
+        as.numeric
+      )
 
-      # Calculate predictions using country-specific beta coefficients
-      S <- nrow(smat)
-      N <- nrow(dat)
       pred_means <- matrix(0, nrow = S, ncol = N)
 
+      # Calculate predictions using country-specific beta coefficients
       for (i in 1:N) {
         # Determine which country column to use (known countries + 1 for new)
         country_idx <- which(x_country_matrix[i, ] == 1)
-
-        # Get alpha for this country
-        alpha_i <- alphas[, country_idx]
 
         # Get beta coefficients for this country
         beta_i <- betas[, , country_idx]
@@ -114,8 +130,12 @@ RandomSlopes <- R6::R6Class("RandomSlopes",
           nrow = S, ncol = length(private$.covariates),
           byrow = TRUE
         )
-        pred_means[, i] <- alpha_i + rowSums(beta_i * x_rep)
+        pred_means[, i] <- alpha + rowSums(beta_i * x_rep)
       }
+
+      pred_means <- pred_means +
+        outputs %*% t(x_output_matrix) +
+        countries %*% t(x_country_matrix)
 
       epsilon <- matrix(rnorm(S * N), nrow = S)
       preds <- pred_means + epsilon * sig

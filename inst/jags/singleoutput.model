@@ -1,0 +1,27 @@
+model {
+  for (i in 1:N) {
+    log_cost[i] ~ dnorm(mu[i], tau)
+    mu[i] <- alpha + inprod(x[i, ], beta[]) + country_effect[country[i]]
+  }
+
+  for (i in 1:N) {
+    log_cost_pred[i] ~ dnorm(mu[i], tau)
+    y_pred[i] <- exp(log_cost_pred[i])
+  }
+
+	alpha ~ dnorm(prior.alpha.mean, prior.alpha.precision)
+
+  sigma_country ~ dt(0, pow(prior.sigma_country.scale, -2), 1) T(0, )
+	tau_country <- pow(sigma_country, -2)
+
+	for (j in 1:NC) {
+		country_effect[j] ~ dnorm(0, tau_country)
+	}
+
+	for (k in 1:K) {
+		beta[k] ~ dnorm(prior.beta.mean[k], prior.beta.precision[k])
+	}
+
+  sigma ~ dt(0, pow(prior.sigma.scale, 2), 1) T(0, )
+  tau <- pow(sigma, -2)
+}

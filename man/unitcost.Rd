@@ -16,10 +16,28 @@ a total of 30,000 posterior samples. This can be used to
 predict the total cost of a single outpatient treatment
 visit at a given facility or facilities via the predict method.
 }
+\details{
+Note that some covariates are centered. The function
+\code{\link[=prepare_covariates]{prepare_covariates()}} can be used to transform raw variables
+using the correct centering values.
+}
 \examples{
 mod <- unitcost()
-new_data <- get_data("OP treatment visit")[1, ]
-mod$predict(new_data, summarised = TRUE)
+new_data <- list(
+  log_ID_p_bldgspace = 1,
+  logVisits = 6.9,
+  logVisitsPP_TB = -1.29,
+  primary = TRUE,
+  secondary = FALSE,
+  tertiary = FALSE,
+  urban = FALSE,
+  public = TRUE,
+  n_services = 3,
+  fc_country = "Ethiopia",
+  output = "op_treatmentvisit"
+)
+new_covariates <- prepare_covariates(new_data, mod)
+mod$predict(new_covariates, summarised = TRUE)
 }
 \seealso{
 MixedEffects

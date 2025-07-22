@@ -5,10 +5,10 @@
 \title{MixedEffects R6 Class}
 \description{
 This class allows the user to fit and use a mixed effects model with
-intercepts that vary by country and fixed covariate effects. It is used
-for the comparison of different model structures as in the
-\code{vignette("03_model-comparisons", package = "capturetb")} vignette, and
-is the class used to generate the \code{\link{unitcost}} model.
+intercepts that vary by country, facility and output type as well as fixed
+covariate effects. It is used for the comparison of different model
+structures as in the \code{vignette("03_model-comparisons", package = "capturetb")}
+vignette, and is the class underlying the \code{\link{unitcost}} model.
 }
 \details{
 An R6 class for fitting and predicting costs using a mixed effects model.
@@ -27,6 +27,7 @@ An R6 class for fitting and predicting costs using a mixed effects model.
 <details><summary>Inherited methods</summary>
 <ul>
 <li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="baselines"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-baselines'><code>capturetb::JAGSModel$baselines()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="centering_values"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-centering_values'><code>capturetb::JAGSModel$centering_values()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="countries"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-countries'><code>capturetb::JAGSModel$countries()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="covariate_correlation"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-covariate_correlation'><code>capturetb::JAGSModel$covariate_correlation()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="covariates"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-covariates'><code>capturetb::JAGSModel$covariates()</code></a></span></li>
@@ -41,6 +42,7 @@ An R6 class for fitting and predicting costs using a mixed effects model.
 <li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="mcmc_rhat"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-mcmc_rhat'><code>capturetb::JAGSModel$mcmc_rhat()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="mcmc_trace"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-mcmc_trace'><code>capturetb::JAGSModel$mcmc_trace()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="n_eff"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-n_eff'><code>capturetb::JAGSModel$n_eff()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="outputs"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-outputs'><code>capturetb::JAGSModel$outputs()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="performance"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-performance'><code>capturetb::JAGSModel$performance()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="plot_fit"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-plot_fit'><code>capturetb::JAGSModel$plot_fit()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="plot_posteriors"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-plot_posteriors'><code>capturetb::JAGSModel$plot_posteriors()</code></a></span></li>
@@ -60,19 +62,13 @@ An R6 class for fitting and predicting costs using a mixed effects model.
 \subsection{Method \code{new()}}{
 Initialize a new model instance.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{MixedEffects$new(
-  dat = get_data("OP treatment visit"),
-  covariates = capturetb_covariates(),
-  target = "USD_unitcost_total",
-  priors = NULL
-)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{MixedEffects$new(dat, covariates, target, priors = NULL)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{dat}}{Data.frame. Training data. Default loads "OP treatment visit"
-from the ValueTB dataset installed with this package.}
+\item{\code{dat}}{Data.frame. Training data.}
 
 \item{\code{covariates}}{Character vector. Names of covariate columns.}
 

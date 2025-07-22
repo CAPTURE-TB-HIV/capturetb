@@ -1,0 +1,38 @@
+model {
+  for (i in 1:N) {
+    log_cost[i] ~ dnorm(mu[i], tau)
+    mu[i] <- alpha + inprod(x[i, ], beta[]) + country_effect[country[i]] + fc_effect[fc[i]] + output_effect[output[i]] 
+  }
+
+  sigma_fc ~ dt(0, pow(prior.sigma_fc.scale, -2), 3) T(0, )
+  tau_fc <- pow(sigma_fc, -2)
+
+  for (j in 1:NFC) {
+    fc_effect[j] ~ dnorm(0, tau_fc)
+  }
+
+  sigma_output ~ dt(0, pow(prior.sigma_output.scale, -2), 3) T(0, )
+  tau_output <- pow(sigma_output, -2)
+
+  for (j in 1:NO) {
+    output_effect[j] ~ dnorm(0, tau_output)
+  }
+
+	alpha ~ dnorm(prior.alpha.mean, prior.alpha.precision)
+
+  sigma_country ~ dt(0, pow(prior.sigma_country.scale, -2), 3) T(0, )
+	tau_country <- pow(sigma_country, -2)
+
+	for (j in 1:NC) {
+		z[j] ~ dnorm(0, 1)
+		country_effect[j] <- 0 + sigma_country * z[j]
+	}
+
+	for (k in 1:K) {
+		beta[k] ~ dnorm(prior.beta.mean[k], prior.beta.precision[k])
+	}
+
+  sigma ~ dt(0, pow(prior.sigma.scale, 2), 1) T(0, )
+  tau <- pow(sigma, -2)
+}
+

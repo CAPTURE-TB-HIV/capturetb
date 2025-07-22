@@ -2,10 +2,12 @@ test_that("capturetb_priors returns correct class and structure", {
   priors <- capturetb_priors()
   expect_s3_class(priors, "capturetbpriors")
   expect_named(priors, c(
-    "prior.mu_alpha.mean",
-    "prior.mu_alpha.precision",
-    "prior.sigma.rate",
-    "prior.sigma_alpha.rate",
+    "prior.alpha.mean",
+    "prior.alpha.precision",
+    "prior.sigma.scale",
+    "prior.sigma_country.scale",
+    "prior.sigma_fc.scale",
+    "prior.sigma_output.scale",
     "prior.beta.mean",
     "prior.beta.precision"
   ))
@@ -13,37 +15,37 @@ test_that("capturetb_priors returns correct class and structure", {
 
 test_that("capturetb_priors accepts custom values", {
   custom <- capturetb_priors(
-    mu_alpha.mean = 1,
-    mu_alpha.precision = 2,
-    sigma.rate = 3,
-    sigma_alpha.rate = 4,
+    alpha.mean = 1,
+    alpha.precision = 2,
+    sigma.scale = 3,
+    sigma_country.scale = 4,
     beta.mean = c(1, 2, 3, 4, 5, 6),
     beta.precision = c(10, 20, 30, 40, 50, 60)
   )
-  expect_equal(custom$prior.mu_alpha.mean, 1)
-  expect_equal(custom$prior.mu_alpha.precision, 2)
-  expect_equal(custom$prior.sigma.rate, 3)
-  expect_equal(custom$prior.sigma_alpha.rate, 4)
+  expect_equal(custom$prior.alpha.mean, 1)
+  expect_equal(custom$prior.alpha.precision, 2)
+  expect_equal(custom$prior.sigma.scale, 3)
+  expect_equal(custom$prior.sigma_country.scale, 4)
   expect_equal(custom$prior.beta.mean, c(1, 2, 3, 4, 5, 6))
   expect_equal(custom$prior.beta.precision, c(10, 20, 30, 40, 50, 60))
 })
 
 test_that("capturetb_priors errors on invalid input", {
   expect_error(
-    capturetb_priors(mu_alpha.mean = "a"),
-    "mu_alpha.mean must be numeric"
+    capturetb_priors(alpha.mean = "a"),
+    "alpha.mean must be numeric"
   )
   expect_error(
-    capturetb_priors(mu_alpha.precision = c(1, 2)),
-    "mu_alpha.precision must be scalar"
+    capturetb_priors(alpha.precision = c(1, 2)),
+    "alpha.precision must be scalar"
   )
   expect_error(
-    capturetb_priors(sigma.rate = "b"),
-    "sigma.rate must be numeric"
+    capturetb_priors(sigma.scale = "b"),
+    "sigma.scale must be numeric"
   )
   expect_error(
-    capturetb_priors(sigma_alpha.rate = NA),
-    "sigma_alpha.rate must be numeric"
+    capturetb_priors(sigma_country.scale = NA),
+    "sigma_country.scale must be numeric"
   )
   expect_error(
     capturetb_priors(beta.mean = "foo"),
@@ -58,7 +60,7 @@ test_that("capturetb_priors errors on invalid input", {
     "beta.precision must not be NaN"
   )
   expect_error(
-    capturetb_priors(sigma.rate = NaN),
-    "sigma.rate must not be NaN"
+    capturetb_priors(sigma.scale = NaN),
+    "sigma.scale must not be NaN"
   )
 })

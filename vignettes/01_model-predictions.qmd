@@ -24,11 +24,11 @@ library(ggplot2)
 library(dplyr)
 ```
 
-This package was developed for two reasons: firstly, to make the model development process transparent and reproducible, and secondly, to allow people to make use of the final model to predict TB outpatient costs. This vignette speaks to the second of these aims. If you want to use the model to predict costs, this vignette is the only documentation you need to read. 
+This package was developed for two reasons: firstly, to make the model development process transparent and reproducible, and secondly, to allow people to make use of the final models to predict TB outpatient costs. This vignette speaks to the second of these aims. If you want to use the model to predict costs, this vignette is the only documentation you need to read. 
 
 ## Model structure
 
-The unit cost model is a mixed effects model with country-specific intercepts and covariate effects that are assumed shared across countries. Log costs are assumed to vary normally:
+The unit cost model is a mixed effects model with country, facility and visit type effects and covariate effects that are assumed shared across countries, facilities and visit types. Log costs are assumed to vary normally:
 
 $$
 \log(\text{USD\_unitcost\_total}_i) \sim \mathcal{N}(\mu_i, \sigma^2)
@@ -66,12 +66,15 @@ The prior distribution for each model parameter ($\sigma$, each $\beta_j$, $\mu_
 ```{r beta-priors, fig.width=10, fig.height=6}
 library(gridExtra)
 plots <- list()
-for(i in 1:3) {
-  plots[[i]] <- plot(priors, parameter = paste0("beta[", i, "]"))
+for(i in 1:9) {
+  plots[[i]] <- plot(priors, par = paste0("beta[", i, "]"))
 }
-plots[[4]] <- plot(priors, parameter = "mu_alpha")
-plots[[5]] <- plot(priors, parameter = "sigma_alpha")
-plots[[6]] <- plot(priors, parameter = "sigma")
+plots[[10]] <- plot(priors, par = "alpha")
+plots[[11]] <- plot(priors, par = "sigma")
+plots[[12]] <- plot(priors, par = "sigma_country")
+plots[[13]] <- plot(priors, par = "sigma_fc")
+plots[[14]] <- plot(priors, par = "sigma_output")
+
 do.call(grid.arrange, c(plots, ncol = 3))
 ```
 
@@ -84,23 +87,26 @@ model$plot_posteriors(pars = paste0("beta[", 1:length(covariates), "]")) +
 ```
 
 ```{r}
-#| fig-cap: Fitted mu_alpha, sigma_alpha and sigma parameters
-model$plot_posteriors(pars = c("mu_alpha", "sigma_alpha", "sigma",  paste0("alpha[", 1:5, "]")))
+#| fig-cap: Fitted intercept and standard deviations of random effects
+model$plot_posteriors(pars = c("alpha", "sigma", "sigma_country", "sigma_fc", "sigma_output"))
 ```
 
 ## Training data
 
-The unit cost model is fitted using top-down economic costs from the ValueTB database. The raw training data are installed with the package and include costs for multiple different output types; run `capturetb::outputs()` to retrieve a complete list of available outputs:
+The unit cost model is fitted using top-down economic costs in 2018 International Dollars from the ValueTB database. The raw data are installed with the package and include costs for multiple different output types. Output types are also grouped into output groups. Run `capturetb::output_groups` to see all groups, and `capturetb::outputs()` to retrieve a complete list of available outputs:
 
 ```{r data-exploration}
+available_output_groups <- capturetb::output_groups()
+head(available_output_groups)
+
 available_outputs <- capturetb::outputs()
 head(available_outputs)
 ```
 
-Subsets of the data can be retrieved using `capturetb::get_data()`.
+Subsets of the data can be retrieved using `capturetb::get_data()`, filtering by output group or output type as needed:
 
 ```{r load-data}
-data <- capturetb::get_data("OP treatment visit")
+data <- capturetb::get_data(output_group = "OP")
 summarised <- data |> 
   group_by(fc_country) |>
   summarise(n_obs = n())
@@ -108,18 +114,14 @@ summarised <- data |>
 knitr::kable(summarised)
 ```
 
-The fitted model predicts the cost of one outpatient treatment visit, given key cost drivers. In the dataset this output is coded as "OP treatment visit". In the raw data some facilities have multiple entries; these were collapsed into a single observation per facility by taking the median.
+The fitted model predicts the cost of a single outpatient visit, given key cost drivers. In the dataset outpatient visits of different types have output group "OP".
 
-The final training data can be seen by calling `model$training_data`:
+The training data was processed from the raw data by adding one additional variable, `n_services`, which is the number of distinct TB outpatient services provided at each facility, and by centering all numeric covariates by their sample mean. The training data can be inspected by calling `model$training_data`:
 
-```{r}
-dat <- model$training_data()
+```{r training-data}
+dat <- model$training_data() |> 
+	select(model$covariates())
 head(dat)
-
-knitr::kable(dat |> 
-  group_by(fc_country) |>
-  summarise(n_obs = n())
-)
 ```
 
 ## Model accuracy
@@ -152,21 +154,30 @@ model$plot_fit(include_ci = TRUE, scale = "log")
 
 ## Generating predictions
 
-Predictions of unit cost for new inputs, not in the training set, are generated via the `predict` method:
+Predictions of unit cost for new inputs, not in the training set, are generated via the `predict` method. Note that numeric covariates must be centered; to convert raw values to centered values, you can use the `prepare_covariates` utility:
 
 ```{r}
-# Include all covariates and facility country `fc_country`
+# Include all covariates plus facility country `fc_country` and visit type `output`
 new_inputs <- list(
-  log_USD_p_bldgspace = 1,
+  log_ID_p_bldgspace = 1, 
   logVisits = 6.9, 
   logVisitsPP_TB = -1.29, 
+	n_services = 1,
+	primary = FALSE,
   secondary = FALSE, 
+	tertiary = FALSE,
   urban = FALSE, 
   public = TRUE,
-  fc_country = "Ethiopia"
+  fc_country = "Ethiopia",
+	output = "op_treatmentvisit"
 )
 
-pred <- model$predict(new_inputs,
+# This will center covariates as required by the model
+covariates <- capturetb::prepare_covariates(raw = new_inputs, mod = model)
+```
+
+```{r}
+pred <- model$predict(covariates,
  scale = "natural",
  summarised = TRUE,
  centrality = c("mean", "median"),
