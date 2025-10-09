@@ -2,29 +2,37 @@ mock_samples <- function(n_sim) {
   smat <- matrix(
     c(
       rep(0, n_sim), # sigma
-      rep(1, n_sim), # mu_alpha
-      rep(0.01, n_sim), # sigma_alpha
+      rep(1, n_sim), # alpha
+      rep(0.01, n_sim), # sigma_country
+      rep(0, n_sim), # sigma_fc
+      rep(0.03, n_sim), # sigma_output
       rep(0.2, n_sim), # beta[1]
       rep(0.3, n_sim), # beta[2]
       rep(0.4, n_sim), # beta[3]
-      rep(2, n_sim), # alpha[1]
-      rep(3, n_sim) # alpha[2]
+      rep(0.2, n_sim), # country_effect[1]
+      rep(0.3, n_sim), # country_effect[2]
+      rep(1, n_sim), # output_effect[1]
+      rep(2, n_sim) # output_effect[2]
     ),
     nrow = n_sim,
-    ncol = 8,
+    ncol = 12,
     byrow = FALSE
   )
   colnames(smat) <- c(
     "sigma",
-    "mu_alpha", "sigma_alpha",
+    "alpha",
+    "sigma_country",
+    "sigma_fc",
+    "sigma_output",
     paste0("beta[", 1:3, "]"),
-    paste0("alpha[", 1:2, "]")
+    paste0("country_effect[", 1:2, "]"),
+    paste0("output_effect[", 1:2, "]")
   )
   fake_samples <- coda::as.mcmc(smat)
   coda::mcmc.list(fake_samples)
 }
 
-dat_cleaned <- get_data("OP treatment visit") |>
+dat_treatment <- get_data(output_name = "op_treatmentvisit") |>
   dplyr::filter(
     dplyr::if_all(
       dplyr::all_of(c(
@@ -36,7 +44,26 @@ dat_cleaned <- get_data("OP treatment visit") |>
       )),
       ~ !is.na(.) & !is.nan(.) & is.finite(.)
     )
-  ) |>
-  dplyr::group_by(.data$fc_code) |>
-  dplyr::slice(1) |>
-  dplyr::ungroup()
+  )
+
+dat_multioutput <- get_data(output_group = "OP") |>
+  dplyr::filter(
+    dplyr::if_all(
+      dplyr::all_of(c(
+        "log_USD_p_bldgspace",
+        "logVisits",
+        "logVisitsPP_TB",
+        "secondary",
+        "public"
+      )),
+      ~ !is.na(.) & !is.nan(.) & is.finite(.)
+    )
+  )
+
+test_covariates <- c(
+  "log_USD_p_bldgspace",
+  "logVisits",
+  "logVisitsPP_TB",
+  "secondary",
+  "public"
+)

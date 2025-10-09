@@ -1,35 +1,33 @@
 #' JAGSModel R6 Class
 #'
 #' Base R6 class for fitting and predicting costs using a JAGS model.
-#' 
+#'
 #' @description
 #' Contains functionality that is shared across model classes.
 #' Should not be instantiated directly, rather one of its children
-#' classes should be used:  [`FixedEffects`],
-#' [`MixedEffects`],  [`RandomSlopes`]
+#' classes should be used: [`MixedEffects`],  [`RandomSlopes`]
 #'
 #' @importFrom R6 R6Class
 #' @importFrom rlang .data
-#' @seealso [`FixedEffects`]
 #' @seealso [`MixedEffects`]
-#' @seealso [`RandomSlopes`]
 JAGSModel <- R6::R6Class("JAGSModel",
   public = list(
     #' @description
     #' Initialize a new model instance.
     #'
-    #' @param dat Data.frame. Training data. Default loads "OP treatment visit"
-    #' from the ValueTB dataset installed with this package.
+    #' @param dat Data.frame. Training data
     #' @param covariates Character vector. Names of covariate columns.
     #' @param target Character. Name of the target variable.
     #' @param priors List of class "capturetbpriors". Should be created using
-    #' [`capturetb_priors`]
+    #' [`capturetb_priors`]. If NULL, non-informative priors will be used.
     #' @param model Name of the JAGS model file.
-    initialize = function(dat = get_data("OP treatment visit"),
-                          covariates = capturetb_covariates(),
-                          target = "USD_unitcost_total",
+    #' @param params Character vector. Names of parameters to monitor.
+    initialize = function(dat,
+                          covariates,
+                          target,
                           priors = NULL,
-                          model) {
+                          model,
+                          params) {
       n_cov <- length(covariates)
       if (is.null(priors)) {
         priors <- capturetb_priors(
@@ -79,13 +77,9 @@ JAGSModel <- R6::R6Class("JAGSModel",
       # Store in private variables
       private$.covariates <- covariates
 
-      dat_missing <- dat |>
-        dplyr::filter(
-          dplyr::if_any(
-            dplyr::all_of(private$.covariates),
-            ~ is.na(.) | is.nan(.) | !is.finite(.)
-          )
-        )
+      dat_missing <- dat[Reduce(`|`, lapply(dat[, private$.covariates, drop = FALSE], function(col) {
+        is.na(col) | is.nan(col) | !is.finite(col)
+      })), , drop = FALSE]
 
       dat <- dplyr::anti_join(dat, dat_missing, by = names(dat))
 
@@ -93,41 +87,24 @@ JAGSModel <- R6::R6Class("JAGSModel",
         warning(sprintf("Removed %d rows with missing data.", nrow(dat_missing)))
       }
 
-      # if there are multiple facilities, take one at random
-      dat_unique <- dat |>
-        dplyr::group_by(.data$fc_code) |>
-        dplyr::slice(1) |>
-        dplyr::ungroup()
-
-      n_dupes <- nrow(dat) - nrow(dat_unique)
-      if (n_dupes > 0) {
-        warning(sprintf("Excluded %d rows with duplicate facility codes.", n_dupes))
-      }
-
-      params <- c(
-        "alpha",
-        "beta",
-        "sigma"
-      )
-
-      if (model != "fixedeffects.model") {
-        params <- c(params, "mu_alpha", "sigma_alpha")
-      }
-      if (model == "randomslopes.model") {
-        params <- c(params, "mu_beta", "sigma_beta")
-      }
+      centering_values <- sapply(dat, function(col) {
+        attr(col, "scaled:center")
+      })
+      private$.centering_values <- centering_values[!sapply(centering_values, is.null)]
 
       private$.params <- params
 
-      private$.training_data <- dat_unique
+      private$.training_data <- dat
       private$.target <- target
       private$.priors <- priors
-      private$.countries <- as.factor(unique(dat_unique$fc_country))
+      private$.countries <- as.factor(unique(dat$fc_country))
+      private$.outputs <- as.factor(unique(dat$output))
+      private$.facilities <- as.factor(unique(dat$fc_code))
       private$.samples <- NULL
       private$.model <- model
     },
     #' @description
-    #' Fit the model using JAGS. Requires JAGS and rjags to be installed.
+    #' Fit the model using JAGS. Requires JAGS and runjags to be installed.
     #'
     #' @param n.chains Integer. Number of MCMC chains. Default is 3.
     #' @param n.iter Integer. Number of total iterations per chain.
@@ -137,10 +114,10 @@ JAGSModel <- R6::R6Class("JAGSModel",
     #' @param n.thin Integer. Thinning interval. Default is 100.
     #' @param seed Optonal integer. Used to seed both the R and JAGS random
     #' generators for reproducible results.
-    #' @param ... Additional arguments passed to [rjags::jags.model].
+    #' @param ... Additional arguments passed to [runjags::run.jags].
     #'
     #' @return Self (invisibly) for method chaining.
-    #' @seealso [rjags::jags.model].
+    #' @seealso [runjags::run.jags].
     fit = function(n.chains = 3,
                    n.iter = 1000000,
                    n.burnin = 5000,
@@ -148,6 +125,9 @@ JAGSModel <- R6::R6Class("JAGSModel",
                    n.thin = 100,
                    seed = NULL,
                    ...) {
+      if (!requireNamespace("runjags", quietly = TRUE)) {
+        stop("Package 'runjags' is required but not installed.")
+      }
       if (!requireNamespace("rjags", quietly = TRUE)) {
         stop("Package 'rjags' is required but not installed.")
       }
@@ -159,71 +139,77 @@ JAGSModel <- R6::R6Class("JAGSModel",
       model_file <- system.file("jags", private$.model, package = "capturetb")
 
       dat <- private$.training_data
-      x <- private$.numeric_to_logical(dat[, private$.covariates])
+      x <- private$.logical_to_numeric(dat[, private$.covariates, drop = FALSE])
 
+      dat <- dat |>
+        dplyr::mutate(
+          fc_id = as.numeric(gsub("[^0-9]", "", fc_code))
+        )
       jags_data <- list(
         N = nrow(dat),
         K = length(private$.covariates),
-        x = x,
-        log_cost = log(dat[[private$.target]])
+        x = as.matrix(x),
+        log_cost = log(dat[[private$.target]]),
+        NC = length(unique(dat$fc_country)),
+        country = as.numeric(as.factor(dat$fc_country))
       )
-
-      if (private$.model != "fixedeffects.model") {
-        jags_data$NC <- length(unique(dat$fc_country))
-        jags_data$country <- as.numeric(as.factor(dat$fc_country))
-      }
 
       jags_data <- c(jags_data, as.list(private$.priors))
 
-      if (is.null(seed)) {
-        jags_mod <- rjags::jags.model(model_file,
-          data = jags_data,
-          n.chains = n.chains,
-          n.adapt = n.adapt,
-          ...
-        )
-      } else {
-        jags_inits <- function(chain) {
-          list(
-            .RNG.name = "base::Mersenne-Twister",
-            .RNG.seed = seed * chain
-          )
-        }
-        jags_mod <- rjags::jags.model(model_file,
-          data = jags_data,
-          n.chains = n.chains,
-          n.adapt = n.adapt,
-          inits = jags_inits,
-          ...
-        )
-      }
-      update(jags_mod, n.iter = n.burnin)
-
-      samples <- rjags::coda.samples(jags_mod,
-        variable.names = private$.params,
-        n.iter = n.iter,
-        thin = n.thin
-      )
-
-      # Store samples
-      private$.samples <- samples
-
-      dic_samples <- rjags::dic.samples(
-        model = jags_mod,
-        n.iter = n.iter,
-        thin = n.thin,
-        type = "pD"
-      )
-
-      private$.dic_samples <- dic_samples
-
-      rhat <- coda::gelman.diag(samples, autoburnin = FALSE)
-      if (any(rhat$psrf > 1.1)) {
-        warning(sprintf(
-          "Model may not have converged. Max rhat is %s",
-          max(rhat$psrf)
+      if (private$.model == "outputeffects.model") {
+        jags_data <- c(jags_data, list(
+          fc = as.numeric(as.factor(dat$fc_code)),
+          NFC = length(unique(dat$fc_code)),
+          NO = length(unique(dat$output)),
+          output = as.numeric(as.factor(dat$output))
         ))
+      } else {
+				jags_data$prior.sigma_fc.scale <- NULL
+				jags_data$prior.sigma_output.scale <- NULL
+			}
+
+      if (is.null(seed)) {
+        seed <- as.integer(Sys.time()) %% 1e7
       }
+      jags_inits <- function(chain) {
+        list(
+          .RNG.name = "base::Mersenne-Twister",
+          .RNG.seed = seed * chain
+        )
+      }
+      jags_mod <- runjags::run.jags(
+        model = model_file,
+        data = jags_data,
+        monitor = private$.params,
+        n.chains = n.chains,
+        adapt = n.adapt,
+        burnin = n.burnin,
+        sample = n.iter / n.thin,
+        thin = n.thin,
+        summarise = FALSE,
+        inits = jags_inits,
+        method = "parallel",
+        ...
+      )
+
+      samples <- coda::as.mcmc.list(jags_mod)
+      private$.samples <- samples
+      private$.DIC <- runjags::extract(jags_mod, what = "DIC")
+
+      tryCatch(
+        {
+          rhat <- coda::gelman.diag(samples, autoburnin = FALSE)
+          if (any(rhat$psrf > 1.1)) {
+            warning(sprintf(
+              "Model may not have converged. Max rhat is %s",
+              max(rhat$psrf)
+            ))
+          }
+        },
+        error = function(e) {
+          warning(sprintf("Model has not converged: %s", e))
+        }
+      )
 
       message(
         "Model fitted successfully with ", n.chains, " chains and ",
@@ -247,7 +233,9 @@ JAGSModel <- R6::R6Class("JAGSModel",
     #' @param ci_method The type of index used for Credible Interval.
     #' Default ETI.
     #' @param test The indices of effect existence to compute. Default NULL.
-    #' @param ... Other arguments that will be passed to [bayestestR::describe_posterior].
+    #' See [bayestestR::describe_posterior] for options.
+    #' @param ... Other arguments that will be passed to
+    #' [bayestestR::describe_posterior].
     #'
     #' @return If summarised=FALSE, matrix of predicted costs with
     #' rows = simulations, columns = input rows. If summarised=TRUE,
@@ -329,10 +317,9 @@ JAGSModel <- R6::R6Class("JAGSModel",
     #' @description
     #' View correlations between covariates in the training data
     #'
-    #' @param plot Logical. If TRUE, return a ggplot2
+    #' @param plot Logical. If TRUE, return a [ggplot2::ggplot]
     #' object. If FALSE return a correlation matrix. Default TRUE.
-    #' @importFrom ggcorrplot ggcorrplot
-    #' @return ggplot2 object or correlation matrix
+    #' @return [ggplot2::ggplot] object or correlation matrix
     covariate_correlation = function(plot = TRUE) {
       stopifnot(
         "plot must be TRUE or FALSE" =
@@ -340,7 +327,33 @@ JAGSModel <- R6::R6Class("JAGSModel",
       )
       cor_mat <- cor(private$.training_data[, private$.covariates])
       if (plot) {
-        return(ggcorrplot::ggcorrplot(cor_mat))
+        ord <- hclust(as.dist(1 - abs(cor_mat)))$order
+        cor_mat <- cor_mat[ord, ord]
+
+        corr_long <- as.data.frame(as.table(cor_mat))
+        names(corr_long) <- c("x", "y", "r")
+        corr_long$x <- factor(corr_long$x, levels = rownames(cor_mat))
+        corr_long$y <- factor(corr_long$y, levels = colnames(cor_mat))
+
+        p <- ggplot2::ggplot(corr_long, aes(x, y, fill = r)) +
+          ggplot2::geom_tile(color = "white", linewidth = 0.3) +
+          ggplot2::scale_fill_gradient2(
+            limits = c(-1, 1),
+            low = "#B2182B", mid = "white", high = "#2166AC",
+            midpoint = 0, name = "Pearson r"
+          ) +
+          ggplot2::coord_fixed() +
+          ggplot2::labs(
+            x = NULL,
+            y = NULL,
+            title = "Correlation heatmap (Pearson)"
+          ) +
+          ggplot2::theme_minimal(base_size = 12) +
+          ggplot2::theme(
+            panel.grid = ggplot2::element_blank(),
+            axis.text.x = ggplot2::element_text(angle = 45, hjust = 1)
+          )
+        return(p)
       } else {
         return(cor_mat)
       }
@@ -348,7 +361,7 @@ JAGSModel <- R6::R6Class("JAGSModel",
     #' @description
     #' Get the name of the target variable.
     #'
-    #' @return data.frame.
+    #' @return character scalar.
     target = function() {
       private$.target
     },
@@ -359,6 +372,14 @@ JAGSModel <- R6::R6Class("JAGSModel",
     #' @return data.frame.
     training_data = function() {
       private$.training_data
+    },
+
+    #' @description
+    #' Get the outputs used for random effects.
+    #'
+    #' @return factor.
+    outputs = function() {
+      private$.outputs
     },
 
     #' @description
@@ -394,11 +415,19 @@ JAGSModel <- R6::R6Class("JAGSModel",
     },
 
     #' @description
+    #' Get any centering values used to center covariates in the training data.
+    #'
+    #' @return List of centering values.
+    centering_values = function() {
+      private$.centering_values
+    },
+
+    #' @description
     #' Check if the model has been fitted.
     #'
     #' @return Logical indicating if model is fitted.
     is_fitted = function() {
-      !is.null(private$.samples) & !is.null(private$.dic_samples)
+      !is.null(private$.samples) # & !is.null(private$.dic_samples)
     },
 
     #' @description
@@ -406,7 +435,7 @@ JAGSModel <- R6::R6Class("JAGSModel",
     #'
     #' @param ... Additional arguments passed to [bayesplot::mcmc_trace].
     #'
-    #' @return A ggplot object showing trace plots.
+    #' @return A [ggplot2::ggplot] object showing trace plots.
     #' @importFrom bayesplot mcmc_trace
     #' @seealso [bayesplot::mcmc_trace]
     mcmc_trace = function(...) {
@@ -418,22 +447,32 @@ JAGSModel <- R6::R6Class("JAGSModel",
     #' @description
     #' Compute and plot R-hat convergence diagnostics.
     #'
+    #' @param par Optional character vector of parameter names to plot.
     #' @return A [ggplot2::ggplot] object showing R-hat diagnostics.
     #' @importFrom ggplot2 ggplot geom_hline geom_point
     #' labs theme_minimal aes
     #' @importFrom coda gelman.diag
-    mcmc_rhat = function() {
+    mcmc_rhat = function(par = NULL) {
       private$.check_fitted()
       samples <- private$.samples
       rhat <- coda::gelman.diag(samples,
         autoburnin = FALSE
       )
 
+      par_df <- data.frame(
+        Parameter = names(rhat$psrf[, 1]),
+        Rhat = rhat$psrf[, "Point est."]
+      )
+
+      if (!is.null(par)) {
+        if (!all(par %in% par_df$Parameter)) {
+          stop("Parameter '", par, "' not found in samples.")
+        }
+        par_df <- par_df[par_df$Parameter %in% par, , drop = FALSE]
+      }
+
       ggplot2::ggplot(
-        data.frame(
-          Parameter = names(rhat$psrf[, 1]),
-          Rhat = rhat$psrf[, "Point est."]
-        ),
+        par_df,
         ggplot2::aes(x = reorder(Parameter, Rhat), y = Rhat)
       ) +
         ggplot2::geom_hline(yintercept = 1.05, linetype = "dashed") +
@@ -447,7 +486,7 @@ JAGSModel <- R6::R6Class("JAGSModel",
     #' @param ... Additional arguments passed to [bayesplot::mcmc_acf].
     #' @seealso [bayesplot::mcmc_acf]
     #' @importFrom bayesplot mcmc_acf
-    #' @return A ggplot object showing autocorrelation plots.
+    #' @return A [ggplot2::ggplot] object showing autocorrelation plots.
     mcmc_acf = function(...) {
       private$.check_fitted()
       samples <- private$.samples
@@ -470,55 +509,67 @@ JAGSModel <- R6::R6Class("JAGSModel",
     #'
     #' @param prob Numeric. Density to highlight. Default 0.9.
     #' @param ... Additional arguments passed to [bayesplot::mcmc_areas].
-    #' @return A ggplot object showing posterior distributions.
+    #' @return A [ggplot2::ggplot] object showing posterior distributions.
     #' @seealso [bayesplot::mcmc_areas]
     #' @importFrom bayesplot mcmc_areas
     plot_posteriors = function(prob = 0.9, ...) {
       private$.check_fitted()
       samples <- private$.samples
+      vn <- colnames(as.matrix(samples))
+      keep <- vn[!grepl("^fc_", vn)]
+      samples <- samples[, keep, drop = FALSE]
       bayesplot::mcmc_areas(samples, prob = prob, ...)
     },
     #' @description
-    #' Calculate model performance metrics on training data.
+    #' Calculate model performance metrics on known data
     #'
-    #' This method evaluates the fitted model's performance by making predictions
-    #' on the training data and computing mean absolute error (MAE),
+    #' This method evaluates the fitted model's performance by comparing
+    #' predictions to known costs and computing mean absolute error (MAE),
     #' root mean square error (RMSE), Bayesian R2, credible interval coverage and
-    #' median credible interval width.
+    #' median credible interval width. By default the model training
+    #' data is used, but a different dataset can also be provided.
     #'
     #' @param scale One of "log" or "natural". Default "log".
-    #'
+    #' @param conditional Logical. If TRUE, returns conditional performance.
+    #' If FALSE, returns performance marginalised over facility random effects.
+    #' Default FALSE.
     #' @param by_country Logical. If TRUE, returns metrics calculated
     #' on country sub-groups. Default FALSE.
+    #' @param dat Data.frame. Optional. If provided, uses this data for
+    #' performance calculation instead of the training data.
     #' @return A data.frame with performance metrics:
     #' \itemize{
     #'  \item country: Only present if by_country = TRUE
     #'   \item mae: Mean Absolute Error between observed and predicted values
     #'   \item rmse: Root Mean Square Error between observed and predicted values
-    #'   \item bayesian_r2: Mean Bayesian r2 estimate.
+    #'   \item bayesian_r2: Mean Bayesian R2 estimate.
     #'   \item ci_coverage: Proportion of observations within 95% credible intervals
     #'   \item median_ci: The median width of 95% credible intervals
     #' }
     #'
     #' @examples
-    #' \dontrun{
-    #' model <- MixedEffects$new()
-    #' model$fit()
-    #' performance_metrics <- model$performance()
-    #' print(performance_metrics)
-    #' }
-    performance = function(scale = "log", by_country = FALSE) {
+    #' model <- unitcost()
+    #' model$performance()
+    performance = function(scale = "natural",
+                           conditional = FALSE,
+                           by_country = FALSE,
+                           dat = NULL) {
       stopifnot(
         "scale must be 'log' or 'natural'" =
           (scale == "log" || scale == "natural")
       )
 
       private$.check_fitted()
-      dat <- private$.training_data
-      preds <- self$predict(dat,
-        scale = scale,
-        summarised = FALSE
-      )
+      if (is.null(dat)) {
+        dat <- private$.training_data
+      } else {
+        private$.validate_data(dat)
+      }
+      preds <- private$.predict(dat, conditional = conditional)
+
+      if (scale == "natural") {
+        preds <- exp(preds)
+      }
 
       pred_summary <- data.frame(
         mean = apply(preds, 2, mean),
@@ -539,7 +590,6 @@ JAGSModel <- R6::R6Class("JAGSModel",
         pred_summary
       )
 
-
       resid_mat <- preds - rep(observed_values, each = nrow(preds))
 
       if (by_country) {
@@ -558,7 +608,6 @@ JAGSModel <- R6::R6Class("JAGSModel",
         }
 
         bayesian_r2 <- unlist(bayesian_r2)
-
       } else {
         var_yhat <- apply(preds, 1, var)
         var_resid <- apply(resid_mat, 1, var)
@@ -604,13 +653,20 @@ JAGSModel <- R6::R6Class("JAGSModel",
 
       private$.check_fitted()
       dat <- private$.training_data
-      pred <- self$predict(dat, scale = "log", summarised = TRUE)
+      preds <- private$.predict(dat, conditional = TRUE)
+
+      pred <- data.frame(
+        mean = apply(preds, 2, mean),
+        lower = apply(preds, 2, quantile, probs = 0.025),
+        upper = apply(preds, 2, quantile, probs = 0.975)
+      )
+
       observed <- dat[[private$.target]]
 
-      residuals <- log(observed) - pred$Mean
+      residuals <- log(observed) - pred$mean
 
       res_df <- data.frame(
-        fitted = pred$Mean,
+        fitted = pred$mean,
         country = dat$fc_country,
         residuals = residuals
       )
@@ -660,6 +716,8 @@ JAGSModel <- R6::R6Class("JAGSModel",
     #' for perfect predictions and optional confidence intervals.
     #'
     #' @param scale One of "log" or "natural". Default "log".
+    #' @param conditional Logical. If TRUE, shows full conditional fit. If FALSE,
+    #' shows marginal fit. Default TRUE.
     #' @param include_ci Logical. Whether to show prediction intervals as
     #' error bars. Default TRUE.
     #' @param color_by_country Logical. Whether to color points by country.
@@ -681,17 +739,32 @@ JAGSModel <- R6::R6Class("JAGSModel",
     #' @importFrom ggplot2 ggplot aes geom_point geom_abline geom_errorbar
     #' labs theme_minimal
     plot_fit = function(scale = "log",
+                        conditional = TRUE,
                         include_ci = TRUE,
                         color_by_country = TRUE) {
       stopifnot(
         "scale must be 'log' or 'natural'" =
           (scale == "log" || scale == "natural"),
-        "include_ci must be logical" = is.logical(include_ci)
+        "include_ci must be logical" = is.logical(include_ci),
+        "conditional must be logical" = is.logical(conditional),
+        "color_by_country must be logical" = is.logical(color_by_country)
       )
 
       private$.check_fitted()
       dat <- private$.training_data
-      pred <- self$predict(dat, scale = scale, summarised = TRUE)
+
+      preds <- private$.predict(dat, conditional = conditional)
+
+      if (scale == "natural") {
+        preds <- exp(preds)
+      }
+
+      pred <- data.frame(
+        mean = apply(preds, 2, mean),
+        lower = apply(preds, 2, quantile, probs = 0.025),
+        upper = apply(preds, 2, quantile, probs = 0.975)
+      )
+
       observed <- dat[[private$.target]]
 
       if (scale == "log") {
@@ -711,7 +784,7 @@ JAGSModel <- R6::R6Class("JAGSModel",
 
       plot <- ggplot2::ggplot(results_df, ggplot2::aes(
         x = .data$observed,
-        y = .data$Mean
+        y = .data$mean
       )) +
         ggplot2::geom_abline(
           slope = 1, intercept = 0, linetype = "dashed",
@@ -728,7 +801,7 @@ JAGSModel <- R6::R6Class("JAGSModel",
       if (include_ci) {
         plot <- plot +
           ggplot2::geom_errorbar(
-            ggplot2::aes(ymin = .data$CI_low, ymax = .data$CI_high),
+            ggplot2::aes(ymin = .data$lower, ymax = .data$upper),
             alpha = 0.2, width = 0
           )
       }
@@ -760,11 +833,18 @@ JAGSModel <- R6::R6Class("JAGSModel",
       }
 
       dat <- private$.training_data
-      n_obs <- nrow(dat)
+      n_fc <- length(unique(dat$fc_code))
 
       # Create fold assignments
-      fold_ids <- sample(rep(1:k_folds, length.out = n_obs))
-      dat$fold <- fold_ids
+      fold_ids <- cbind(
+        fc_code = unique(dat$fc_code),
+        fold = sample(rep(1:k_folds, length.out = n_fc))
+      )
+
+      dat <- dat |> dplyr::left_join(
+        as.data.frame(fold_ids),
+        by = "fc_code"
+      )
 
       cv_predictions <- list()
       all_predictions <- list()
@@ -776,18 +856,8 @@ JAGSModel <- R6::R6Class("JAGSModel",
         train_data <- dat[dat$fold != fold, ]
         test_data <- dat[dat$fold == fold, ]
 
-        if (private$.model == "fixedeffects.model") {
-          model_type <- FixedEffects
-        }
-        if (private$.model == "mixedeffects.model") {
-          model_type <- MixedEffects
-        }
-        if (private$.model == "randomslopes.model") {
-          model_type <- RandomSlopes
-        }
-
         # Create temporary model for this fold
-        temp_model <- model_type$new(
+        temp_model <- MixedEffects$new(
           dat = train_data,
           covariates = private$.covariates,
           target = private$.target,
@@ -804,7 +874,7 @@ JAGSModel <- R6::R6Class("JAGSModel",
           summarised = FALSE
         )
 
-        # Store full predictions for Bayesian R² calculation
+        # Store full predictions for Bayesian R-squared calculation
         all_predictions[[fold]] <- fold_preds_full
 
         # Calculate summary statistics for results dataframe
@@ -832,11 +902,11 @@ JAGSModel <- R6::R6Class("JAGSModel",
       # Combine all fold results
       results_df <- do.call(rbind, cv_predictions)
 
-      # Combine all predictions for Bayesian R² calculation
+      # Combine all predictions for Bayesian R-squared calculation
       all_preds_matrix <- do.call(cbind, all_predictions)
       observed_values <- results_df$observed
 
-      # Calculate Bayesian R²
+      # Calculate Bayesian R-squared
       var_yhat <- apply(all_preds_matrix, 1, var)
       resid_mat <- all_preds_matrix - rep(observed_values, each = nrow(all_preds_matrix))
       var_resid <- apply(resid_mat, 1, var)
@@ -882,23 +952,16 @@ JAGSModel <- R6::R6Class("JAGSModel",
         train_data <- dat |> dplyr::filter(fc_country != countries[[i]])
         test_data <- dat |> dplyr::filter(fc_country == countries[[i]])
 
-        if (private$.model == "fixedeffects.model") {
-          model_type <- FixedEffects
-        }
-        if (private$.model == "mixedeffects.model") {
-          model_type <- MixedEffects
-        }
-        if (private$.model == "randomslopes.model") {
-          model_type <- RandomSlopes
-        }
-
         # Create temporary model for this country
-        temp_model <- model_type$new(
+        temp_model <- MixedEffects$new(
           dat = train_data,
           covariates = private$.covariates,
           target = private$.target,
           priors = private$.priors
         )
+        # Filter test data to modelled output types
+        test_data <- test_data |>
+          dplyr::filter(output %in% unique(train_data$output))
 
         all_models[[i]] <- temp_model
 
@@ -912,7 +975,7 @@ JAGSModel <- R6::R6Class("JAGSModel",
           summarised = FALSE
         )
 
-        # Store full predictions for Bayesian R² calculation
+        # Store full predictions for Bayesian R-squared calculation
         all_predictions[[i]] <- fold_preds_full
 
         # Calculate summary statistics for results dataframe
@@ -940,11 +1003,11 @@ JAGSModel <- R6::R6Class("JAGSModel",
       # Combine all fold results
       results_df <- do.call(rbind, cv_predictions)
 
-      # Combine all predictions for Bayesian R² calculation
+      # Combine all predictions for Bayesian R-squared calculation
       all_preds_matrix <- do.call(cbind, all_predictions)
       observed_values <- results_df$observed
 
-      # Calculate Bayesian R²
+      # Calculate Bayesian R-squared
       var_yhat <- apply(all_preds_matrix, 1, var)
       resid_mat <- all_preds_matrix - rep(observed_values, each = nrow(all_preds_matrix))
       var_resid <- apply(resid_mat, 1, var)
@@ -1080,7 +1143,13 @@ JAGSModel <- R6::R6Class("JAGSModel",
                                  ci_method = "eti",
                                  test = NULL, ...) {
       private$.check_fitted()
-      bayestestR::describe_posterior(private$.samples,
+      smat <- as.matrix(private$.samples)
+      fc_cols <- which(grepl("^fc_", colnames(smat)))
+      if (any(fc_cols)) {
+        # Remove facility random effects from parameter summary
+        smat <- smat[, -fc_cols]
+      }
+      bayestestR::describe_posterior(as.data.frame(smat),
         centrality = centrality,
         ci = ci,
         ci_method = ci_method,
@@ -1090,35 +1159,41 @@ JAGSModel <- R6::R6Class("JAGSModel",
     #' @description Retrieve penalized deviance statistics.
     #'
     #' This method returns cached penalized deviance statistics created
-    #' at the time of model fitting using [rjags::dic.samples()].
-    #' @param summarised Logical indicating whether to return the full
-    #' sample or the summarised DIC. Default TRUE.
-    #' @seealso rjags dic.samples
+    #' at the time of model fitting using.
+    #' @param summarised Logical. If TRUE (default) return the
+    #' total DIC as a single numeric value. If FALSE, return all
+    #' DIC samples.
+    #' @return If summarised = TRUE, a numeric scalar of the total DIC.
+    #' If summarised = FALSE, an object of class "dic"; see [rjags::dic.samples()].
     #' @examples
     #' mod <- unitcost()
     #' mod$mcmc_DIC()
     #' @export
     mcmc_DIC = function(summarised = TRUE) {
       private$.check_fitted()
+      dic_samples <- private$.DIC
       if (summarised) {
-        sum(private$.dic_samples$deviance) + mean(sum(private$.dic_samples[[2]]))
+        return(sum(dic_samples$deviance) + sum(dic_samples$penalty))
       } else {
-        private$.dic_samples
+        return(dic_samples)
       }
     }
   ),
   private = list(
     .model = NULL,
-    .dic_samples = NULL,
+    .DIC = NULL,
     .params = NULL,
+    .centering_values = NULL,
     .covariates = NULL,
+    .facilities = NULL,
     .countries = NULL,
+    .outputs = NULL,
     .training_data = NULL,
     .fitted_data = NULL,
     .target = NULL,
     .priors = NULL,
     .samples = NULL,
-    .numeric_to_logical = function(x) {
+    .logical_to_numeric = function(x) {
       logical_cols <- sapply(x, is.logical)
       if (any(logical_cols)) {
         x[, logical_cols] <- lapply(x[, logical_cols, drop = FALSE], as.numeric)
@@ -1128,6 +1203,29 @@ JAGSModel <- R6::R6Class("JAGSModel",
     .net_benefit = function(lambda, cost) {
       lambda - cost
     },
+    .validate_data = function(dat) {
+      stopifnot("dat must be a data.frame" = is.data.frame(dat))
+      required_cols <- c(
+        private$.target, private$.covariates,
+        "fc_country", "output"
+      )
+      missing_cols <- setdiff(required_cols, names(dat))
+      if (length(missing_cols) > 0) {
+        stop(
+          "Missing required columns in data: ",
+          paste(missing_cols, collapse = ", ")
+        )
+      }
+      if (any(!dat$output %in% private$.outputs)) {
+        stop(sprintf(
+          "Unknown output types: %s",
+          paste(setdiff(
+            unique(dat$output),
+            private$.outputs
+          ), collapse = ", ")
+        ))
+      }
+    },
     .check_fitted = function() {
       if (!self$is_fitted()) {
         stop(
@@ -1136,8 +1234,8 @@ JAGSModel <- R6::R6Class("JAGSModel",
         )
       }
     },
-    .predict = function(dat) {
-      stop("Method not implemented on the base Model class. Use one of FixedEffects, MixedEffects or RandomSlopes")
+    .predict = function(dat, include_fc) {
+      stop("Method not implemented on the base Model class. Use one of MixedEffects or RandomSlopes")
     }
   )
 )

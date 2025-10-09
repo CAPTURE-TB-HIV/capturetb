@@ -4,16 +4,16 @@
 \alias{plot.capturetbpriors}
 \title{Plot prior distribution from a \code{capturetbpriors} object}
 \usage{
-\method{plot}{capturetbpriors}(x, ..., parameter = "mu_alpha")
+\method{plot}{capturetbpriors}(x, ..., par = "alpha")
 }
 \arguments{
 \item{x}{Object of class 'capturetbpriors'. See \code{\link[=capturetb_priors]{capturetb_priors()}}.}
 
 \item{\dots}{Further arguments passed to the method.}
 
-\item{parameter}{Character. Name of the parameter to plot.
-("mu_alpha_mean", "sigma", "sigma_alpha", "beta[1]", ...).
-Default is "mu_alpha_mean".}
+\item{par}{Character. Name of the parameter to plot.
+("alpha", "sigma", "sigma_country", "beta[1]", ...).
+Default is "alpha".}
 }
 \description{
 Plots the distribution of a specified prior from a `capturetbpriors`` object.

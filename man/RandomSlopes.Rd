@@ -5,7 +5,8 @@
 \title{RandomSlopes R6 Class}
 \description{
 This class allows the user to fit and use a random slopes model with
-coyntry specific intercepts and country specific covariate effects.
+country, facility and output specific intercepts and country specific
+covariate effects.
 Its primary purpose is for the comparison of different model structures
 as per the \code{vignette("03_model-comparisons", package = "capturetb")}
 vignette.
@@ -28,6 +29,7 @@ random slopes.
 <details><summary>Inherited methods</summary>
 <ul>
 <li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="baselines"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-baselines'><code>capturetb::JAGSModel$baselines()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="centering_values"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-centering_values'><code>capturetb::JAGSModel$centering_values()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="countries"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-countries'><code>capturetb::JAGSModel$countries()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="covariate_correlation"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-covariate_correlation'><code>capturetb::JAGSModel$covariate_correlation()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="covariates"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-covariates'><code>capturetb::JAGSModel$covariates()</code></a></span></li>
@@ -42,6 +44,7 @@ random slopes.
 <li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="mcmc_rhat"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-mcmc_rhat'><code>capturetb::JAGSModel$mcmc_rhat()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="mcmc_trace"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-mcmc_trace'><code>capturetb::JAGSModel$mcmc_trace()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="n_eff"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-n_eff'><code>capturetb::JAGSModel$n_eff()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="outputs"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-outputs'><code>capturetb::JAGSModel$outputs()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="performance"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-performance'><code>capturetb::JAGSModel$performance()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="plot_fit"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-plot_fit'><code>capturetb::JAGSModel$plot_fit()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="capturetb" data-topic="JAGSModel" data-id="plot_posteriors"><a href='../../capturetb/html/JAGSModel.html#method-JAGSModel-plot_posteriors'><code>capturetb::JAGSModel$plot_posteriors()</code></a></span></li>

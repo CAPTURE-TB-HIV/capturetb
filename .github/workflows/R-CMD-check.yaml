@@ -74,6 +74,10 @@ jobs:
         with:
           extra-packages: any::rcmdcheck
           needs: check
+      - name: Install runjags
+        shell: Rscript {0}
+        run: |
+          install.packages(c("remotes", "runjags"), repos = "https://cran.r-project.org")
 
       - name: Install rjags
         if: runner.os != 'macOS'  

@@ -4,11 +4,14 @@
 \alias{get_data}
 \title{Get raw data filtered by output type}
 \usage{
-get_data(output_name = NULL)
+get_data(output_name = NULL, output_group = NULL)
 }
 \arguments{
 \item{output_name}{Optional character string specifying an output type to
-filter by. Defaults to NULL (all data).}
+filter by. Defaults to NULL (all data). See \code{\link[=outputs]{outputs()}} for valid options.}
+
+\item{output_group}{Optional character string specifying an output group to
+filter by. Defaults to NULL (all data). See \code{\link[=output_groups]{output_groups()}} for valid options.}
 }
 \value{
 A data frame containing only rows matching the specified output type.
@@ -17,5 +20,8 @@ A data frame containing only rows matching the specified output type.
 Returns the raw ValueTB data filtered to a specified output type.
 }
 \examples{
-head(get_data("IP bedday"))
+head(get_data(output_group = "IP"))
+}
+\seealso{
+outputs, output_groups
 }
