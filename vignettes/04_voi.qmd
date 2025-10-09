@@ -48,8 +48,8 @@ new_inputs <- list(
   fc_country = "Ethiopia"
 )
 
-centered <- prepare_covariates(new_inputs, model)
-pred <- model$predict(centered, scale = "natural", summarised = TRUE)
+prepared_inputs <- prepare_covariates(new_inputs, model)
+pred <- model$predict(prepared_inputs, scale = "natural", summarised = TRUE)
 
 # Expected unit cost is mean prediction
 expected_unit_cost <- pred$mean
@@ -59,7 +59,7 @@ knitr::kable(pred)
 As well as the point estimates, the model actually gives a full probability distribution for predicted costs:
 
 ```{r, plot-pred}
-pred <- model$predict(new_inputs, scale = "natural", summarised = FALSE)
+pred <- model$predict(prepared_inputs, scale = "natural", summarised = FALSE)
 ggplot(data.frame(cost = pred), aes(x = cost)) + geom_density()
 ```
 
@@ -67,7 +67,7 @@ We can use this to calculate the EVPI given various WTP thresholds for a single 
 
 ```{r, plot-evpi}
 lambda <- c(2:10)
-evpi <- model$evpi(new_inputs, lambda)
+evpi <- model$evpi(prepared_inputs, lambda)
 ggplot(data.frame(lambda, evpi)) + 
     geom_line(aes(x = lambda, y = evpi))
 ```

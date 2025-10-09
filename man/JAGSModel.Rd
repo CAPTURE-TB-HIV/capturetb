@@ -44,7 +44,7 @@ print(p2)
 ## ------------------------------------------------
 
 \dontrun{
-dat <- list(x1 = 1, x2 = 2)
+dat <- prepare_covariates(list(x1 = 1, x2 = 2), model)
 lambda <- c(10000, 20000, 30000)
 model$evpi(dat, lambda)
 }
@@ -205,7 +205,8 @@ Generate predictions from the fitted model.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{dat}}{Data.frame. New input data for predictions.}
+\item{\code{dat}}{New input data for predictions. This should be prepared
+for the model using \link{prepare_covariates}.}
 
 \item{\code{scale}}{One of "log" or "natural". Default "log".}
 
@@ -517,8 +518,9 @@ Default FALSE.}
 \item{\code{by_country}}{Logical. If TRUE, returns metrics calculated
 on country sub-groups. Default FALSE.}
 
-\item{\code{dat}}{Data.frame. Optional. If provided, uses this data for
-performance calculation instead of the training data.}
+\item{\code{dat}}{Optional data prepared using \code{\link[=prepare_covariates]{prepare_covariates()}}.
+If provided, uses this data for performance calculation instead of
+the training data.}
 }
 \if{html}{\out{</div>}}
 }
@@ -698,7 +700,7 @@ thresholds (\code{lambda}).
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{dat}}{\code{data.frame} of model inputs (facility characteristics)}
+\item{\code{dat}}{Model input data prepared using \code{\link[=prepare_covariates]{prepare_covariates()}}.}
 
 \item{\code{lambda}}{Numeric vector of willingness-to-pay thresholds
 at which to calculate EVPI.}
@@ -718,7 +720,7 @@ in \code{lambda}.
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\dontrun{
-dat <- list(x1 = 1, x2 = 2)
+dat <- prepare_covariates(list(x1 = 1, x2 = 2), model)
 lambda <- c(10000, 20000, 30000)
 model$evpi(dat, lambda)
 }
@@ -742,7 +744,7 @@ of outputs at each
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{dat}}{\code{data.frame} of model inputs (facility characteristics)}
+\item{\code{dat}}{Model input data prepared using \code{\link[=prepare_covariates]{prepare_covariates()}}.}
 
 \item{\code{n_outputs}}{Number of outputs at each facility. Should either be
 length 1, for the same number of outputs at each facility, or should

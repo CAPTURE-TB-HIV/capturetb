@@ -112,6 +112,8 @@ JAGSModel <- R6::R6Class("JAGSModel",
       }
 
       private$.params <- params
+      dat <- tibble::as_tibble(dat)
+      class(dat) <- append("capturetbdata", class(dat))
       private$.training_data <- dat
       private$.target <- target
       private$.priors <- priors
@@ -238,7 +240,8 @@ JAGSModel <- R6::R6Class("JAGSModel",
     #' @description
     #' Generate predictions from the fitted model.
     #'
-    #' @param dat Data.frame. New input data for predictions.
+    #' @param dat New input data for predictions. This should be prepared
+		#' for the model using [prepare_covariates].
     #' @param scale One of "log" or "natural". Default "log".
     #' @param summarised Logical. If TRUE, summarises predictions using
     #' [bayestestR::describe_posterior]. See [bayestestR::describe_posterior]
@@ -275,9 +278,8 @@ JAGSModel <- R6::R6Class("JAGSModel",
         stop("Model must be fitted before making predictions. Call $fit() first.")
       }
 
-      # Validate prediction data
-      stopifnot("dat must be a list or data.frame" = is.list(dat))
-      dat <- as.data.frame(dat)
+      private$.validate_data(dat)
+
       missing_covs <- setdiff(private$.covariates, names(dat))
       if (length(missing_covs) > 0) {
         stop(
@@ -552,8 +554,9 @@ JAGSModel <- R6::R6Class("JAGSModel",
     #' Default FALSE.
     #' @param by_country Logical. If TRUE, returns metrics calculated
     #' on country sub-groups. Default FALSE.
-    #' @param dat Data.frame. Optional. If provided, uses this data for
-    #' performance calculation instead of the training data.
+    #' @param dat Optional data prepared using [prepare_covariates()].
+		#' If provided, uses this data for performance calculation instead of
+		#' the training data.
     #' @return A data.frame with performance metrics:
     #' \itemize{
     #'  \item country: Only present if by_country = TRUE
@@ -580,7 +583,7 @@ JAGSModel <- R6::R6Class("JAGSModel",
       if (is.null(dat)) {
         dat <- private$.training_data
       } else {
-        private$.validate_data(dat)
+        private$.validate_data(dat, include_target = TRUE)
       }
       preds <- private$.predict(dat, conditional = conditional)
 
@@ -884,6 +887,10 @@ JAGSModel <- R6::R6Class("JAGSModel",
         # Fit model on training fold
         temp_model$fit(seed = seed, ...)
 
+				# Filter test data to modelled output types
+        test_data <- test_data |>
+          dplyr::filter(output %in% unique(train_data$output))
+
         # Make full predictions on test fold (not summarised)
         fold_preds_full <- temp_model$predict(
           test_data,
@@ -1050,7 +1057,7 @@ JAGSModel <- R6::R6Class("JAGSModel",
     #' for given facility characteristics and a vector of willingness-to-pay
     #' thresholds (`lambda`).
     #'
-    #' @param dat `data.frame` of model inputs (facility characteristics)
+    #' @param dat Model input data prepared using [prepare_covariates()].
     #' @param lambda Numeric vector of willingness-to-pay thresholds
     #' at which to calculate EVPI.
     #' @param n_outputs Numeric scalar. The number of outputs to compare to the
@@ -1064,7 +1071,7 @@ JAGSModel <- R6::R6Class("JAGSModel",
     #'
     #' @examples
     #' \dontrun{
-    #' dat <- list(x1 = 1, x2 = 2)
+    #' dat <- prepare_covariates(list(x1 = 1, x2 = 2), model)
     #' lambda <- c(10000, 20000, 30000)
     #' model$evpi(dat, lambda)
     #' }
@@ -1072,11 +1079,8 @@ JAGSModel <- R6::R6Class("JAGSModel",
     #' @seealso [predict()]
     #' @export
     evpi = function(dat, lambda, n_outputs = 1) {
-      stopifnot(
-        "dat must be a list or data.frame" =
-          (is.list(dat))
-      )
-      dat <- as.data.frame(dat)
+      private$.validate_data(dat)
+
       if (length(n_outputs) == 1) {
         n_outputs <- rep(n_outputs, nrow(dat))
       }
@@ -1108,7 +1112,7 @@ JAGSModel <- R6::R6Class("JAGSModel",
     #' Predict the total cost across multiple facilities with arbitrary numbers
     #' of outputs at each
     #'
-    #' @param dat `data.frame` of model inputs (facility characteristics)
+    #' @param dat Model input data prepared using [prepare_covariates()].
     #' @param n_outputs Number of outputs at each facility. Should either be
     #' length 1, for the same number of outputs at each facility, or should
     #' have an entry for each row in `dat`.
@@ -1116,11 +1120,7 @@ JAGSModel <- R6::R6Class("JAGSModel",
     #' @return Posterior distribution of predicted total cost, as a vector
     #' @export
     predict_total = function(dat, n_outputs) {
-      stopifnot(
-        "dat must be a list or data.frame" =
-          (is.list(dat))
-      )
-      dat <- as.data.frame(dat)
+      private$.validate_data(dat)
       if (length(n_outputs) == 1) {
         n_outputs <- rep(n_outputs, nrow(dat))
       }
@@ -1220,12 +1220,18 @@ JAGSModel <- R6::R6Class("JAGSModel",
     .net_benefit = function(lambda, cost) {
       lambda - cost
     },
-    .validate_data = function(dat) {
-      stopifnot("dat must be a data.frame" = is.data.frame(dat))
+    .validate_data = function(dat, include_target = FALSE) {
+      stopifnot(
+        "'dat' must be prepared using prepare_covariates" =
+          inherits(dat, "capturetbdata")
+      )
       required_cols <- c(
-        private$.target, private$.covariates,
+        private$.covariates,
         "fc_country", "output"
       )
+			if (include_target) {
+				required_cols <- c(required_cols, private$.target)
+			}
       missing_cols <- setdiff(required_cols, names(dat))
       if (length(missing_cols) > 0) {
         stop(
@@ -1234,13 +1240,21 @@ JAGSModel <- R6::R6Class("JAGSModel",
         )
       }
       if (any(!dat$output %in% private$.outputs)) {
-        stop(sprintf(
+        warning(sprintf(
           "Unknown output types: %s",
           paste(setdiff(
             unique(dat$output),
             private$.outputs
           ), collapse = ", ")
         ))
+      }
+      centering_values <- private$.centering_values
+      for (cov in private$.covariates) {
+        if (is.numeric(dat[[cov]]) && !is.null(centering_values[[cov]])) {
+          if (attr(dat[[cov]], "scaled:center") != centering_values[[cov]]) {
+            stop(sprintf("'dat' has not been prepared for this model: %s is not centered", cov))
+          }
+        }
       }
     },
     .check_fitted = function() {

@@ -1,5 +1,5 @@
 test_that("JAGSModel class initialization works", {
-  dat <- get_data("OP treatment visit")
+  dat <- get_data("op_treatmentvisit")
   model <- suppressWarnings(JAGSModel$new(dat,
     covariates = test_covariates,
     target = "USD_unitcost_total",
@@ -18,7 +18,8 @@ test_that("JAGSModel class initialization works", {
     capturetb_priors(beta.mean = rep(0, 5), beta.precision = rep(0.01, 5))
   )
 
-  expect_equal(model$training_data(), dat)
+  expect_equal(model$training_data(), dat, ignore_attr = TRUE)
+	expect_true(inherits(model$training_data(), "capturetbdata"))
 })
 
 test_that("JAGSModel$new validation works", {
@@ -145,7 +146,7 @@ test_that("JAGSModel class methods work with small example", {
     n_countries + n_outputs + n_fc + 4))
 
   # Test prediction
-  pred_data <- small_data[1:3, ]
+  pred_data <- prepare_covariates(small_data[1:3, ], model)
   predictions <- model$predict(pred_data)
 
   expect_true(is.matrix(predictions))
@@ -170,8 +171,8 @@ test_that("JAGSModel getter methods work", {
 })
 
 test_that("k_fold_cv works correctly", {
-  small_data <- dat_multioutput[sample(
-    nrow(dat_multioutput),
+  small_data <- dat_treatment[sample(
+    nrow(dat_treatment),
     30
   ), ]
 

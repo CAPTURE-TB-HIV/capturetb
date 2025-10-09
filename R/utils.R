@@ -93,6 +93,8 @@ plot.capturetbpriors <- function(x, ..., par = "alpha") {
 #' @param raw List or data frame of raw covariate values.
 #' @param model A `capturetb::JAGSModel` object.
 #' @export
+#' @returns A [tibble::tibble()] with class 'capturetbdta' suitable for input to
+#' [JAGSModel$predict()], []JAGSModel$performance()], and [JAGSModel$evpi()].
 #' @examples
 #' mod <- unitcost()
 #' prepare_covariates(
@@ -119,7 +121,7 @@ prepare_covariates <- function(raw, model) {
   )
 
   covariates <- model$covariates()
-  df <- as.data.frame(raw)
+  df <- tibble::as_tibble(raw)
   missing_covariates <- setdiff(covariates, names(df))
   if (length(missing_covariates) > 0) {
     stop("Missing covariates: ", paste(missing_covariates, collapse = ","))
@@ -127,8 +129,9 @@ prepare_covariates <- function(raw, model) {
   centering_values <- model$centering_values()
   for (cov in covariates) {
     if (is.numeric(df[[cov]]) && !is.null(centering_values[[cov]])) {
-      df[[cov]] <- df[[cov]] - centering_values[[cov]]
+      df[[cov]] <- scale(df[[cov]], center = centering_values[[cov]], scale = FALSE)
     }
   }
+  class(df) <- append("capturetbdata", class(df))
   df
 }
