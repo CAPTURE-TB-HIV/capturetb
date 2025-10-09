@@ -171,7 +171,7 @@ opvisit_data <- function() {
 
 #' CaptureTB outpatient treatment visit cost model
 #'
-#' This function loads a [`MixedEffects`] model object
+#' This function loads a [`JAGSModel`] model object
 #' fitted using default covariates and priors, with
 #' a total of 30,000 posterior samples. This can be used to
 #' predict the total cost of a single outpatient treatment
@@ -181,7 +181,7 @@ opvisit_data <- function() {
 #' [prepare_covariates()] can be used to transform raw variables
 #' using the correct centering values.
 #'
-#' @return An object of class [`MixedEffects`].
+#' @return An object of class [`JAGSModel`].
 #' @examples
 #' mod <- unitcost()
 #' new_data <- list(
@@ -199,7 +199,7 @@ opvisit_data <- function() {
 #' )
 #' new_covariates <- prepare_covariates(new_data, mod)
 #' mod$predict(new_covariates, summarised = TRUE)
-#' @seealso MixedEffects
+#' @seealso JAGSModel
 #' @export
 unitcost <- function() {
   samples <- readRDS(system.file("posterior_samples.rds",
@@ -223,7 +223,7 @@ unitcost <- function() {
 
   data <- opvisit_data()
 
-  mod <- MixedEffects$new(data,
+  mod <- JAGSModel$new(data,
     target = "ID_unitcost_total",
     covariates = covariates,
     priors = opvisit_priors(n_weak_priors = length(covariates) - 5)
@@ -235,7 +235,7 @@ unitcost <- function() {
 
 #' CaptureTB outpatient treatment visit overhead costs model
 #'
-#' This function loads a [`MixedEffects`] model object
+#' This function loads a [`JAGSModel`] model object
 #' fitted using default covariates and priors, with
 #' a total of 30,000 posterior samples. This can be used to
 #' predict the overhead costs per outpatient treatment visit
@@ -245,7 +245,7 @@ unitcost <- function() {
 #' [prepare_covariates()] can be used to transform raw variables
 #' using the correct centering values.
 #'
-#' @return An object of class [`MixedEffects`].
+#' @return An object of class [`JAGSModel`].
 #' @examples
 #' mod <- unitcost_ohd()
 #' new_data <- list(
@@ -262,7 +262,7 @@ unitcost <- function() {
 #' )
 #' new_covariates <- prepare_covariates(new_data, mod)
 #' mod$predict(new_covariates, summarised = TRUE)
-#' @seealso MixedEffects
+#' @seealso JAGSModel
 #' @export
 unitcost_ohd <- function() {
   samples <- readRDS(system.file("posterior_samples_ohd.rds",
@@ -290,7 +290,7 @@ unitcost_ohd <- function() {
     "logVisitsPP_TB"
   )
 
-  mod <- MixedEffects$new(
+  mod <- JAGSModel$new(
     data,
     priors = opvisit_priors(n_weak_priors = length(covariates) - 5),
     covariates = covariates,
@@ -304,7 +304,7 @@ unitcost_ohd <- function() {
 
 #' CaptureTB outpatient treatment visit fixed costs model
 #'
-#' This function loads a [`MixedEffects`] model object
+#' This function loads a [`JAGSModel`] model object
 #' fitted using default covariates and priors, with
 #' a total of 30,000 posterior samples. This can be used to
 #' predict the fixed costs per outpatient treatment visit
@@ -314,7 +314,7 @@ unitcost_ohd <- function() {
 #' [prepare_covariates()] can be used to transform raw variables
 #' using the correct centering values.
 #'
-#' @return An object of class [`MixedEffects`].
+#' @return An object of class [`JAGSModel`].
 #' @examples
 #' mod <- unitcost_ohd()
 #' new_data <- list(
@@ -331,7 +331,7 @@ unitcost_ohd <- function() {
 #' )
 #' new_covariates <- prepare_covariates(new_data, mod)
 #' mod$predict(new_covariates, summarised = TRUE)
-#' @seealso MixedEffects
+#' @seealso JAGSModel
 #' @importFrom stats median
 #' @export
 unitcost_fixed <- function() {
@@ -360,7 +360,7 @@ unitcost_fixed <- function() {
     "logVisits",
     "logVisitsPP_TB"
   )
-  mod <- MixedEffects$new(
+  mod <- JAGSModel$new(
     data,
     priors = opvisit_priors(n_weak_priors = length(covariates) - 5),
     covariates = covariates,

@@ -4,12 +4,15 @@
 \alias{JAGSModel}
 \title{JAGSModel R6 Class}
 \description{
-Contains functionality that is shared across model classes.
-Should not be instantiated directly, rather one of its children
-classes should be used: \code{\link{MixedEffects}},  \code{\link{RandomSlopes}}
+This class allows the user to fit and use a mixed effects model with
+intercepts that vary by country, facility and output type as well as fixed
+covariate effects. It is used for the comparison of different model
+structures as in the \code{vignette("03_model-comparisons", package = "capturetb")}
+vignette, and is the class underlying the \code{\link{unitcost}}, \code{\link{unitcost_fixed}}
+and \code{\link{unitcost_ohd}} models.
 }
 \details{
-Base R6 class for fitting and predicting costs using a JAGS model.
+R6 class for fitting and predicting costs using a JAGS model.
 }
 \examples{
 
@@ -25,7 +28,7 @@ model$performance()
 ## ------------------------------------------------
 
 \dontrun{
-model <- MixedEffects$new()
+model <- JAGSModel$new()
 model$fit()
 p <- model$plot_fit()
 print(p)
@@ -66,8 +69,6 @@ mod <- unitcost()
 mod$mcmc_DIC()
 }
 \seealso{
-\code{\link{MixedEffects}}
-
 \link[runjags:run.jags]{runjags::run.jags}.
 
 bayestestR describe_posterior
@@ -124,7 +125,7 @@ bayestestR describe_posterior
 \subsection{Method \code{new()}}{
 Initialize a new model instance.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{JAGSModel$new(dat, covariates, target, priors = NULL, model, params)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{JAGSModel$new(dat, covariates, target, priors = NULL)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -138,10 +139,6 @@ Initialize a new model instance.
 
 \item{\code{priors}}{List of class "capturetbpriors". Should be created using
 \code{\link{capturetb_priors}}. If NULL, non-informative priors will be used.}
-
-\item{\code{model}}{Name of the JAGS model file.}
-
-\item{\code{params}}{Character vector. Names of parameters to monitor.}
 }
 \if{html}{\out{</div>}}
 }
@@ -616,7 +613,7 @@ A \link[ggplot2:ggplot]{ggplot2::ggplot} object showing observed vs predicted va
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\dontrun{
-model <- MixedEffects$new()
+model <- JAGSModel$new()
 model$fit()
 p <- model$plot_fit()
 print(p)

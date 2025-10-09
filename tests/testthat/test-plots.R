@@ -28,7 +28,7 @@ test_that("prior snapshot test", {
 })
 
 test_that("can plot posteriors once fitted", {
-  model <- MixedEffects$new(dat_multioutput,
+  model <- JAGSModel$new(dat_multioutput,
     covariates = test_covariates,
     target = "USD_unitcost_total",
     priors = capturetb_priors(
@@ -52,7 +52,7 @@ test_that("posterior snapshot test", {
 })
 
 test_that("can plot trace once fitted", {
-  model <- MixedEffects$new(dat_multioutput,
+  model <- JAGSModel$new(dat_multioutput,
     covariates = test_covariates,
     target = "USD_unitcost_total",
     priors = capturetb_priors(
@@ -78,7 +78,7 @@ test_that("trace snapshot test", {
 })
 
 test_that("can plot rhat once fitted", {
-  model <- MixedEffects$new(dat_multioutput,
+  model <- JAGSModel$new(dat_multioutput,
     covariates = test_covariates,
     target = "USD_unitcost_total",
     priors = capturetb_priors(
@@ -104,7 +104,7 @@ test_that("rhat snapshot test", {
 })
 
 test_that("can plot acf once fitted", {
-  model <- MixedEffects$new(dat_multioutput,
+  model <- JAGSModel$new(dat_multioutput,
     covariates = test_covariates,
     target = "USD_unitcost_total",
     priors = capturetb_priors(
@@ -130,7 +130,7 @@ test_that("acf snapshot test", {
 })
 
 test_that("can plot fit once fitted", {
-  model <- MixedEffects$new(dat_multioutput,
+  model <- JAGSModel$new(dat_multioutput,
     covariates = test_covariates,
     target = "USD_unitcost_total",
     priors = capturetb_priors(
@@ -166,7 +166,7 @@ test_that("fit snapshot test", {
 })
 
 test_that("can plot residuals once fitted", {
-  model <- MixedEffects$new(dat_multioutput,
+  model <- JAGSModel$new(dat_multioutput,
     covariates = test_covariates,
     target = "USD_unitcost_total",
     priors = capturetb_priors(

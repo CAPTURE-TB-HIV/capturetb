@@ -1,15 +1,17 @@
 #' JAGSModel R6 Class
 #'
-#' Base R6 class for fitting and predicting costs using a JAGS model.
+#' R6 class for fitting and predicting costs using a JAGS model.
 #'
 #' @description
-#' Contains functionality that is shared across model classes.
-#' Should not be instantiated directly, rather one of its children
-#' classes should be used: [`MixedEffects`],  [`RandomSlopes`]
+#' This class allows the user to fit and use a mixed effects model with
+#' intercepts that vary by country, facility and output type as well as fixed
+#' covariate effects. It is used for the comparison of different model
+#' structures as in the `vignette("03_model-comparisons", package = "capturetb")`
+#' vignette, and is the class underlying the [`unitcost`], [`unitcost_fixed`]
+#' and [`unitcost_ohd`] models.
 #'
 #' @importFrom R6 R6Class
 #' @importFrom rlang .data
-#' @seealso [`MixedEffects`]
 JAGSModel <- R6::R6Class("JAGSModel",
   public = list(
     #' @description
@@ -20,14 +22,10 @@ JAGSModel <- R6::R6Class("JAGSModel",
     #' @param target Character. Name of the target variable.
     #' @param priors List of class "capturetbpriors". Should be created using
     #' [`capturetb_priors`]. If NULL, non-informative priors will be used.
-    #' @param model Name of the JAGS model file.
-    #' @param params Character vector. Names of parameters to monitor.
     initialize = function(dat,
                           covariates,
                           target,
-                          priors = NULL,
-                          model,
-                          params) {
+                          priors = NULL) {
       n_cov <- length(covariates)
       if (is.null(priors)) {
         priors <- capturetb_priors(
@@ -92,8 +90,28 @@ JAGSModel <- R6::R6Class("JAGSModel",
       })
       private$.centering_values <- centering_values[!sapply(centering_values, is.null)]
 
-      private$.params <- params
+      params <- c(
+        "alpha",
+        "beta",
+        "sigma",
+        "sigma_country",
+        "country_effect"
+      )
+      stopifnot("dat must be a data.frame" = is.data.frame(dat))
+      if (length(unique(dat[["output"]])) > 1) {
+        private$.model <- "outputeffects.model"
+        params <- c(
+          params,
+          "sigma_fc",
+          "sigma_output",
+          "output_effect",
+          "fc_effect"
+        )
+      } else {
+        private$.model <- "singleoutput.model"
+      }
 
+      private$.params <- params
       private$.training_data <- dat
       private$.target <- target
       private$.priors <- priors
@@ -101,7 +119,6 @@ JAGSModel <- R6::R6Class("JAGSModel",
       private$.outputs <- as.factor(unique(dat$output))
       private$.facilities <- as.factor(unique(dat$fc_code))
       private$.samples <- NULL
-      private$.model <- model
     },
     #' @description
     #' Fit the model using JAGS. Requires JAGS and runjags to be installed.
@@ -164,9 +181,9 @@ JAGSModel <- R6::R6Class("JAGSModel",
           output = as.numeric(as.factor(dat$output))
         ))
       } else {
-				jags_data$prior.sigma_fc.scale <- NULL
-				jags_data$prior.sigma_output.scale <- NULL
-			}
+        jags_data$prior.sigma_fc.scale <- NULL
+        jags_data$prior.sigma_output.scale <- NULL
+      }
 
       if (is.null(seed)) {
         seed <- as.integer(Sys.time()) %% 1e7
@@ -726,7 +743,7 @@ JAGSModel <- R6::R6Class("JAGSModel",
     #'
     #' @examples
     #' \dontrun{
-    #' model <- MixedEffects$new()
+    #' model <- JAGSModel$new()
     #' model$fit()
     #' p <- model$plot_fit()
     #' print(p)
@@ -857,7 +874,7 @@ JAGSModel <- R6::R6Class("JAGSModel",
         test_data <- dat[dat$fold == fold, ]
 
         # Create temporary model for this fold
-        temp_model <- MixedEffects$new(
+        temp_model <- JAGSModel$new(
           dat = train_data,
           covariates = private$.covariates,
           target = private$.target,
@@ -953,7 +970,7 @@ JAGSModel <- R6::R6Class("JAGSModel",
         test_data <- dat |> dplyr::filter(fc_country == countries[[i]])
 
         # Create temporary model for this country
-        temp_model <- MixedEffects$new(
+        temp_model <- JAGSModel$new(
           dat = train_data,
           covariates = private$.covariates,
           target = private$.target,
@@ -1234,8 +1251,135 @@ JAGSModel <- R6::R6Class("JAGSModel",
         )
       }
     },
-    .predict = function(dat, include_fc) {
-      stop("Method not implemented on the base Model class. Use one of MixedEffects or RandomSlopes")
+    .predict = function(dat, conditional = FALSE) {
+      output_effects <- private$.model == "outputeffects.model"
+      if (output_effects) {
+        if (!"output" %in% names(dat)) {
+          stop("Column 'output' required in prediction data")
+        }
+        unknown_outputs <- unique(dat[["output"]][!(dat[["output"]] %in% private$.outputs)])
+        if (length(unknown_outputs) > 0) {
+          warning(
+            "Unknown output types in prediction data: ",
+            paste(unknown_outputs, collapse = ", ")
+          )
+        }
+      }
+
+      smat <- do.call(rbind, lapply(private$.samples, as.matrix))
+
+      # shared intercept
+      alpha <- smat[, "alpha"]
+
+      # population standard deviations
+      sig <- smat[, "sigma"]
+      sig_country <- smat[, "sigma_country"]
+
+      if (output_effects) {
+        # facility and output effect standard deviations
+        sig_fc <- smat[, "sigma_fc"]
+        sig_output <- smat[, "sigma_output"]
+
+        # known output effects
+        if (length(private$.outputs) == 1) {
+          output_cols <- "output_effect"
+        } else {
+          output_cols <- paste0("output_effect[", as.numeric(private$.outputs), "]")
+        }
+
+        outputs <- smat[, output_cols, drop = FALSE]
+
+        # use sig_output to generate output effects for unknown output
+        output_new <- rnorm(length(alpha), 0, sig_output)
+        outputs <- cbind(outputs, output_new)
+
+        x_output <- dat[, "output", drop = FALSE]
+        x_output_matrix <- as.data.frame(lapply(
+          private$.outputs,
+          function(output) as.character(output) == x_output
+        ))
+        x_output_matrix[, ] <- lapply(
+          x_output_matrix[, , drop = FALSE],
+          as.numeric
+        )
+        x_output_matrix[, length(private$.outputs) + 1] <- 0
+        x_output_matrix[
+          which(rowSums(x_output_matrix) == 0),
+          length(private$.outputs) + 1
+        ] <- 1
+      }
+
+      # country effects
+      country_cols <- paste0("country_effect[", as.numeric(private$.countries), "]")
+      countries <- smat[, country_cols, drop = FALSE]
+
+      # use sig_country to generate country effects for unseen countries
+      country_new <- rnorm(length(alpha), 0, sig_country)
+      countries <- cbind(countries, country_new)
+
+      if (length(private$.covariates) == 1) {
+        beta_cols <- "beta"
+      } else {
+        beta_cols <- paste0("beta[", seq_along(private$.covariates), "]")
+      }
+      betas <- smat[, beta_cols, drop = FALSE]
+
+      x <- as.matrix(private$.logical_to_numeric(
+        dat[, private$.covariates, drop = FALSE]
+      ))
+      x_country <- dat[, "fc_country", drop = FALSE]
+      x_country_matrix <- as.data.frame(lapply(
+        private$.countries,
+        function(country) as.character(country) == x_country
+      ))
+      x_country_matrix[, ] <- lapply(
+        x_country_matrix[, , drop = FALSE],
+        as.numeric
+      )
+      x_country_matrix[, length(private$.countries) + 1] <- 0
+      x_country_matrix[
+        which(rowSums(x_country_matrix) == 0),
+        length(private$.countries) + 1
+      ] <- 1
+
+      pred_means <- alpha + betas %*% t(x) +
+        countries %*% t(x_country_matrix)
+
+      S <- length(sig)
+      N <- ncol(pred_means)
+
+      if (conditional) {
+        if (!output_effects) {
+          warning("conditional = TRUE has no effect when there is only one output type")
+        } else {
+          if (!"fc_code" %in% names(dat)) {
+            stop("Column 'fc_code' required in data for full conditional predictions.")
+          }
+          fc_cols <- paste0("fc_effect[", as.numeric(private$.facilities), "]")
+          fc <- smat[, fc_cols, drop = FALSE]
+
+          x_fc <- dat[, "fc_code", drop = FALSE]
+          x_fc_matrix <- as.data.frame(lapply(
+            private$.facilities,
+            function(code) as.character(code) == x_fc
+          ))
+          x_fc_matrix[, ] <- lapply(
+            x_fc_matrix[, , drop = FALSE],
+            as.numeric
+          )
+          pred_means <- pred_means + fc %*% t(x_fc_matrix) +
+            outputs %*% t(x_output_matrix)
+        }
+      } else if (output_effects) {
+        epsilon_fc <- matrix(rnorm(S * N), nrow = S)
+        pred_means <- pred_means + epsilon_fc * sig_fc +
+          outputs %*% t(x_output_matrix)
+      }
+
+      epsilon <- matrix(rnorm(S * N), nrow = S)
+
+      preds <- pred_means + epsilon * sig
+      preds
     }
   )
 )

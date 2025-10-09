@@ -86,11 +86,9 @@ get_data <- function(output_name = NULL, output_group = NULL) {
 #' @param sigma_output.scale Numeric scalar. Scale parameter for Half-Cauchy
 #' prior on `sigma_output`. Default is 1.
 #' @param beta.mean Numeric vector. Means of the priors for the `beta`
-#' coefficients in [`MixedEffects`] model,
-#' or the `mu_beta` hyper-parameters in a [`RandomSlopes`] model.
+#' coefficients of fixed effects.
 #' @param beta.precision Numeric vector. Precision of the priors for the
-#' `beta` coefficients in a [`MixedEffects`] model, or the `mu_beta` 
-#' hyper-parameters in a [`RandomSlopes`] model.
+#' `beta` coefficients of fixed effects.
 #'
 #' @return A list of prior parameters with class `capturetbpriors`.
 #' @export

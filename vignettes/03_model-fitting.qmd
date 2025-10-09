@@ -50,10 +50,10 @@ data <- get_data(output_name = "op_diagnosticvisit")
 # installed with the package
 ```
 
-We now create an instance of the `capturetb::MixedEffects` class to fit a model with country, facility and output type effects and shared slopes. To fit a fixed effects model we could use the FixedEffects class, or to fit a model with random slopes, we could use a RandomSlopes class. See `vignette("03_model-comparisons")` for details on the different model structures.
+We now create an instance of the `capturetb::JAGSModel` class to fit a model with country, facility and output type effects and shared slopes. To fit a fixed effects model we could use the FixedEffects class, or to fit a model with random slopes, we could use a RandomSlopes class. See `vignette("03_model-comparisons")` for details on the different model structures.
  
 ```{r model-creation}
-model <- capturetb::MixedEffects$new(
+model <- capturetb::JAGSModel$new(
   dat = data,
   covariates = covariates,
   target = "ID_unitcost_total",
@@ -78,7 +78,7 @@ do.call(grid.arrange, c(plots, ncol = 3))
 
 ## Fitting the model
 
-Under the hood the MixedEffects class uses JAGS (Just Another Gibbs Sampler) to fit a multilevel linear regression model with country, output and facility random effects, and fixed covariate effects. To fit the model, [JAGS](https://sourceforge.net/projects/mcmc-jags/) and the [runjags](https://cran.r-project.org/web/packages/runjags/index.html) package must be installed on your machine.
+Under the hood the JAGSModel class uses JAGS (Just Another Gibbs Sampler) to fit a multilevel linear regression model with country, output and facility random effects, and fixed covariate effects. To fit the model, [JAGS](https://sourceforge.net/projects/mcmc-jags/) and the [runjags](https://cran.r-project.org/web/packages/runjags/index.html) package must be installed on your machine.
 
 For the purpose of the vignette, we'll use fewer iterations than recommended for faster computation:
 

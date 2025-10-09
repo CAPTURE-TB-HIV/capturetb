@@ -35,12 +35,10 @@ prior on \code{sigma_fc}. Default is 1.}
 prior on \code{sigma_output}. Default is 1.}
 
 \item{beta.mean}{Numeric vector. Means of the priors for the \code{beta}
-coefficients in \code{\link{MixedEffects}} model,
-or the \code{mu_beta} hyper-parameters in a \code{\link{RandomSlopes}} model.}
+coefficients of fixed effects.}
 
 \item{beta.precision}{Numeric vector. Precision of the priors for the
-\code{beta} coefficients in a \code{\link{MixedEffects}} model, or the \code{mu_beta}
-hyper-parameters in a \code{\link{RandomSlopes}} model.}
+\code{beta} coefficients of fixed effects.}
 }
 \value{
 A list of prior parameters with class \code{capturetbpriors}.

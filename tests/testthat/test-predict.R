@@ -1,5 +1,5 @@
-test_that("MixedEffects$predict method validation works", {
-  model <- MixedEffects$new(
+test_that("JAGSModel$predict method validation works", {
+  model <- JAGSModel$new(
     dat = dat_multioutput,
     covariates = test_covariates,
     target = "USD_unitcost_total",
@@ -24,7 +24,7 @@ test_that("can make predictions for known and new countries", {
 		dplyr::filter(output %in% c("op_monitoringvisit", "op_treatmentvisit")) |>
 		dplyr::filter(fc_country %in% c("Kenya", "Ethiopia"))
 
-  model <- MixedEffects$new(
+  model <- JAGSModel$new(
     dat = dat,
     covariates = covariates,
     target = "USD_unitcost_total",
@@ -74,7 +74,7 @@ test_that("returns summarised predictions if summarised=TRUE", {
 		dplyr::filter(output %in% c("op_treatmentvisit", "op_monitoringvisit")) |>
 		dplyr::filter(fc_country %in% c("Kenya", "Georgia"))
 
-  model <- MixedEffects$new(
+  model <- JAGSModel$new(
     dat = dat,
     covariates = covariates,
     target = "USD_unitcost_total",

@@ -1,5 +1,5 @@
-test_that("MixedEffects model can be initialised, fitted, and used for predictions", {
-    model <- MixedEffects$new(
+test_that("JAGSModel model can be initialised, fitted, and used for predictions", {
+    model <- JAGSModel$new(
         dat = dat_treatment, 
 				target = "USD_unitcost_total",
 				covariates = c("logVisits", "logVisitsPP_TB"),
@@ -16,8 +16,8 @@ test_that("MixedEffects model can be initialised, fitted, and used for predictio
     expect_true(nrow(preds) > 0)
 })
 
-test_that("MixedEffects model works for a single covariate", {
-    model <- MixedEffects$new(
+test_that("JAGSModel model works for a single covariate", {
+    model <- JAGSModel$new(
         dat = dat_treatment, 
 				target = "USD_unitcost_total",
 				covariates = c("logVisits"),
@@ -54,6 +54,6 @@ test_that("can perform loco validation", {
   expect_true(perf$bayesian_r2 < 0.9)
   expect_true(perf$mae < 1)
   mods <- attr(res, "models")
-  expect_true(inherits(mods[[1]], "MixedEffects"))
+  expect_true(inherits(mods[[1]], "JAGSModel"))
   expect_equal(length(mods), 5)
 })

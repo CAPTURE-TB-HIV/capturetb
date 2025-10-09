@@ -7,10 +7,10 @@
 unitcost_ohd()
 }
 \value{
-An object of class \code{\link{MixedEffects}}.
+An object of class \code{\link{JAGSModel}}.
 }
 \description{
-This function loads a \code{\link{MixedEffects}} model object
+This function loads a \code{\link{JAGSModel}} model object
 fitted using default covariates and priors, with
 a total of 30,000 posterior samples. This can be used to
 predict the overhead costs per outpatient treatment visit
@@ -39,5 +39,5 @@ new_covariates <- prepare_covariates(new_data, mod)
 mod$predict(new_covariates, summarised = TRUE)
 }
 \seealso{
-MixedEffects
+JAGSModel
 }
