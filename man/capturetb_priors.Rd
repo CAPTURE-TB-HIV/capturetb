@@ -28,8 +28,8 @@ on \code{sigma}. Default is 1.}
 \item{sigma_country.scale}{Numeric scalar. Scale parameter for Half-Cauchy
 prior on \code{sigma_country}. Default is 1.}
 
-\item{sigma_fc.scale}{Numeric scalar. Scale parameter for Half-Cauchy
-prior on \code{sigma_fc}. Default is 1.}
+\item{sigma_fc.scale}{Numeric scalar. Scale parameter for Half-Student-t with
+3 degrees of freedom prior on \code{sigma_fc}. Default is 1.}
 
 \item{sigma_output.scale}{Numeric scalar. Scale parameter for Half-Cauchy
 prior on \code{sigma_output}. Default is 1.}
@@ -46,9 +46,7 @@ A list of prior parameters with class \code{capturetbpriors}.
 \description{
 Constructs a list of prior distributions for model parameters.
 This function validates the input arguments and returns a list
-with class \code{capturetbpriors}. Note that if these priors are
-used in a \code{\link{RandomSlopes}} model, \code{beta.mean} and
-\code{beta.precision} define priors on the \code{mu_beta} hyper-parameters
-which in turn define priors for the country-specific coefficients.
-See \code{vignette("03_model-comparisons", package = "capturetb")} for details.
+with class \code{capturetbpriors}.
+See \code{vignette("03_model-fitting", package = "capturetb")} for details
+of the model structure.
 }

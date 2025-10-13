@@ -67,11 +67,9 @@ get_data <- function(output_name = NULL, output_group = NULL) {
 #'
 #' Constructs a list of prior distributions for model parameters.
 #' This function validates the input arguments and returns a list
-#' with class `capturetbpriors`. Note that if these priors are
-#' used in a [`RandomSlopes`] model, `beta.mean` and
-#' `beta.precision` define priors on the `mu_beta` hyper-parameters
-#' which in turn define priors for the country-specific coefficients.
-#' See `vignette("03_model-comparisons", package = "capturetb")` for details.
+#' with class `capturetbpriors`.
+#' See `vignette("03_model-fitting", package = "capturetb")` for details
+#' of the model structure.
 #'
 #' @param alpha.mean Numeric scalar. Mean of the prior for the intercept `alpha`.
 #' Default is 0.
@@ -81,8 +79,8 @@ get_data <- function(output_name = NULL, output_group = NULL) {
 #' on `sigma`. Default is 1.
 #' @param sigma_country.scale Numeric scalar. Scale parameter for Half-Cauchy
 #' prior on `sigma_country`. Default is 1.
-#' @param sigma_fc.scale Numeric scalar. Scale parameter for Half-Cauchy
-#' prior on `sigma_fc`. Default is 1.
+#' @param sigma_fc.scale Numeric scalar. Scale parameter for Half-Student-t with 
+#' 3 degrees of freedom prior on `sigma_fc`. Default is 1.
 #' @param sigma_output.scale Numeric scalar. Scale parameter for Half-Cauchy
 #' prior on `sigma_output`. Default is 1.
 #' @param beta.mean Numeric vector. Means of the priors for the `beta`

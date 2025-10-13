@@ -99,6 +99,7 @@ JAGSModel <- R6::R6Class("JAGSModel",
       )
       stopifnot("dat must be a data.frame" = is.data.frame(dat))
       if (length(unique(dat[["output"]])) > 1) {
+        message("Multiple outputs detected. Including output-level random effects in model.")
         private$.model <- "outputeffects.model"
         params <- c(
           params,
@@ -108,6 +109,7 @@ JAGSModel <- R6::R6Class("JAGSModel",
           "fc_effect"
         )
       } else {
+        message("Single output type detected. Not including output-level random effects in model.")
         private$.model <- "singleoutput.model"
       }
 
@@ -241,7 +243,7 @@ JAGSModel <- R6::R6Class("JAGSModel",
     #' Generate predictions from the fitted model.
     #'
     #' @param dat New input data for predictions. This should be prepared
-		#' for the model using [prepare_covariates].
+    #' for the model using [prepare_covariates].
     #' @param scale One of "log" or "natural". Default "log".
     #' @param summarised Logical. If TRUE, summarises predictions using
     #' [bayestestR::describe_posterior]. See [bayestestR::describe_posterior]
@@ -555,8 +557,8 @@ JAGSModel <- R6::R6Class("JAGSModel",
     #' @param by_country Logical. If TRUE, returns metrics calculated
     #' on country sub-groups. Default FALSE.
     #' @param dat Optional data prepared using [prepare_covariates()].
-		#' If provided, uses this data for performance calculation instead of
-		#' the training data.
+    #' If provided, uses this data for performance calculation instead of
+    #' the training data.
     #' @return A data.frame with performance metrics:
     #' \itemize{
     #'  \item country: Only present if by_country = TRUE
@@ -887,7 +889,7 @@ JAGSModel <- R6::R6Class("JAGSModel",
         # Fit model on training fold
         temp_model$fit(seed = seed, ...)
 
-				# Filter test data to modelled output types
+        # Filter test data to modelled output types
         test_data <- test_data |>
           dplyr::filter(output %in% unique(train_data$output))
 
@@ -1227,11 +1229,14 @@ JAGSModel <- R6::R6Class("JAGSModel",
       )
       required_cols <- c(
         private$.covariates,
-        "fc_country", "output"
+        "fc_country"
       )
-			if (include_target) {
-				required_cols <- c(required_cols, private$.target)
-			}
+      if (include_target) {
+        required_cols <- c(required_cols, private$.target)
+      }
+      if (length(unique(private$outputs)) > 1) {
+        required_cols <- c(required_cols, "output")
+      }
       missing_cols <- setdiff(required_cols, names(dat))
       if (length(missing_cols) > 0) {
         stop(

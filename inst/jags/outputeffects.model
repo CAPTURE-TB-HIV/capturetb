@@ -4,7 +4,8 @@ model {
     mu[i] <- alpha + inprod(x[i, ], beta[]) + country_effect[country[i]] + fc_effect[fc[i]] + output_effect[output[i]] 
   }
 
-  sigma_fc ~ dt(0, pow(prior.sigma_fc.scale, -2), 3) T(0, )
+ # sigma_fc ~ dt(0, pow(prior.sigma_fc.scale, -2), 3) T(0, )
+	sigma_fc ~ dunif(0, 100)  # Alternative prior
   tau_fc <- pow(sigma_fc, -2)
 
   for (j in 1:NFC) {

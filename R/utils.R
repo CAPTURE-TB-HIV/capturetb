@@ -47,7 +47,7 @@ plot.capturetbpriors <- function(x, ..., par = "alpha") {
     ggplot2::ggplot(df, ggplot2::aes(.data$x, .data$y)) +
       ggplot2::geom_line() +
       ggplot2::labs(
-        title = paste("Half-Cauchy prior for", label),
+        title = paste("Half-Student-t 3 d.f. prior for", label),
         x = label, y = "Density"
       )
   }
@@ -98,8 +98,8 @@ plot.capturetbpriors <- function(x, ..., par = "alpha") {
 #' @param raw List or data frame of raw covariate values.
 #' @param model A `capturetb::JAGSModel` object.
 #' @export
-#' @returns A [tibble::tibble()] with class 'capturetbdta' suitable for input to
-#' [JAGSModel$predict()], []JAGSModel$performance()], and [JAGSModel$evpi()].
+#' @returns A [tibble::tibble()] with class 'capturetbdata' suitable for input
+#' \code{\link[=JAGSModel]{JAGSModel}}'s \code{$predict()}, \code{$performance()}, and \code{$evpi()} methods.
 #' @examples
 #' mod <- unitcost()
 #' prepare_covariates(
