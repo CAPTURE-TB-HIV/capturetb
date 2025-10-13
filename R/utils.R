@@ -23,17 +23,22 @@ plot.capturetbpriors <- function(x, ..., par = "alpha") {
     df <- data.frame(x = vals, y = dens)
     ggplot2::ggplot(df, ggplot2::aes(.data$x, .data$y)) +
       ggplot2::geom_line() +
+      ggplot2::geom_vline(
+        xintercept = mean,
+        linetype = "dashed",
+        color = "grey"
+      ) +
       ggplot2::labs(
         title = paste("Normal prior for", label),
         x = label, y = "Density"
       )
   }
 
-  # half Cauchy density
+  # half Student's-t with d.f. 3 density
   dhalft <- function(x, sigma) {
-    dt(x / sigma, df = 1) / sigma
+    dt(x / sigma, df = 3) / sigma
   }
-  # half Cauchy plot helper
+  # half Student's-t plot helper
   plot_half_cauchy <- function(scale, label) {
     vals <- seq(0, 10, length.out = 1000)
     dens <- dhalft(vals, sigma = scale)
