@@ -35,7 +35,7 @@ Fixed costs vary very little by visit type, and overheads not at all by visit ty
 For both, log costs are assumed to vary normally:
 
 $$
-\log(\text{USD\_unitcost\_total}_i) \sim \mathcal{N}(\mu_i, \sigma^2)
+\log(\text{USD\_unitcost\_total}_i) \sim \mathrm{N}(\mu_i, \sigma^2)
 $$
 
 where $\mu_i$ is given by:
@@ -47,12 +47,15 @@ $$
 where $x_{ji}$ represents the value of the jth covariate and $c_i$ the country of observation $i$. The variable $\gamma_{c_i}$ accounts for systematic differences across countries, and is assumed to vary normally about zero:
 
 $$
-\gamma_{c} \sim \mathcal{N}(0, \sigma_c^2)
+\gamma_{c} \sim \mathrm{N}(0, \sigma_c^2)
 $$
 
 ## Comparing accuracy of each model
 
-To compare the accuracy of predictions made by each of the models:
+We compare the accuracy of predictions made by each of the models by looking at:
+1. The cost of a single visit as predicted by the `unitcost` model.
+2. The cost of a single visit as estimated by combining the directly measured variable costs in the raw data with the predictions for fixed costs made by the `unitcost_fixed` model.
+3. The cost of a single visit as estimated by combining the directly measured non-overhead costs in the raw data with the predictions for overhead costs made by the `unitcost_ohd` model.
 
 ```{r, mods}
 mod_uc <- unitcost()

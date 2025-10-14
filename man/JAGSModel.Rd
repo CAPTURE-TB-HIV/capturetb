@@ -587,7 +587,7 @@ for perfect predictions and optional confidence intervals.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{JAGSModel$plot_fit(
   scale = "log",
-  conditional = TRUE,
+  conditional = FALSE,
   include_ci = TRUE,
   color_by_country = TRUE
 )}\if{html}{\out{</div>}}
@@ -599,7 +599,7 @@ for perfect predictions and optional confidence intervals.
 \item{\code{scale}}{One of "log" or "natural". Default "log".}
 
 \item{\code{conditional}}{Logical. If TRUE, shows full conditional fit. If FALSE,
-shows marginal fit. Default TRUE.}
+shows marginal fit. Default FALSE.}
 
 \item{\code{include_ci}}{Logical. Whether to show prediction intervals as
 error bars. Default TRUE.}

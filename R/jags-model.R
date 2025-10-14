@@ -740,7 +740,7 @@ JAGSModel <- R6::R6Class("JAGSModel",
     #'
     #' @param scale One of "log" or "natural". Default "log".
     #' @param conditional Logical. If TRUE, shows full conditional fit. If FALSE,
-    #' shows marginal fit. Default TRUE.
+    #' shows marginal fit. Default FALSE.
     #' @param include_ci Logical. Whether to show prediction intervals as
     #' error bars. Default TRUE.
     #' @param color_by_country Logical. Whether to color points by country.
@@ -762,7 +762,7 @@ JAGSModel <- R6::R6Class("JAGSModel",
     #' @importFrom ggplot2 ggplot aes geom_point geom_abline geom_errorbar
     #' labs theme_minimal
     plot_fit = function(scale = "log",
-                        conditional = TRUE,
+                        conditional = FALSE,
                         include_ci = TRUE,
                         color_by_country = TRUE) {
       stopifnot(

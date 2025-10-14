@@ -169,13 +169,13 @@ opvisit_data <- function() {
   training_data
 }
 
-#' CaptureTB outpatient treatment visit cost model
+#' CaptureTB outpatient visit cost model
 #'
 #' This function loads a [`JAGSModel`] model object
 #' fitted using default covariates and priors, with
 #' a total of 30,000 posterior samples. This can be used to
-#' predict the total cost of a single outpatient treatment
-#' visit at a given facility or facilities via the predict method.
+#' predict the total cost of a single outpatient visit at
+#' a given facility or facilities via the predict method.
 #'
 #' Note that some covariates are centered. The function
 #' [prepare_covariates()] can be used to transform raw variables
@@ -233,12 +233,12 @@ unitcost <- function() {
   mod
 }
 
-#' CaptureTB outpatient treatment visit overhead costs model
+#' CaptureTB outpatient visit overhead costs model
 #'
 #' This function loads a [`JAGSModel`] model object
 #' fitted using default covariates and priors, with
 #' a total of 30,000 posterior samples. This can be used to
-#' predict the overhead costs per outpatient treatment visit
+#' predict the overhead costs per outpatient visit
 #' at a given facility or facilities via the predict method.
 #'
 #' Note that some covariates are centered. The function
@@ -302,13 +302,13 @@ unitcost_ohd <- function() {
 }
 
 
-#' CaptureTB outpatient treatment visit fixed costs model
+#' CaptureTB outpatient visit fixed costs model
 #'
 #' This function loads a [`JAGSModel`] model object
 #' fitted using default covariates and priors, with
 #' a total of 30,000 posterior samples. This can be used to
-#' predict the fixed costs per outpatient treatment visit
-#' at a given facility or facilities via the predict method.
+#' predict the fixed costs per outpatient visit at a
+#' given facility or facilities via the predict method.
 #'
 #' Note that some covariates are centered. The function
 #' [prepare_covariates()] can be used to transform raw variables

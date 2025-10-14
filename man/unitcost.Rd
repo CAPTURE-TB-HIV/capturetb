@@ -2,7 +2,7 @@
 % Please edit documentation in R/capturetb.R
 \name{unitcost}
 \alias{unitcost}
-\title{CaptureTB outpatient treatment visit cost model}
+\title{CaptureTB outpatient visit cost model}
 \usage{
 unitcost()
 }
@@ -13,8 +13,8 @@ An object of class \code{\link{JAGSModel}}.
 This function loads a \code{\link{JAGSModel}} model object
 fitted using default covariates and priors, with
 a total of 30,000 posterior samples. This can be used to
-predict the total cost of a single outpatient treatment
-visit at a given facility or facilities via the predict method.
+predict the total cost of a single outpatient visit at
+a given facility or facilities via the predict method.
 }
 \details{
 Note that some covariates are centered. The function

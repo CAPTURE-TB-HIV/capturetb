@@ -35,17 +35,17 @@ model <- capturetb::unitcost()
 
 # Include all covariates and facility country `fc_country`
 new_inputs <- list(
-  log_ID_p_bldgspace = 1,
-  logVisits = 6.9, 
-  logVisitsPP_TB = -1.29, 
+	log_ID_p_bldgspace = 1, 
+	logVisits = 6.9, 
+	logVisitsPP_TB = -1.29, 
 	primary = TRUE,
-  secondary = FALSE, 
+	secondary = FALSE, 
 	tertiary = FALSE,
 	n_services = 5,
-  urban = FALSE, 
-  public = TRUE,
+	urban = FALSE, 
+	public = TRUE,
 	output = "op_treatmentvisit",
-  fc_country = "Ethiopia"
+	fc_country = "Ethiopia"
 )
 
 prepared_inputs <- prepare_covariates(new_inputs, model)
@@ -66,7 +66,7 @@ ggplot(data.frame(cost = pred), aes(x = cost)) + geom_density()
 We can use this to calculate the EVPI given various WTP thresholds for a single output:
 
 ```{r, plot-evpi}
-lambda <- c(2:10)
+lambda <- c(3:12)
 evpi <- model$evpi(prepared_inputs, lambda)
 ggplot(data.frame(lambda, evpi)) + 
     geom_line(aes(x = lambda, y = evpi))
@@ -111,7 +111,7 @@ lines(lambda, all_evpi_quants[3, ])
 
 We can see that when a WTP threshold is close to the predicted cost, resolving model uncertainty completely would be worth approximately 20% of the total cost of the intervention. Of couse in practice we can never measure costs "perfectly", but this gives some indication of the magnitude of the value of collecting primary cost data when assessing cost-effectiveness.
 
-As well as calculating EVPI for costs at a single facility, the method can be used to look at EVPI for an intervention that involve $n_i$ visits for facilities $i = ...I$:
+As well as calculating EVPI for costs at a single facility, the method can be used to look at EVPI for an intervention that involve $n_i$ visits for facilities $i = 1 ...I$
 
 ```{r, total-evpi}
 # using model training data to demonstrate
@@ -140,7 +140,7 @@ L(\hat{c}, c) =
 \end{cases}
 $$
 
-Bayesian decision theory shows that the optimal decision under an asymmetric linear function is the $\dfrac{\alpha}{\alpha + \beta}$ quantile of the posterior cost distribution, call it $c*$. The expected loss associated with using this prediction is then 
+Bayesian decision theory shows that the optimal budget under an asymmetric linear function is the $\dfrac{\alpha}{\alpha + \beta}$ quantile of the posterior cost distribution, call it $c*$. The expected loss associated with using this prediction is then 
 $\mathop{\mathbb{E}}[L(c*, c)]$. We can estimate this using draws from the posterior. For illustration, suppose our budget includes all facilities in the training data:
 
 ```{r, loss-asymmetric}

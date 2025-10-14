@@ -8,7 +8,7 @@ remotes::install_github("CAPTURE-TB-HIV/capturetb")
 
 ## Basic usage
 
-To predict the unitcost of one outpatient treatment visit given facility characteristics:
+To predict the unitcost of one outpatient visit given facility characteristics:
 
 ```r
 # Load model
