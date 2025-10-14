@@ -13,7 +13,7 @@ test_that("can load total unit cost model", {
     c((n_iter_expected) / n_thin_expected, 1 + length(mod$covariates()) +
       5 + n_outputs + n_fc + 4)
   )
-  expect_equal(mod$priors()$prior.sigma_country.scale, 0.1)
+  expect_equal(mod$priors()$prior.sigma_c.scale, 0.1)
   expect_equal(
     mod$covariates(),
     c(
@@ -50,7 +50,7 @@ test_that("can load fixed unitcost model", {
     c((n_iter_expected) / n_thin_expected, 1 + length(mod$covariates()) +
       5 + 2)
   )
-  expect_equal(mod$priors()$prior.sigma_country.scale, 0.1)
+  expect_equal(mod$priors()$prior.sigma_c.scale, 0.1)
   expect_equal(
     mod$covariates(),
     c(
@@ -86,7 +86,7 @@ test_that("can load ohd unitcost model", {
     c((n_iter_expected) / n_thin_expected, 1 + length(mod$covariates()) +
       5 + 2)
   )
-  expect_equal(mod$priors()$prior.sigma_country.scale, 0.1)
+  expect_equal(mod$priors()$prior.sigma_c.scale, 0.1)
   expect_equal(
     mod$covariates(),
     c(

@@ -4,7 +4,7 @@ author: "Alex Hill"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{predicting costs}
+  %\VignetteIndexEntry{Using the Unit Cost Model}
   %\VignetteEngine{quarto::html}
   %\VignetteEncoding{UTF-8}
 ---
@@ -37,14 +37,21 @@ $$
 where $\mu_i$ is given by:
 
 $$
-\mu_i = \alpha_{c_i} + \sum_{j=1}^J{\beta_j \times x_{ji}}
+\mu_i = \alpha + \sum_{j=1}^J{\beta_j x_{ji}} + \gamma_{c_i} +  \delta_{f_i} +  \zeta_{v_i}
 $$
 
-The country-specific intercepts $\alpha_{c_i}$ are assumed to vary normally 
-according to:
+where $x_{ji}$ represents the value of the jth covariate, $c_i$ the country, $f_i$ the facility, and $v_i$ the visit type of observation $i$. The variables $\gamma_{c_i}$, $\delta_{f_i}$ and $\zeta_{v_i}$ account for systematic differences across countries, facilities and visit types, respectively, and are assumed to vary normally about zero:
 
 $$
-\alpha_{c} \sim \mathcal{N}(\mu_\alpha, \sigma_\alpha^2)
+\gamma_{c} \sim \mathcal{N}(0, \sigma_c^2)
+$$
+
+$$
+\delta_{f} \sim \mathcal{N}(0, \sigma_f^2)
+$$
+
+$$
+\zeta_{o} \sim \mathcal{N}(0, \sigma_v^2)
 $$
 
 Model instances are created via the `unitcost` function:
@@ -61,7 +68,7 @@ priors <- model$priors()
 print(priors)
 ```
 
-The prior distribution for each model parameter ($\sigma$, each $\beta_j$, $\mu_\alpha$, and $\sigma_\alpha$) can be visualised by calling `plot(priors, parameter = "name_of_param")`:
+The prior distribution for each model parameter can be visualised by calling `plot(priors, parameter = "name_of_param")`:
 
 ```{r beta-priors, fig.width=10, fig.height=6}
 library(gridExtra)
@@ -71,9 +78,9 @@ for(i in 1:9) {
 }
 plots[[10]] <- plot(priors, par = "alpha")
 plots[[11]] <- plot(priors, par = "sigma")
-plots[[12]] <- plot(priors, par = "sigma_country")
-plots[[13]] <- plot(priors, par = "sigma_fc")
-plots[[14]] <- plot(priors, par = "sigma_output")
+plots[[12]] <- plot(priors, par = "sigma_c")
+plots[[13]] <- plot(priors, par = "sigma_f")
+plots[[14]] <- plot(priors, par = "sigma_v")
 
 do.call(grid.arrange, c(plots, ncol = 3))
 ```
@@ -88,7 +95,7 @@ model$plot_posteriors(pars = paste0("beta[", 1:length(covariates), "]")) +
 
 ```{r}
 #| fig-cap: Fitted intercept and standard deviations of random effects
-model$plot_posteriors(pars = c("alpha", "sigma", "sigma_country", "sigma_fc", "sigma_output"))
+model$plot_posteriors(pars = c("alpha", "sigma", "sigma_c", "sigma_f", "sigma_v"))
 ```
 
 ## Training data
@@ -116,7 +123,7 @@ knitr::kable(summarised)
 
 The fitted model predicts the cost of a single outpatient visit, given key cost drivers. In the dataset outpatient visits of different types have output group "OP".
 
-The training data was processed from the raw data by adding one additional variable, `n_services`, which is the number of distinct TB outpatient services provided at each facility, and by centering all numeric covariates by their sample mean. The training data can be inspected by calling `model$training_data`:
+The training data was processed from the raw data by adding one additional variable, `n_services`, which is the number of distinct TB outpatient services provided at each facility, and by centering all numeric covariates by their sample mean. The training data can be inspected by calling `model$training_data()`:
 
 ```{r training-data}
 dat <- model$training_data() |> 
@@ -154,9 +161,9 @@ model$plot_fit(include_ci = TRUE, scale = "log")
 
 ## Generating predictions
 
-Predictions of unit cost for new inputs, not in the training set, are generated via the `predict` method. Note that numeric covariates must be centered; to convert raw values to centered values, you can use the `prepare_covariates` utility:
+Predictions of unit cost for new inputs, not in the training set, are generated via the `predict` method. Note that numeric covariates must be centered; to convert raw values to centered values, use the `prepare_covariates` utility:
 
-```{r}
+```{r, prepare}
 # Include all covariates plus facility country `fc_country` and visit type `output`
 new_inputs <- list(
   log_ID_p_bldgspace = 1, 
@@ -176,7 +183,7 @@ new_inputs <- list(
 covariates <- capturetb::prepare_covariates(raw = new_inputs, mod = model)
 ```
 
-```{r}
+```{r, pred}
 pred <- model$predict(covariates,
  scale = "natural",
  summarised = TRUE,
@@ -192,7 +199,7 @@ knitr::kable(pred)
 
 To see the full distribution of predicted costs:
 
-```{r}
-pred <- model$predict(new_inputs, scale = "natural", summarised = FALSE)
+```{r, plot-pred}
+pred <- model$predict(covariates, scale = "natural", summarised = FALSE)
 ggplot(data.frame(cost = pred), aes(x = cost)) + geom_density()
 ```

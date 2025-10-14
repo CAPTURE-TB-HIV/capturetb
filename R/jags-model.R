@@ -94,7 +94,7 @@ JAGSModel <- R6::R6Class("JAGSModel",
         "alpha",
         "beta",
         "sigma",
-        "sigma_country",
+        "sigma_c",
         "country_effect"
       )
       stopifnot("dat must be a data.frame" = is.data.frame(dat))
@@ -103,8 +103,8 @@ JAGSModel <- R6::R6Class("JAGSModel",
         private$.model <- "outputeffects.model"
         params <- c(
           params,
-          "sigma_fc",
-          "sigma_output",
+          "sigma_f",
+          "sigma_v",
           "output_effect",
           "fc_effect"
         )
@@ -185,8 +185,8 @@ JAGSModel <- R6::R6Class("JAGSModel",
           output = as.numeric(as.factor(dat$output))
         ))
       } else {
-        jags_data$prior.sigma_fc.scale <- NULL
-        jags_data$prior.sigma_output.scale <- NULL
+        jags_data$prior.sigma_f.scale <- NULL
+        jags_data$prior.sigma_v.scale <- NULL
       }
 
       if (is.null(seed)) {
@@ -486,8 +486,9 @@ JAGSModel <- R6::R6Class("JAGSModel",
       )
 
       if (!is.null(par)) {
-        if (!all(par %in% par_df$Parameter)) {
-          stop("Parameter '", par, "' not found in samples.")
+				unknown_par <- which(!(par %in% par_df$Parameter))
+        if (length(unknown_par) > 0) {
+          stop("Parameter '", par[[unknown_par[[1]]]], "' not found in samples.")
         }
         par_df <- par_df[par_df$Parameter %in% par, , drop = FALSE]
       }
@@ -1282,12 +1283,12 @@ JAGSModel <- R6::R6Class("JAGSModel",
 
       # population standard deviations
       sig <- smat[, "sigma"]
-      sig_country <- smat[, "sigma_country"]
+      sig_country <- smat[, "sigma_c"]
 
       if (output_effects) {
         # facility and output effect standard deviations
-        sig_fc <- smat[, "sigma_fc"]
-        sig_output <- smat[, "sigma_output"]
+        sig_fc <- smat[, "sigma_f"]
+        sig_output <- smat[, "sigma_v"]
 
         # known output effects
         if (length(private$.outputs) == 1) {

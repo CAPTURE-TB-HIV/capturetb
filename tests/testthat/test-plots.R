@@ -103,6 +103,13 @@ test_that("rhat snapshot test", {
   vdiffr::expect_doppelganger("rhat", unitcost()$mcmc_rhat(par = "alpha"))
 })
 
+test_that("get sensible error message if unknown par passed to rhat", {
+  expect_error(
+    res <- unitcost()$mcmc_rhat(par = c("alpha", "bad")),
+    "Parameter 'bad' not found in samples."
+  )
+})
+
 test_that("can plot acf once fitted", {
   model <- JAGSModel$new(dat_multioutput,
     covariates = test_covariates,

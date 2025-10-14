@@ -4,16 +4,15 @@ model {
     mu[i] <- alpha + inprod(x[i, ], beta[]) + country_effect[country[i]] + fc_effect[fc[i]] + output_effect[output[i]] 
   }
 
- # sigma_fc ~ dt(0, pow(prior.sigma_fc.scale, -2), 3) T(0, )
-	sigma_fc ~ dunif(0, 100)  # Alternative prior
-  tau_fc <- pow(sigma_fc, -2)
+  sigma_f ~ dt(0, pow(prior.sigma_f.scale, -2), 3) T(0, )
+  tau_fc <- pow(sigma_f, -2)
 
   for (j in 1:NFC) {
     fc_effect[j] ~ dnorm(0, tau_fc)
   }
 
-  sigma_output ~ dt(0, pow(prior.sigma_output.scale, -2), 3) T(0, )
-  tau_output <- pow(sigma_output, -2)
+  sigma_v ~ dt(0, pow(prior.sigma_v.scale, -2), 3) T(0, )
+  tau_output <- pow(sigma_v, -2)
 
   for (j in 1:NO) {
     output_effect[j] ~ dnorm(0, tau_output)
@@ -21,12 +20,12 @@ model {
 
 	alpha ~ dnorm(prior.alpha.mean, prior.alpha.precision)
 
-  sigma_country ~ dt(0, pow(prior.sigma_country.scale, -2), 3) T(0, )
-	tau_country <- pow(sigma_country, -2)
+  sigma_c ~ dt(0, pow(prior.sigma_c.scale, -2), 3) T(0, )
+	tau_country <- pow(sigma_c, -2)
 
 	for (j in 1:NC) {
 		z[j] ~ dnorm(0, 1)
-		country_effect[j] <- 0 + sigma_country * z[j]
+		country_effect[j] <- 0 + sigma_c * z[j]
 	}
 
 	for (k in 1:K) {

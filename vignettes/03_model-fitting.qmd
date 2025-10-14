@@ -24,24 +24,25 @@ library(ggplot2)
 library(dplyr)
 ```
 
-This vignette demonstrates how the default model was fitted and sensitivity analyses performed. It also shows how models could be fit using different covariates, target variable, training data or priors.
+This vignette demonstrates how the `unitcost`, `unitcost_fixed` and `unitcost_ohd` models were fitted and sensitivity analyses performed. It also shows how models could be fit using different covariates, target variable, training data or priors.
 
-The following functions were included in the package to make the process of model development transparent and reproducible, but if you want to use the final `capturetb` models to predict costs you should read `vignette("01_model-predictions")` instead.
+The following functions were included in the package to make the process of model development transparent and reproducible, but if you want to use the final `capturetb` models to predict costs you should read `vignette("01_unitcost-model-predictions")` and `vignette("02_combining-predictions-data")` instead.
 
 ## Creating a model instance
 
 A model instance requires a list of covariates, a target variable to predict, training data, and priors for parameters. 
 
 ```{r model-inputs}
-covariates <- c("logVisits", "logVisitsPP", "logVisitsPP_TB", "primary",
- "secondary", "urban", "public")
+covariates <- c("logVisits", "logVisitsPP", "logVisitsPP_TB", "urban", "public")
+
+target <- "ID_unitcost_total"
 
 # Specifying priors for the fixed effects
 # One beta coefficient for each covariate
 # Other parameters will take default values
 priors <- capturetb::capturetb_priors(
-  beta.mean = c(-0.0142, -0.0412, -0.0412, 0.304, 0.348, 0.352, -0.29),
-  beta.precision = c(227, 139, 139, 46.4, 80.8, 55.2, 234.5)
+  beta.mean = rep(0, length(covariates)),
+  beta.precision = rep(0.01, length(covariates))
 )
 
 data <- get_data(output_name = "op_diagnosticvisit") 
@@ -50,18 +51,18 @@ data <- get_data(output_name = "op_diagnosticvisit")
 # installed with the package
 ```
 
-We now create an instance of the `capturetb::JAGSModel` class to fit a model with country, facility and output type effects and shared slopes. To fit a fixed effects model we could use the FixedEffects class, or to fit a model with random slopes, we could use a RandomSlopes class. See `vignette("03_model-comparisons")` for details on the different model structures.
+We now create an instance of the `capturetb::JAGSModel` class to fit a model with fixed covariate effects and country level random effects. If the data provided has more than one unique output type in the `output` column, the model will include facility and visit type effects. If the data has only one unique output type, no facility or visit type effects will be included.
  
 ```{r model-creation}
 model <- capturetb::JAGSModel$new(
   dat = data,
   covariates = covariates,
-  target = "ID_unitcost_total",
+  target = target,
   priors = priors
 )
 ```
 
-Priors can be visualised by calling `plot(priors, parameter = "name_of_param")`:
+Priors can be visualised by calling `plot(priors, par = "name_of_param")`:
 
 ```{r beta-priors, fig.width=10, fig.height=6}
 library(gridExtra)
@@ -70,15 +71,14 @@ plots <- list()
 for(i in 1:3) {
   plots[[i]] <- plot(priors, par = paste0("beta[", i, "]"))
 }
-plots[[4]] <- plot(priors, par = "sigma_country")
-plots[[5]] <- plot(priors, par = "sigma_output")
-plots[[6]] <- plot(priors, par = "sigma")
+plots[[4]] <- plot(priors, par = "sigma_c")
+plots[[5]] <- plot(priors, par = "sigma")
 do.call(grid.arrange, c(plots, ncol = 3))
 ```
 
 ## Fitting the model
 
-Under the hood the JAGSModel class uses JAGS (Just Another Gibbs Sampler) to fit a multilevel linear regression model with country, output and facility random effects, and fixed covariate effects. To fit the model, [JAGS](https://sourceforge.net/projects/mcmc-jags/) and the [runjags](https://cran.r-project.org/web/packages/runjags/index.html) package must be installed on your machine.
+Under the hood the JAGSModel class uses JAGS (Just Another Gibbs Sampler) to fit a multilevel linear regression model. To fit the model, [JAGS](https://sourceforge.net/projects/mcmc-jags/) and the [runjags](https://cran.r-project.org/web/packages/runjags/index.html) package must be installed on your machine.
 
 For the purpose of the vignette, we'll use fewer iterations than recommended for faster computation:
 
@@ -105,36 +105,36 @@ Several functions are available on the model class to check whether the model ha
 
 Rhat:
 
-```{r}
-model$mcmc_rhat(par = paste0("beta[", 1:6, "]"))
+```{r, rhat}
+model$mcmc_rhat(par = paste0("beta[", 1:length(covariates), "]"))
 ```
 
 Trace:
 
-```{r}
+```{r, trace}
 model$mcmc_trace(regex_pars = "beta")
 ```
 
 Auto-correlation:
 
-```{r}
+```{r, acf}
 model$mcmc_acf(regex_pars = "beta")
 ```
 
 Effective sample size:
 
-```{r}
+```{r, neff}
 knitr::kable(model$n_eff())
 ```
 
 We can also plot the posterior distributions of each parameter:
 
-```{r}
+```{r, post}
 model$plot_posteriors(pars = paste0("beta[", 1:length(covariates), "]")) + 
   scale_y_discrete(labels = covariates)
 ```
 
-```{r}
+```{r, country}
 model$plot_posteriors(pars = paste0("country_effect[", 1:5, "]"))
 ```
 
@@ -195,7 +195,7 @@ model$plot_fit() +
 
 We can check for overfitting and estimate out-of-sample performance using k-fold cross-validation. Here we use 3 folds for quick compilation; in practice, 10 or 20 folds would give a more accurate picture.
 
-```{r}
+```{r, kfold}
 res <- model$k_fold_cv(k_folds = 3, 
   n.iter = 10000,
   n.burnin = 1000,
@@ -218,7 +218,7 @@ There are three pre-fitted models installed with the package:
 * `unitcost_fixed()`: predicts the fixed costs associated with a single outpatient visit
 * `unitcost_ohd()`: predicts the fixed costs associated with a single outpatient visit
 
-```{r, eval = FALSE}
+```{r, eval = FALSE, inst}
 mod_unit <- unitcost()
 mod_unit$fit(seed = 1)
 samples <- mod_unit$samples()
@@ -236,7 +236,7 @@ saveRDS(DIC_fixed, "inst/posterior_samples_dic_fixed.rds")
 mod_unit_ohd <- unitcost_ohd()
 mod_unit_ohd$fit(seed = 1)
 samples_ohd <- mod_unit_ohd$samples()
-DIC <- mod_unit$mcmc_DIC()
+DIC_ohd <- mod_unit_ohd$mcmc_DIC()
 saveRDS(samples_ohd, "inst/posterior_samples_ohd.rds")
 saveRDS(DIC_ohd, "inst/posterior_samples_dic_ohd.rds")
 ```
@@ -244,11 +244,3 @@ saveRDS(DIC_ohd, "inst/posterior_samples_dic_ohd.rds")
 Executing the above code will reproduce exactly the posterior samples installed with 
 this package. The functions `unitcost()`, `unitcost_fixed()` and `unitcost_ohd()` use 
 the saved posteriors to load the models without requiring fitting at runtime. 
-
-```{r}
-df <- rbind(unitcost()$performance(scale = "natural"),
-unitcost_fixed()$performance(scale = "natural"),
-unitcost_ohd()$performance(scale = "natural"))
-rownames(df) <- c("unitcost", "unitcost_fixed", "unitcost_ohd")
-knitr::kable(df)
-```

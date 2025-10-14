@@ -357,7 +357,7 @@ test_that("fitted_parameters method works correctly", {
     paste0("beta[", 1:9, "]"),
     paste0("country_effect[", 1:5, "]"),
     paste0("output_effect[", 1:14, "]"),
-    "sigma", "sigma_country", "sigma_fc", "sigma_output"
+    "sigma", "sigma_c", "sigma_f", "sigma_v"
   )
   expect_equal(params$Parameter, expected_params)
 

@@ -26,7 +26,7 @@ library(dplyr)
 
 ## Cost-effectiveness analyses
 
-When using model estimates in the context of an HTA, model uncertainty will have a certain cost associated with it. The `capturetb::unitcost` model has a built-in method for calulating the Expected Value of Perfect Information (EVPI) - in other words, the cost of model uncertainty - given a willingness-to-pay threshold.
+When using model estimates in the context of an HTA, model uncertainty will have a certain cost associated with it. The models in this package have a built-in method for calulating the Expected Value of Perfect Information (EVPI) - in other words, the cost of model uncertainty - given a willingness-to-pay threshold.
 
 To visualise model uncertainty, we predict costs for an unseen facility:
 

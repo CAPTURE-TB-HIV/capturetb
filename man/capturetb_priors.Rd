@@ -8,9 +8,9 @@ capturetb_priors(
   alpha.mean = 0,
   alpha.precision = 0.01,
   sigma.scale = 10,
-  sigma_country.scale = 10,
-  sigma_fc.scale = 10,
-  sigma_output.scale = 10,
+  sigma_c.scale = 10,
+  sigma_f.scale = 10,
+  sigma_v.scale = 10,
   beta.mean = 0,
   beta.precision = 0.01
 )
@@ -25,14 +25,14 @@ the prior for the intercept `alpha``. Default is 0.01.}
 \item{sigma.scale}{Numeric scalar. Scale parameter for Half-Cauchy prior
 on \code{sigma}. Default is 1.}
 
-\item{sigma_country.scale}{Numeric scalar. Scale parameter for Half-Cauchy
-prior on \code{sigma_country}. Default is 1.}
+\item{sigma_c.scale}{Numeric scalar. Scale parameter for Half-Cauchy
+prior on \code{sigma_c}. Default is 1.}
 
-\item{sigma_fc.scale}{Numeric scalar. Scale parameter for Half-Student-t with
-3 degrees of freedom prior on \code{sigma_fc}. Default is 1.}
+\item{sigma_f.scale}{Numeric scalar. Scale parameter for Half-Student-t with
+3 degrees of freedom prior on \code{sigma_f}. Default is 1.}
 
-\item{sigma_output.scale}{Numeric scalar. Scale parameter for Half-Cauchy
-prior on \code{sigma_output}. Default is 1.}
+\item{sigma_v.scale}{Numeric scalar. Scale parameter for Half-Cauchy
+prior on \code{sigma_v}. Default is 1.}
 
 \item{beta.mean}{Numeric vector. Means of the priors for the \code{beta}
 coefficients of fixed effects.}

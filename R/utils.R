@@ -4,7 +4,7 @@
 #'
 #' @param x Object of class 'capturetbpriors'. See [capturetb_priors()].
 #' @param par Character. Name of the parameter to plot.
-#' ("alpha", "sigma", "sigma_country", "beta\[1\]", ...).
+#' ("alpha", "sigma", "sigma_c", "beta\[1\]", ...).
 #' Default is "alpha".
 #' @export
 #' @method plot capturetbpriors
@@ -40,7 +40,7 @@ plot.capturetbpriors <- function(x, ..., par = "alpha") {
   }
   # half Student's-t plot helper
   plot_half_cauchy <- function(scale, label) {
-    vals <- seq(0, 10, length.out = 1000)
+    vals <- seq(0, 50, length.out = 5000)
     dens <- dhalft(vals, sigma = scale)
     df <- data.frame(x = vals, y = dens)
 
@@ -49,7 +49,7 @@ plot.capturetbpriors <- function(x, ..., par = "alpha") {
       ggplot2::labs(
         title = paste("Half-Student-t 3 d.f. prior for", label),
         x = label, y = "Density"
-      )
+      ) + ggplot2::xlim(0, max(df$x[df$y > 0.01]))
   }
 
   # Handle beta priors
@@ -65,8 +65,8 @@ plot.capturetbpriors <- function(x, ..., par = "alpha") {
 
   # Handle other priors
   if (par %in% c(
-    "alpha", "sigma_country", "sigma",
-    "sigma_fc", "sigma_output"
+    "alpha", "sigma_c", "sigma",
+    "sigma_f", "sigma_v"
   )) {
     if (par == "alpha") {
       mean <- x$prior.alpha.mean
@@ -75,20 +75,20 @@ plot.capturetbpriors <- function(x, ..., par = "alpha") {
     } else if (par == "sigma") {
       scale <- x$prior.sigma.scale
       return(plot_half_cauchy(scale, "sigma"))
-    } else if (par == "sigma_country") {
-      scale <- x$prior.sigma_country.scale
-      return(plot_half_cauchy(scale, "sigma_country"))
-    } else if (par == "sigma_fc") {
-      scale <- x$prior.sigma_fc.scale
-      return(plot_half_cauchy(scale, "sigma_fc"))
-    } else if (par == "sigma_output") {
-      scale <- x$prior.sigma_output.scale
-      return(plot_half_cauchy(scale, "sigma_output"))
+    } else if (par == "sigma_c") {
+      scale <- x$prior.sigma_c.scale
+      return(plot_half_cauchy(scale, "sigma_c"))
+    } else if (par == "sigma_f") {
+      scale <- x$prior.sigma_f.scale
+      return(plot_half_cauchy(scale, "sigma_f"))
+    } else if (par == "sigma_v") {
+      scale <- x$prior.sigma_v.scale
+      return(plot_half_cauchy(scale, "sigma_v"))
     }
   }
 
   stop("Unknown parameter name. Use 'alpha', 'sigma',
-  'sigma_country', 'sigma_fc', 'sigma_output', or 'beta[1]', etc.")
+  'sigma_c', 'sigma_f', 'sigma_v', or 'beta[1]', etc.")
 }
 
 #' Prepare covariates for prediction

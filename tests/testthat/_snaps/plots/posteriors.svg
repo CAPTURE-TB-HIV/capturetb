@@ -369,9 +369,9 @@
 <line x1='271.41' y1='532.97' x2='355.70' y2='532.97' style='stroke-width: 1.07; stroke: #03396C; stroke-linecap: butt;' />
 </g>
 <g clip-path='url(#cpMC4wMHw3MjAuMDB8MC4wMHw1NzYuMDA=)'>
-<text x='71.05' y='536.00' text-anchor='end' style='font-size: 8.80px; font-weight: bold; fill: #4D4D4D; font-family: sans;' textLength='52.84px' lengthAdjust='spacingAndGlyphs'>sigma_output</text>
-<text x='71.05' y='520.54' text-anchor='end' style='font-size: 8.80px; font-weight: bold; fill: #4D4D4D; font-family: sans;' textLength='35.22px' lengthAdjust='spacingAndGlyphs'>sigma_fc</text>
-<text x='71.05' y='505.08' text-anchor='end' style='font-size: 8.80px; font-weight: bold; fill: #4D4D4D; font-family: sans;' textLength='57.24px' lengthAdjust='spacingAndGlyphs'>sigma_country</text>
+<text x='71.05' y='536.00' text-anchor='end' style='font-size: 8.80px; font-weight: bold; fill: #4D4D4D; font-family: sans;' textLength='52.84px' lengthAdjust='spacingAndGlyphs'>sigma_v</text>
+<text x='71.05' y='520.54' text-anchor='end' style='font-size: 8.80px; font-weight: bold; fill: #4D4D4D; font-family: sans;' textLength='35.22px' lengthAdjust='spacingAndGlyphs'>sigma_f</text>
+<text x='71.05' y='505.08' text-anchor='end' style='font-size: 8.80px; font-weight: bold; fill: #4D4D4D; font-family: sans;' textLength='57.24px' lengthAdjust='spacingAndGlyphs'>sigma_c</text>
 <text x='71.05' y='489.62' text-anchor='end' style='font-size: 8.80px; font-weight: bold; fill: #4D4D4D; font-family: sans;' textLength='23.48px' lengthAdjust='spacingAndGlyphs'>sigma</text>
 <text x='71.05' y='474.16' text-anchor='end' style='font-size: 8.80px; font-weight: bold; fill: #4D4D4D; font-family: sans;' textLength='65.57px' lengthAdjust='spacingAndGlyphs'>output_effect[14]</text>
 <text x='71.05' y='458.70' text-anchor='end' style='font-size: 8.80px; font-weight: bold; fill: #4D4D4D; font-family: sans;' textLength='65.57px' lengthAdjust='spacingAndGlyphs'>output_effect[13]</text>

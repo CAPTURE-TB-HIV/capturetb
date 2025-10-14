@@ -77,12 +77,12 @@ get_data <- function(output_name = NULL, output_group = NULL) {
 #' the prior for the intercept `alpha``. Default is 0.01.
 #' @param sigma.scale Numeric scalar. Scale parameter for Half-Cauchy prior
 #' on `sigma`. Default is 1.
-#' @param sigma_country.scale Numeric scalar. Scale parameter for Half-Cauchy
-#' prior on `sigma_country`. Default is 1.
-#' @param sigma_fc.scale Numeric scalar. Scale parameter for Half-Student-t with 
-#' 3 degrees of freedom prior on `sigma_fc`. Default is 1.
-#' @param sigma_output.scale Numeric scalar. Scale parameter for Half-Cauchy
-#' prior on `sigma_output`. Default is 1.
+#' @param sigma_c.scale Numeric scalar. Scale parameter for Half-Cauchy
+#' prior on `sigma_c`. Default is 1.
+#' @param sigma_f.scale Numeric scalar. Scale parameter for Half-Student-t with 
+#' 3 degrees of freedom prior on `sigma_f`. Default is 1.
+#' @param sigma_v.scale Numeric scalar. Scale parameter for Half-Cauchy
+#' prior on `sigma_v`. Default is 1.
 #' @param beta.mean Numeric vector. Means of the priors for the `beta`
 #' coefficients of fixed effects.
 #' @param beta.precision Numeric vector. Precision of the priors for the
@@ -93,9 +93,9 @@ get_data <- function(output_name = NULL, output_group = NULL) {
 capturetb_priors <- function(alpha.mean = 0,
                              alpha.precision = 0.01,
                              sigma.scale = 10,
-                             sigma_country.scale = 10,
-                             sigma_fc.scale = 10,
-                             sigma_output.scale = 10,
+                             sigma_c.scale = 10,
+                             sigma_f.scale = 10,
+                             sigma_v.scale = 10,
                              beta.mean = 0,
                              beta.precision = 0.01) {
   stopifnot(
@@ -105,20 +105,20 @@ capturetb_priors <- function(alpha.mean = 0,
     "alpha.precision must be scalar" = length(alpha.precision) == 1,
     "sigma.scale must be numeric" = is.numeric(sigma.scale),
     "sigma.scale must be scalar" = length(sigma.scale) == 1,
-    "sigma_country.scale must be numeric" = is.numeric(sigma_country.scale),
-    "sigma_country.scale must be scalar" = length(sigma_country.scale) == 1,
-    "sigma_fc.scale must be numeric" = is.numeric(sigma_fc.scale),
-    "sigma_fc.scale must be scalar" = length(sigma_fc.scale) == 1,
-    "sigma_output.scale must be numeric" = is.numeric(sigma_output.scale),
-    "sigma_output.scale must be scalar" = length(sigma_output.scale) == 1,
+    "sigma_c.scale must be numeric" = is.numeric(sigma_c.scale),
+    "sigma_c.scale must be scalar" = length(sigma_c.scale) == 1,
+    "sigma_f.scale must be numeric" = is.numeric(sigma_f.scale),
+    "sigma_f.scale must be scalar" = length(sigma_f.scale) == 1,
+    "sigma_v.scale must be numeric" = is.numeric(sigma_v.scale),
+    "sigma_v.scale must be scalar" = length(sigma_v.scale) == 1,
     "beta.mean must be numeric" = is.numeric(beta.mean),
     "beta.precision must be numeric" = is.numeric(beta.precision),
     "alpha.mean must not be NaN" = !is.nan(alpha.mean),
     "alpha.precision must not be NaN" = !is.nan(alpha.precision),
     "sigma.scale must not be NaN" = !is.nan(sigma.scale),
-    "sigma_country.scale must not be NaN" = !is.nan(sigma_country.scale),
-    "sigma_fc.scale must not be NaN" = !is.nan(sigma_fc.scale),
-    "sigma_output.scale must not be NaN" = !is.nan(sigma_output.scale),
+    "sigma_c.scale must not be NaN" = !is.nan(sigma_c.scale),
+    "sigma_f.scale must not be NaN" = !is.nan(sigma_f.scale),
+    "sigma_v.scale must not be NaN" = !is.nan(sigma_v.scale),
     "beta.mean must not be NaN" = !any(is.nan(beta.mean)),
     "beta.precision must not be NaN" = !any(is.nan(beta.precision)),
     "beta.mean and beta.precision must be the same length" =
@@ -128,9 +128,9 @@ capturetb_priors <- function(alpha.mean = 0,
     prior.alpha.mean = alpha.mean,
     prior.alpha.precision = alpha.precision,
     prior.sigma.scale = sigma.scale,
-    prior.sigma_country.scale = sigma_country.scale,
-		prior.sigma_fc.scale = sigma_fc.scale,
-    prior.sigma_output.scale = sigma_output.scale,
+    prior.sigma_c.scale = sigma_c.scale,
+		prior.sigma_f.scale = sigma_f.scale,
+    prior.sigma_v.scale = sigma_v.scale,
     prior.beta.mean = beta.mean,
     prior.beta.precision = beta.precision
   )

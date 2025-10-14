@@ -123,7 +123,7 @@ opvisit_priors <- function(n_weak_priors) {
   # use a moderately informative prior to regularise the country-level effects
   # as only 5 countries are included in the training data
   capturetb_priors(
-    sigma_country.scale = 0.1,
+    sigma_c.scale = 0.1,
     beta.mean = c(
       public_prior$mu, urban_prior$mu,
       primary$mu, secondary$mu, tertiary$mu,
