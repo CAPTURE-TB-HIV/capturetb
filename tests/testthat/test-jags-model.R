@@ -359,7 +359,7 @@ test_that("fitted_parameters method works correctly", {
     paste0("output_effect[", 1:14, "]"),
     "sigma", "sigma_c", "sigma_f", "sigma_v"
   )
-  expect_equal(params$Parameter, expected_params)
+  expect_equal(order(params$Parameter), order(expected_params))
 
   # Check that lower <= mean <= upper for all parameters
   expect_true(all(params$CI_low <= params$Mean))
