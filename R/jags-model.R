@@ -1231,10 +1231,11 @@ JAGSModel <- R6::R6Class("JAGSModel",
         private$.covariates,
         "fc_country"
       )
+
       if (include_target) {
         required_cols <- c(required_cols, private$.target)
       }
-      if (length(unique(private$outputs)) > 1) {
+      if (length(unique(private$.outputs)) > 1) {
         required_cols <- c(required_cols, "output")
       }
       missing_cols <- setdiff(required_cols, names(dat))
@@ -1244,7 +1245,8 @@ JAGSModel <- R6::R6Class("JAGSModel",
           paste(missing_cols, collapse = ", ")
         )
       }
-      if (any(!dat$output %in% private$.outputs)) {
+
+      if ("output" %in% names(dat) && any(!dat$output %in% private$.outputs)) {
         warning(sprintf(
           "Unknown output types: %s",
           paste(setdiff(
@@ -1253,6 +1255,7 @@ JAGSModel <- R6::R6Class("JAGSModel",
           ), collapse = ", ")
         ))
       }
+
       centering_values <- private$.centering_values
       for (cov in private$.covariates) {
         if (is.numeric(dat[[cov]]) && !is.null(centering_values[[cov]])) {
@@ -1272,19 +1275,6 @@ JAGSModel <- R6::R6Class("JAGSModel",
     },
     .predict = function(dat, conditional = FALSE) {
       output_effects <- private$.model == "outputeffects.model"
-      if (output_effects) {
-        if (!"output" %in% names(dat)) {
-          stop("Column 'output' required in prediction data")
-        }
-        unknown_outputs <- unique(dat[["output"]][!(dat[["output"]] %in% private$.outputs)])
-        if (length(unknown_outputs) > 0) {
-          warning(
-            "Unknown output types in prediction data: ",
-            paste(unknown_outputs, collapse = ", ")
-          )
-        }
-      }
-
       smat <- do.call(rbind, lapply(private$.samples, as.matrix))
 
       # shared intercept

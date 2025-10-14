@@ -131,6 +131,56 @@ test_that("returns summarised predictions if summarised=TRUE", {
   expect_equal(preds_summary$Mean, manual_mean, tolerance = 0.01)
 })
 
+test_that("multioutput models require output", {
+  multioutput <- unitcost()
+  dat <- multioutput$training_data()
+  dat$output <- NULL
+
+  expect_error(
+    multioutput$predict(dat), "Missing required columns in data: output"
+  )
+  dat$output <- "unknown"
+  expect_warning(
+    multioutput$predict(dat), "Unknown output types: unknown"
+  )
+})
+
+test_that("single output models do not require output", {
+  mod <- unitcost_fixed()
+  dat <- mod$training_data()
+  dat$output <- NULL
+
+  expect_silent(
+    mod$predict(dat)
+  )
+  dat$output <- "unknown"
+  expect_warning(
+    mod$predict(dat), "Unknown output types: unknown"
+  )
+})
+
+test_that("conditional predictions require fc_code for multioutput models", {
+  mod <- unitcost()
+  dat <- mod$training_data()
+  dat$fc_code <- NULL
+
+  expect_error(
+    mod$performance(dat = dat, conditional = TRUE),
+    "Column 'fc_code' required"
+  )
+})
+
+test_that("conditional flag ignored for single output models", {
+  mod <- unitcost_fixed()
+  dat <- mod$training_data()
+  dat$fc_code <- NULL
+
+  expect_warning(
+    mod$performance(dat = dat, conditional = TRUE),
+    "conditional = TRUE has no effect when there is only one output type"
+  )
+})
+
 test_that("predict_total expects n_outputs to be scalar or have right length", {
   model <- unitcost()
   dat <- model$training_data()
