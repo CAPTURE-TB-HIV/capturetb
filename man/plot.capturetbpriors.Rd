@@ -12,7 +12,7 @@
 \item{\dots}{Further arguments passed to the method.}
 
 \item{par}{Character. Name of the parameter to plot.
-("alpha", "sigma", "sigma_country", "beta[1]", ...).
+("alpha", "sigma", "sigma_c", "beta[1]", ...).
 Default is "alpha".}
 }
 \description{

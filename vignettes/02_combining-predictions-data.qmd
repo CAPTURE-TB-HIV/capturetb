@@ -26,10 +26,36 @@ library(dplyr)
 
 In some contexts it may be feasible to collect partial costs. The package provides two models to assist with this:
 
-* `unitcost_fixed()` - predicts the fixed costs of a single outpatient treatment visit and can be combined with directly measured variable costs
-* `unitcost_ohd()` - predicts the overhead costs of a single outpatient treatment visit and can be combined with directly measured costs excluding overheads
+* `unitcost_fixed()` - predicts the fixed costs of a single outpatient visit and can be combined with directly measured variable costs
+* `unitcost_ohd()` - predicts the overhead costs of a single outpatient visit and can be combined with directly measured costs excluding overheads
 
-To see how the resulting estimates of unit costs vary:
+## Model Structures
+Fixed costs vary very little by visit type, and overheads not at all by visit type, so the Fixed Unit Cost and Overhead Unit Cost model have a simpler structure than the Unit Cost Model.
+
+For both, log costs are assumed to vary normally:
+
+$$
+\log(\text{USD\_unitcost\_total}_i) \sim \mathrm{N}(\mu_i, \sigma^2)
+$$
+
+where $\mu_i$ is given by:
+
+$$
+\mu_i = \alpha + \sum_{j=1}^J{\beta_j x_{ji}} + \gamma_{c_i}
+$$
+
+where $x_{ji}$ represents the value of the jth covariate and $c_i$ the country of observation $i$. The variable $\gamma_{c_i}$ accounts for systematic differences across countries, and is assumed to vary normally about zero:
+
+$$
+\gamma_{c} \sim \mathrm{N}(0, \sigma_c^2)
+$$
+
+## Comparing accuracy of each model
+
+We compare the accuracy of predictions made by each of the models by looking at:
+1. The cost of a single visit as predicted by the `unitcost` model.
+2. The cost of a single visit as estimated by combining the directly measured variable costs in the raw data with the predictions for fixed costs made by the `unitcost_fixed` model.
+3. The cost of a single visit as estimated by combining the directly measured non-overhead costs in the raw data with the predictions for overhead costs made by the `unitcost_ohd` model.
 
 ```{r, mods}
 mod_uc <- unitcost()
@@ -124,7 +150,7 @@ ggplot2::ggplot(results_df, ggplot2::aes(
 	)
 ```
 
-As would be expected, measuring a subset of costs improves accuracy of final estimates and somewhat reduces uncertainty, although uncertainty remains high, especially for the predictions of overheads.
+As would be expected, measuring a subset of costs improves accuracy of final estimates and somewhat reduces uncertainty, although uncertainty remains high.
 
 ```{r, uncertainty}
 #| tab-cap: Performance metrics of each model

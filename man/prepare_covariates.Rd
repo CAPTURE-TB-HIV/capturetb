@@ -11,6 +11,10 @@ prepare_covariates(raw, model)
 
 \item{model}{A \code{capturetb::JAGSModel} object.}
 }
+\value{
+A \code{\link[tibble:tibble]{tibble::tibble()}} with class 'capturetbdata' suitable for input
+\code{\link[=JAGSModel]{JAGSModel}}'s \code{$predict()}, \code{$performance()}, and \code{$evpi()} methods.
+}
 \description{
 Centers numeric covariates as required by the model.
 }

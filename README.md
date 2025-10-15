@@ -8,7 +8,7 @@ remotes::install_github("CAPTURE-TB-HIV/capturetb")
 
 ## Basic usage
 
-To predict the unitcost of one outpatient treatment visit given facility characteristics:
+To predict the unitcost of one outpatient visit given facility characteristics:
 
 ```r
 # Load model
@@ -17,27 +17,33 @@ model <- capturetb::unitcost()
 # View covariates
 covariates <- model$covariates()
 print(covariates)
-# [1] "log_USD_p_bldgspace" "logVisits"           "logVisitsPP_TB"        
-# [4] "secondary"           "urban"               "public"    
+[1] "public"             "urban"              "primary"           
+[4] "secondary"          "tertiary"           "n_services"        
+[7] "log_ID_p_bldgspace" "logVisits"          "logVisitsPP_TB"     
 
 # Generate predictions from posterior
-pred <- model$predict(list(
-  log_USD_p_bldgspace = 1,
+inputs <- list(
+  log_ID_p_bldgspace = 1,
   logVisits = 6.9, 
   logVisitsPP_TB = -1.29, 
-	primary = TRUE,
+  primary = TRUE,
   secondary = FALSE, 
+  tertiary = FALSE,
   urban = FALSE, 
   public = TRUE,
-	n_services = 3,
-	output = "op_treatmentvisit",
+  n_services = 3,
+  output = "op_treatmentvisit",
   fc_country = "Ethiopia"
-), scale = "natural", summarised = TRUE)
+)
+pred <- model$predict(
+	prepare_covariates(inputs),
+	scale = "natural",
+	summarised = TRUE)
 
 # Expected unit cost is mean prediction
 expected_unit_cost <- pred$Mean
 print(expected_unit_cost)
-[1] 8.659947
+[1] 4.08444
 ```
 
 ## Advanced usage

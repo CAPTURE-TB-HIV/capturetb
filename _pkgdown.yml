@@ -20,8 +20,6 @@ reference:
 - title: "Advanced usage"
   desc: "Functions for fitting models to new data, using different model structures, or using different priors"
   contents:
-    - MixedEffects
-    - RandomSlopes
     - JAGSModel
     - capturetb_priors
     - plot.capturetbpriors

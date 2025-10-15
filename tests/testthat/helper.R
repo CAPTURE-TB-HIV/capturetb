@@ -3,9 +3,9 @@ mock_samples <- function(n_sim) {
     c(
       rep(0, n_sim), # sigma
       rep(1, n_sim), # alpha
-      rep(0.01, n_sim), # sigma_country
-      rep(0, n_sim), # sigma_fc
-      rep(0.03, n_sim), # sigma_output
+      rep(0.01, n_sim), # sigma_c
+      rep(0, n_sim), # sigma_f
+      rep(0.03, n_sim), # sigma_v
       rep(0.2, n_sim), # beta[1]
       rep(0.3, n_sim), # beta[2]
       rep(0.4, n_sim), # beta[3]
@@ -21,9 +21,9 @@ mock_samples <- function(n_sim) {
   colnames(smat) <- c(
     "sigma",
     "alpha",
-    "sigma_country",
-    "sigma_fc",
-    "sigma_output",
+    "sigma_c",
+    "sigma_f",
+    "sigma_v",
     paste0("beta[", 1:3, "]"),
     paste0("country_effect[", 1:2, "]"),
     paste0("output_effect[", 1:2, "]")

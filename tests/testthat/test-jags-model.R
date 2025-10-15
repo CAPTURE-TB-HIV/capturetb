@@ -1,6 +1,6 @@
-test_that("MixedEffects class initialization works", {
-  dat <- get_data("OP treatment visit")
-  model <- suppressWarnings(MixedEffects$new(dat,
+test_that("JAGSModel class initialization works", {
+  dat <- get_data("op_treatmentvisit")
+  model <- suppressWarnings(JAGSModel$new(dat,
     covariates = test_covariates,
     target = "USD_unitcost_total",
     priors = capturetb_priors(
@@ -18,14 +18,15 @@ test_that("MixedEffects class initialization works", {
     capturetb_priors(beta.mean = rep(0, 5), beta.precision = rep(0.01, 5))
   )
 
-  expect_equal(model$training_data(), dat)
+  expect_equal(model$training_data(), dat, ignore_attr = TRUE)
+  expect_true(inherits(model$training_data(), "capturetbdata"))
 })
 
-test_that("MixedEffects$new validation works", {
+test_that("JAGSModel$new validation works", {
   dat <- get_data(output_name = "op_treatmentvisit")
   dat[1, "logVisits"] <- NA
   warnings <- testthat::capture_warnings({
-    model <- MixedEffects$new(dat,
+    model <- JAGSModel$new(dat,
       covariates = test_covariates,
       target = "USD_unitcost_total"
     )
@@ -43,7 +44,7 @@ test_that("MixedEffects$new validation works", {
 
   # Test invalid data
   expect_error(
-    MixedEffects$new(
+    JAGSModel$new(
       dat = "not a data frame",
       priors = capturetb_priors(
         beta.mean = rep(0, 5),
@@ -59,7 +60,7 @@ test_that("MixedEffects$new validation works", {
   data <- dat[1:50, ]
   data$log_USD_p_bldgspace <- NULL
   expect_error(
-    MixedEffects$new(
+    JAGSModel$new(
       dat = data,
       target = "USD_unitcost_total",
       priors = capturetb_priors(
@@ -73,7 +74,7 @@ test_that("MixedEffects$new validation works", {
 
   # Test missing target
   expect_error(
-    MixedEffects$new(
+    JAGSModel$new(
       dat = dat,
       priors = capturetb_priors(
         beta.mean = rep(0, 5),
@@ -87,7 +88,7 @@ test_that("MixedEffects$new validation works", {
 
   # Test mismatched priors and covariates
   expect_error(
-    MixedEffects$new(
+    JAGSModel$new(
       dat = dat,
       priors = capturetb_priors(
         beta.mean = rep(0, 6),
@@ -99,7 +100,7 @@ test_that("MixedEffects$new validation works", {
     "6 fixed effect priors provided but only 2 covariates"
   )
   expect_error(
-    MixedEffects$new(
+    JAGSModel$new(
       dat = dat,
       priors = capturetb_priors(
         beta.mean = rep(0, 4),
@@ -112,7 +113,7 @@ test_that("MixedEffects$new validation works", {
   )
 })
 
-test_that("MixedEffects class methods work with small example", {
+test_that("JAGSModel class methods work with small example", {
   # Use a small dataset for testing with multiple countries
   countries_sample <- unique(dat_multioutput$fc_country)[1:2]
   n_countries <- 2
@@ -121,7 +122,7 @@ test_that("MixedEffects class methods work with small example", {
   n_outputs <- length(unique(small_data$output))
   n_fc <- length(unique(small_data$fc_code))
 
-  model <- MixedEffects$new(
+  model <- JAGSModel$new(
     dat = small_data,
     priors = capturetb_priors(
       beta.mean = rep(0, 5),
@@ -145,7 +146,7 @@ test_that("MixedEffects class methods work with small example", {
     n_countries + n_outputs + n_fc + 4))
 
   # Test prediction
-  pred_data <- small_data[1:3, ]
+  pred_data <- prepare_covariates(small_data[1:3, ], model)
   predictions <- model$predict(pred_data)
 
   expect_true(is.matrix(predictions))
@@ -153,8 +154,8 @@ test_that("MixedEffects class methods work with small example", {
   expect_true(nrow(predictions) > 0)
 })
 
-test_that("MixedEffects getter methods work", {
-  model <- MixedEffects$new(dat_multioutput,
+test_that("JAGSModel getter methods work", {
+  model <- JAGSModel$new(dat_multioutput,
     target = "USD_unitcost_total",
     covariates = test_covariates,
     priors = capturetb_priors(
@@ -170,12 +171,12 @@ test_that("MixedEffects getter methods work", {
 })
 
 test_that("k_fold_cv works correctly", {
-  small_data <- dat_multioutput[sample(
-    nrow(dat_multioutput),
+  small_data <- dat_treatment[sample(
+    nrow(dat_treatment),
     30
   ), ]
 
-  model <- MixedEffects$new(
+  model <- JAGSModel$new(
     dat = small_data,
     target = "USD_unitcost_total",
     covariates = test_covariates,
@@ -235,7 +236,7 @@ test_that("k_fold_cv works correctly", {
 })
 
 test_that("can get n_eff after model fitting", {
-  model <- MixedEffects$new(
+  model <- JAGSModel$new(
     dat = dat_multioutput,
     target = "USD_unitcost_total",
     covariates = test_covariates,
@@ -265,7 +266,7 @@ test_that("can get n_eff after model fitting", {
 })
 
 test_that("performance method validation works", {
-  model <- MixedEffects$new(dat_multioutput,
+  model <- JAGSModel$new(dat_multioutput,
     priors = capturetb_priors(
       beta.mean = rep(0, 5),
       beta.precision = rep(0.01, 5)
@@ -325,7 +326,7 @@ test_that("performance method works with natural scale", {
 })
 
 test_that("fitted_parameters method works correctly", {
-  model <- MixedEffects$new(
+  model <- JAGSModel$new(
     dat = dat_multioutput,
     covariates = test_covariates,
     target = "USD_unitcost_total",
@@ -356,9 +357,12 @@ test_that("fitted_parameters method works correctly", {
     paste0("beta[", 1:9, "]"),
     paste0("country_effect[", 1:5, "]"),
     paste0("output_effect[", 1:14, "]"),
-    "sigma", "sigma_country", "sigma_fc", "sigma_output"
+    "sigma", "sigma_c", "sigma_f", "sigma_v"
   )
-  expect_equal(params$Parameter, expected_params)
+  expect_equal(
+    params$Parameter[order(params$Parameter)],
+    expected_params[order(expected_params)]
+  )
 
   # Check that lower <= mean <= upper for all parameters
   expect_true(all(params$CI_low <= params$Mean))
@@ -378,7 +382,7 @@ test_that("fitted_parameters method works correctly", {
 })
 
 test_that("baselines method works correctly", {
-  model <- MixedEffects$new(
+  model <- JAGSModel$new(
     dat = dat_multioutput,
     covariates = test_covariates,
     target = "USD_unitcost_total",
@@ -427,7 +431,7 @@ test_that("baselines method works correctly", {
 })
 
 test_that("covariate_correlation method works correctly", {
-  model <- MixedEffects$new(
+  model <- JAGSModel$new(
     dat = dat_multioutput,
     covariates = test_covariates,
     target = "USD_unitcost_total",
@@ -459,7 +463,7 @@ test_that("covariate_correlation method works correctly", {
 })
 
 test_that("covariate_correlation validates plot parameter", {
-  model <- MixedEffects$new(
+  model <- JAGSModel$new(
     dat = dat_multioutput,
     covariates = test_covariates,
     target = "USD_unitcost_total",
@@ -510,7 +514,7 @@ test_that("can perform loco validation", {
   expect_true(perf$bayesian_r2 < 0.5)
   expect_true(perf$mae < 1)
   mods <- attr(res, "models")
-  expect_true(inherits(mods[[1]], "MixedEffects"))
+  expect_true(inherits(mods[[1]], "JAGSModel"))
   expect_equal(length(mods), 5)
 })
 
@@ -536,12 +540,12 @@ test_that("can get loco validation results on natural scale", {
   expect_true(perf$bayesian_r2 < 0.6)
   expect_true(perf$mae > 1)
   mods <- attr(res, "models")
-  expect_true(inherits(mods[[1]], "MixedEffects"))
+  expect_true(inherits(mods[[1]], "JAGSModel"))
   expect_equal(length(mods), 5)
 })
 
 test_that("can get DIC", {
-  mod <- MixedEffects$new(
+  mod <- JAGSModel$new(
     dat = dat_multioutput,
     covariates = test_covariates,
     target = "USD_unitcost_total",

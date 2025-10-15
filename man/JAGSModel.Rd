@@ -4,12 +4,15 @@
 \alias{JAGSModel}
 \title{JAGSModel R6 Class}
 \description{
-Contains functionality that is shared across model classes.
-Should not be instantiated directly, rather one of its children
-classes should be used: \code{\link{MixedEffects}},  \code{\link{RandomSlopes}}
+This class allows the user to fit and use a mixed effects model with
+intercepts that vary by country, facility and output type as well as fixed
+covariate effects. It is used for the comparison of different model
+structures as in the \code{vignette("03_model-comparisons", package = "capturetb")}
+vignette, and is the class underlying the \code{\link{unitcost}}, \code{\link{unitcost_fixed}}
+and \code{\link{unitcost_ohd}} models.
 }
 \details{
-Base R6 class for fitting and predicting costs using a JAGS model.
+R6 class for fitting and predicting costs using a JAGS model.
 }
 \examples{
 
@@ -25,7 +28,7 @@ model$performance()
 ## ------------------------------------------------
 
 \dontrun{
-model <- MixedEffects$new()
+model <- JAGSModel$new()
 model$fit()
 p <- model$plot_fit()
 print(p)
@@ -41,7 +44,7 @@ print(p2)
 ## ------------------------------------------------
 
 \dontrun{
-dat <- list(x1 = 1, x2 = 2)
+dat <- prepare_covariates(list(x1 = 1, x2 = 2), model)
 lambda <- c(10000, 20000, 30000)
 model$evpi(dat, lambda)
 }
@@ -66,8 +69,6 @@ mod <- unitcost()
 mod$mcmc_DIC()
 }
 \seealso{
-\code{\link{MixedEffects}}
-
 \link[runjags:run.jags]{runjags::run.jags}.
 
 bayestestR describe_posterior
@@ -124,7 +125,7 @@ bayestestR describe_posterior
 \subsection{Method \code{new()}}{
 Initialize a new model instance.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{JAGSModel$new(dat, covariates, target, priors = NULL, model, params)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{JAGSModel$new(dat, covariates, target, priors = NULL)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -138,10 +139,6 @@ Initialize a new model instance.
 
 \item{\code{priors}}{List of class "capturetbpriors". Should be created using
 \code{\link{capturetb_priors}}. If NULL, non-informative priors will be used.}
-
-\item{\code{model}}{Name of the JAGS model file.}
-
-\item{\code{params}}{Character vector. Names of parameters to monitor.}
 }
 \if{html}{\out{</div>}}
 }
@@ -208,7 +205,8 @@ Generate predictions from the fitted model.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{dat}}{Data.frame. New input data for predictions.}
+\item{\code{dat}}{New input data for predictions. This should be prepared
+for the model using \link{prepare_covariates}.}
 
 \item{\code{scale}}{One of "log" or "natural". Default "log".}
 
@@ -520,8 +518,9 @@ Default FALSE.}
 \item{\code{by_country}}{Logical. If TRUE, returns metrics calculated
 on country sub-groups. Default FALSE.}
 
-\item{\code{dat}}{Data.frame. Optional. If provided, uses this data for
-performance calculation instead of the training data.}
+\item{\code{dat}}{Optional data prepared using \code{\link[=prepare_covariates]{prepare_covariates()}}.
+If provided, uses this data for performance calculation instead of
+the training data.}
 }
 \if{html}{\out{</div>}}
 }
@@ -588,7 +587,7 @@ for perfect predictions and optional confidence intervals.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{JAGSModel$plot_fit(
   scale = "log",
-  conditional = TRUE,
+  conditional = FALSE,
   include_ci = TRUE,
   color_by_country = TRUE
 )}\if{html}{\out{</div>}}
@@ -600,7 +599,7 @@ for perfect predictions and optional confidence intervals.
 \item{\code{scale}}{One of "log" or "natural". Default "log".}
 
 \item{\code{conditional}}{Logical. If TRUE, shows full conditional fit. If FALSE,
-shows marginal fit. Default TRUE.}
+shows marginal fit. Default FALSE.}
 
 \item{\code{include_ci}}{Logical. Whether to show prediction intervals as
 error bars. Default TRUE.}
@@ -616,7 +615,7 @@ A \link[ggplot2:ggplot]{ggplot2::ggplot} object showing observed vs predicted va
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\dontrun{
-model <- MixedEffects$new()
+model <- JAGSModel$new()
 model$fit()
 p <- model$plot_fit()
 print(p)
@@ -701,7 +700,7 @@ thresholds (\code{lambda}).
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{dat}}{\code{data.frame} of model inputs (facility characteristics)}
+\item{\code{dat}}{Model input data prepared using \code{\link[=prepare_covariates]{prepare_covariates()}}.}
 
 \item{\code{lambda}}{Numeric vector of willingness-to-pay thresholds
 at which to calculate EVPI.}
@@ -721,7 +720,7 @@ in \code{lambda}.
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\dontrun{
-dat <- list(x1 = 1, x2 = 2)
+dat <- prepare_covariates(list(x1 = 1, x2 = 2), model)
 lambda <- c(10000, 20000, 30000)
 model$evpi(dat, lambda)
 }
@@ -745,7 +744,7 @@ of outputs at each
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{dat}}{\code{data.frame} of model inputs (facility characteristics)}
+\item{\code{dat}}{Model input data prepared using \code{\link[=prepare_covariates]{prepare_covariates()}}.}
 
 \item{\code{n_outputs}}{Number of outputs at each facility. Should either be
 length 1, for the same number of outputs at each facility, or should

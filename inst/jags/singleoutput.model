@@ -11,8 +11,8 @@ model {
 
 	alpha ~ dnorm(prior.alpha.mean, prior.alpha.precision)
 
-  sigma_country ~ dt(0, pow(prior.sigma_country.scale, -2), 1) T(0, )
-	tau_country <- pow(sigma_country, -2)
+  sigma_c ~ dt(0, pow(prior.sigma_c.scale, -2), 1) T(0, )
+	tau_country <- pow(sigma_c, -2)
 
 	for (j in 1:NC) {
 		country_effect[j] ~ dnorm(0, tau_country)

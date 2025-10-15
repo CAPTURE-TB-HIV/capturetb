@@ -5,9 +5,9 @@ test_that("capturetb_priors returns correct class and structure", {
     "prior.alpha.mean",
     "prior.alpha.precision",
     "prior.sigma.scale",
-    "prior.sigma_country.scale",
-    "prior.sigma_fc.scale",
-    "prior.sigma_output.scale",
+    "prior.sigma_c.scale",
+    "prior.sigma_f.scale",
+    "prior.sigma_v.scale",
     "prior.beta.mean",
     "prior.beta.precision"
   ))
@@ -18,14 +18,14 @@ test_that("capturetb_priors accepts custom values", {
     alpha.mean = 1,
     alpha.precision = 2,
     sigma.scale = 3,
-    sigma_country.scale = 4,
+    sigma_c.scale = 4,
     beta.mean = c(1, 2, 3, 4, 5, 6),
     beta.precision = c(10, 20, 30, 40, 50, 60)
   )
   expect_equal(custom$prior.alpha.mean, 1)
   expect_equal(custom$prior.alpha.precision, 2)
   expect_equal(custom$prior.sigma.scale, 3)
-  expect_equal(custom$prior.sigma_country.scale, 4)
+  expect_equal(custom$prior.sigma_c.scale, 4)
   expect_equal(custom$prior.beta.mean, c(1, 2, 3, 4, 5, 6))
   expect_equal(custom$prior.beta.precision, c(10, 20, 30, 40, 50, 60))
 })
@@ -44,8 +44,8 @@ test_that("capturetb_priors errors on invalid input", {
     "sigma.scale must be numeric"
   )
   expect_error(
-    capturetb_priors(sigma_country.scale = NA),
-    "sigma_country.scale must be numeric"
+    capturetb_priors(sigma_c.scale = NA),
+    "sigma_c.scale must be numeric"
   )
   expect_error(
     capturetb_priors(beta.mean = "foo"),
