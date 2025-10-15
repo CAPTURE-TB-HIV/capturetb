@@ -19,7 +19,7 @@ test_that("JAGSModel class initialization works", {
   )
 
   expect_equal(model$training_data(), dat, ignore_attr = TRUE)
-	expect_true(inherits(model$training_data(), "capturetbdata"))
+  expect_true(inherits(model$training_data(), "capturetbdata"))
 })
 
 test_that("JAGSModel$new validation works", {
@@ -359,7 +359,10 @@ test_that("fitted_parameters method works correctly", {
     paste0("output_effect[", 1:14, "]"),
     "sigma", "sigma_c", "sigma_f", "sigma_v"
   )
-  expect_equal(order(params$Parameter), order(expected_params))
+  expect_equal(
+    params$Parameter[order(params$Parameter)],
+    expected_params[order(expected_params)]
+  )
 
   # Check that lower <= mean <= upper for all parameters
   expect_true(all(params$CI_low <= params$Mean))
