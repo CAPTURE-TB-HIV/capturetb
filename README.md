@@ -35,8 +35,9 @@ inputs <- list(
   output = "op_treatmentvisit",
   fc_country = "Ethiopia"
 )
+prepared_inputs <- prepare_covariates(inputs, model)
 pred <- model$predict(
-	prepare_covariates(inputs),
+	prepared_inputs,
 	scale = "natural",
 	summarised = TRUE)
 
