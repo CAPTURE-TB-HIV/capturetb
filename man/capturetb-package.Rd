@@ -4,9 +4,9 @@
 \name{capturetb-package}
 \alias{capturetb}
 \alias{capturetb-package}
-\title{capturetb: Econometric cost functions for estimating TB unit costs}
+\title{capturetb: Econometric cost functions for estimating TB outpatient visit unit costs}
 \description{
-Econometric cost function for estimating TB unit costs, developed at LSHTM for the CAPTURE (Cost Analysis for Prioritizing TB and HIV Resources Efficiently) project.
+Econometric cost functions for estimating TB outpatient visit unit costs, developed at LSHTM for the CAPTURE (Cost Analysis for Prioritizing TB and HIV Resources Efficiently) project.
 }
 \author{
 \strong{Maintainer}: Alex Hill \email{alex.hill@gmail.com} (\href{https://orcid.org/0009-0003-8104-1890}{ORCID})

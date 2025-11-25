@@ -1,10 +1,10 @@
 Package: capturetb
-Title: Econometric cost functions for estimating TB unit costs 
-Version: 0.0.0.9000
+Title: Econometric cost functions for estimating TB outpatient visit unit costs 
+Version: 1.0.0
 Authors@R:
   	person("Alex", "Hill", email = "alex.hill@gmail.com", role = c("aut", "cre"),
 			comment = c(ORCID = "0009-0003-8104-1890"))
-Description: Econometric cost function for estimating TB unit costs, 
+Description: Econometric cost functions for estimating TB outpatient visit unit costs, 
 		developed at LSHTM for the CAPTURE (Cost Analysis for Prioritizing TB
 		and HIV Resources Efficiently) project.
 License: GPL (>= 3)
