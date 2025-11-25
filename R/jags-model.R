@@ -1056,86 +1056,6 @@ JAGSModel <- R6::R6Class("JAGSModel",
       results_df
     },
     #' @description
-    #' This function computes the Expected Value of Perfect Information (EVPI)
-    #' for given facility characteristics and a vector of willingness-to-pay
-    #' thresholds (`lambda`).
-    #'
-    #' @param dat Model input data prepared using [prepare_covariates()].
-    #' @param lambda Numeric vector of willingness-to-pay thresholds
-    #' at which to calculate EVPI.
-    #' @param n_outputs Numeric scalar. The number of outputs to compare to the
-    #' willingness-to-pay thresholds. If the willingness-to-pay is for a single
-    #' output then leave as the default of 1. Should either be length 1, for
-    #' the same number of outputs at each facility, or should have an entry for
-    #' each row in `dat`.
-    #'
-    #' @return A numeric vector of EVPI values, one for each value
-    #' in `lambda`.
-    #'
-    #' @examples
-    #' \dontrun{
-    #' dat <- prepare_covariates(list(x1 = 1, x2 = 2), model)
-    #' lambda <- c(10000, 20000, 30000)
-    #' model$evpi(dat, lambda)
-    #' }
-    #'
-    #' @seealso [predict()]
-    #' @export
-    evpi = function(dat, lambda, n_outputs = 1) {
-      private$.validate_data(dat)
-
-      if (length(n_outputs) == 1) {
-        n_outputs <- rep(n_outputs, nrow(dat))
-      }
-      stopifnot(
-        "n_outputs must have length == nrow(dat)" =
-          (is.numeric(n_outputs) && length(n_outputs) == nrow(dat))
-      )
-      stopifnot("lambda must be a numeric vector" = is.numeric(lambda))
-      cost_pred <- self$predict(dat,
-        scale = "natural",
-        summarised = FALSE
-      )
-      cost_pred_sum <- rowSums(cost_pred * n_outputs)
-      evpi <- c()
-      for (i in seq_along(lambda)) {
-        exp_max <- mean(sapply(
-          cost_pred_sum,
-          function(c) max(private$.net_benefit(lambda[i], c), 0)
-        ))
-        max_exp <- max(mean(sapply(
-          cost_pred_sum,
-          function(c) private$.net_benefit(lambda[i], c)
-        )), 0)
-        evpi <- c(evpi, exp_max - max_exp)
-      }
-      evpi
-    },
-    #' @description
-    #' Predict the total cost across multiple facilities with arbitrary numbers
-    #' of outputs at each
-    #'
-    #' @param dat Model input data prepared using [prepare_covariates()].
-    #' @param n_outputs Number of outputs at each facility. Should either be
-    #' length 1, for the same number of outputs at each facility, or should
-    #' have an entry for each row in `dat`.
-    #'
-    #' @return Posterior distribution of predicted total cost, as a vector
-    #' @export
-    predict_total = function(dat, n_outputs) {
-      private$.validate_data(dat)
-      if (length(n_outputs) == 1) {
-        n_outputs <- rep(n_outputs, nrow(dat))
-      }
-      stopifnot(
-        "n_outputs must have length == nrow(dat)" =
-          (is.numeric(n_outputs) && length(n_outputs) == nrow(dat))
-      )
-      samples <- self$predict(dat, scale = "natural", summarised = FALSE)
-      samples_total <- sweep(samples, 2, n_outputs, "*")
-      rowSums(samples_total)
-    },
-    #' @description
     #' Extract fitted model parameters with credible intervals.
     #'
     #' This method summarises fitted parameters using
@@ -1351,6 +1271,13 @@ JAGSModel <- R6::R6Class("JAGSModel",
         which(rowSums(x_country_matrix) == 0),
         length(private$.countries) + 1
       ] <- 1
+
+		  non_numeric <- which(!is.numeric(x)) 
+			
+			if (length(non_numeric) > 0) {
+				stop(paste0("Non-numeric covariate values found in columns: ",
+					paste(private$.covariates[non_numeric], collapse = ", ")))
+			}
 
       pred_means <- alpha + betas %*% t(x) +
         countries %*% t(x_country_matrix)

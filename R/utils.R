@@ -99,7 +99,7 @@ plot.capturetbpriors <- function(x, ..., par = "alpha") {
 #' @param model A `capturetb::JAGSModel` object.
 #' @export
 #' @returns A [tibble::tibble()] with class 'capturetbdata' suitable for input
-#' \code{\link[=JAGSModel]{JAGSModel}}'s \code{$predict()}, \code{$performance()}, and \code{$evpi()} methods.
+#' \code{\link[=JAGSModel]{JAGSModel}}'s \code{$predict()}, and \code{$performance()} methods.
 #' @examples
 #' mod <- unitcost()
 #' prepare_covariates(

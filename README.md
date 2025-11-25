@@ -67,3 +67,5 @@ To build pkgdown documentation locally:
 devtools::load_all()
 pkgdown::build_site()
 ```
+
+Files will appear in the `docs/` folder.
