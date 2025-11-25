@@ -1,6 +1,5 @@
 ---
 title: "Using the Unit Cost Model"
-author: "Alex Hill"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
@@ -138,9 +137,9 @@ To see how the model performs on the training data:
 ```{r predictions}
 # Various measures of fit
 performance <- model$performance(scale = "natural")
-colnames(performance) <- c("Country", "MAE",
+colnames(performance) <- c("MAE",
  "RMSE", "95% CI Coverage", "Median CI width", "Bayesian R-squ")
-knitr::kable(compare_performance)
+knitr::kable(performance)
 ```
 
 and by country: 
@@ -159,12 +158,12 @@ By default, performance is reported after marginalising over facility effects. T
 ```{r conditional}
 # Various measures of fit
 performance <- model$performance(scale = "natural", conditional = TRUE)
-colnames(performance) <- c("Country", "MAE",
+colnames(performance) <- c("MAE",
  "RMSE", "95% CI Coverage", "Median CI width", "Bayesian R-squ")
 knitr::kable(performance)
 ```
 
-Visusaling predictions for inputs in the training data, including credible intervals, against observed costs:
+Visualisiing predictions for inputs in the training data, including credible intervals, against observed costs:
 
 ```{r prediction-intervals}
 # Plot with prediction intervals
@@ -215,5 +214,5 @@ To see the full distribution of predicted costs:
 
 ```{r, plot-pred}
 pred <- model$predict(covariates, scale = "natural", summarised = FALSE)
-ggplot(data.frame(cost = pred), aes(x = cost)) + geom_density()
+ggplot2::ggplot(data.frame(cost = pred), ggplot2::aes(x = cost)) + ggplot2::geom_density()
 ```

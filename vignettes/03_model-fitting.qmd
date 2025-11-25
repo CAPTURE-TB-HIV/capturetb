@@ -1,6 +1,5 @@
 ---
 title: "Model Fitting"
-author: "Alex Hill"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
@@ -131,7 +130,7 @@ We can also plot the posterior distributions of each parameter:
 
 ```{r, post}
 model$plot_posteriors(pars = paste0("beta[", 1:length(covariates), "]")) + 
-  scale_y_discrete(labels = covariates)
+  ggplot2::scale_y_discrete(labels = covariates)
 ```
 
 ```{r, country}
@@ -188,7 +187,7 @@ knitr::kable(country_performance)
 
 ```{r country-plot}
 model$plot_fit() + 
-  facet_wrap(~country, scales = "free")
+  ggplot2::facet_wrap(~country, scales = "free")
 ```
 
 ### 5. Out-of-sample performance
