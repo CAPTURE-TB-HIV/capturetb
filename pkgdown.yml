@@ -1,0 +1,8 @@
+pandoc: 3.1.11
+pkgdown: 2.2.0
+pkgdown_sha: ~
+articles:
+  01_unitcost-model-predictions: 01_unitcost-model-predictions.html
+  02_combining-predictions-data: 02_combining-predictions-data.html
+  03_model-fitting: 03_model-fitting.html
+last_built: 2025-12-08T11:38Z
