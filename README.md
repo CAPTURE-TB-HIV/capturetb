@@ -1,4 +1,4 @@
-# capturetb [![R-CMD-check](https://github.com/CAPTURE-TB-HIV/capturetb/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/CAPTURE-TB-HIV/capturetb/actions/workflows/R-CMD-check.yaml) [![codecov](https://codecov.io/gh/CAPTURE-TB-HIV/capturetb/graph/badge.svg?token=LC3NJPM0SY)](https://codecov.io/gh/CAPTURE-TB-HIV/capturetb) ![GitHub R package version](https://img.shields.io/github/r-package/v/CAPTURE-TB-HIV/capturetb)
+# capturetb [![R-CMD-check](https://github.com/CAPTURE-TB-HIV/capturetb/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/CAPTURE-TB-HIV/capturetb/actions/workflows/R-CMD-check.yaml) [![codecov](https://codecov.io/gh/CAPTURE-TB-HIV/capturetb/graph/badge.svg?token=LC3NJPM0SY)](https://codecov.io/gh/CAPTURE-TB-HIV/capturetb) ![GitHub R package version](https://img.shields.io/github/r-package/v/CAPTURE-TB-HIV/capturetb) ![GitHub License](https://img.shields.io/github/license/CAPTURE-TB-HIV/capturetb)
 
 ## Installation
 
