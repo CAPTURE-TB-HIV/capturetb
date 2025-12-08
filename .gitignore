@@ -8,3 +8,5 @@ vignettes/*/*
 *.rmarkdown
 docs
 vignettes/_quarto.yaml
+
+/.quarto/
