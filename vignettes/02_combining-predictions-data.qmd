@@ -1,6 +1,5 @@
 ---
 title: "Combining predictions with primary data"
-author: "Alex Hill"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
