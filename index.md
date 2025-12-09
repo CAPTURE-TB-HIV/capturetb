@@ -56,7 +56,7 @@ If fitting models, you will also need to install
 package.
 
 See vignettes for [full
-documentation](https://capturetb-hiv.github.io/capturetb).
+documentation](https://capture-tb-hiv.github.io/capturetb).
 
 ## Testing
 

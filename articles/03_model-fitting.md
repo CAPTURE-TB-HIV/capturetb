@@ -124,36 +124,36 @@ summary(fitted_samples)
 #>    plus standard error of the mean:
 #> 
 #>                       Mean      SD  Naive SE Time-series SE
-#> alpha              3.68234 0.58725 0.0065657      0.0426259
-#> beta[1]           -0.08234 0.05273 0.0005895      0.0034891
-#> beta[2]            0.04250 0.05569 0.0006227      0.0008785
-#> beta[3]           -0.35283 0.09442 0.0010557      0.0022155
-#> beta[4]            0.38707 0.13727 0.0015347      0.0022177
-#> beta[5]           -0.31679 0.12858 0.0014376      0.0017677
-#> sigma              0.56546 0.04143 0.0004632      0.0004949
-#> sigma_c            0.54545 0.35560 0.0039758      0.0098397
-#> country_effect[1] -0.05753 0.29531 0.0033017      0.0114702
-#> country_effect[2]  0.00245 0.30604 0.0034216      0.0118355
-#> country_effect[3] -0.48519 0.30598 0.0034209      0.0110291
-#> country_effect[4]  0.43960 0.30204 0.0033769      0.0110404
-#> country_effect[5]  0.05088 0.31343 0.0035043      0.0132101
+#> alpha              3.62002 0.55972 0.0062578      0.0387141
+#> beta[1]           -0.07916 0.05181 0.0005792      0.0033275
+#> beta[2]            0.04268 0.05528 0.0006180      0.0007040
+#> beta[3]           -0.35453 0.09824 0.0010984      0.0024006
+#> beta[4]            0.39430 0.13562 0.0015163      0.0021948
+#> beta[5]           -0.31318 0.12837 0.0014352      0.0017950
+#> sigma              0.56512 0.04165 0.0004656      0.0004773
+#> sigma_c            0.56903 0.39477 0.0044136      0.0121861
+#> country_effect[1] -0.03716 0.30555 0.0034161      0.0121271
+#> country_effect[2]  0.02618 0.31565 0.0035290      0.0123806
+#> country_effect[3] -0.46875 0.31414 0.0035122      0.0114606
+#> country_effect[4]  0.46854 0.31055 0.0034721      0.0120761
+#> country_effect[5]  0.08089 0.31692 0.0035432      0.0131170
 #> 
 #> 2. Quantiles for each variable:
 #> 
 #>                       2.5%       25%      50%      75%    97.5%
-#> alpha              2.52989  3.293780  3.68709  4.06588  4.86129
-#> beta[1]           -0.18584 -0.117499 -0.08227 -0.04739  0.02058
-#> beta[2]           -0.06901  0.006089  0.04302  0.07953  0.15125
-#> beta[3]           -0.53577 -0.415552 -0.35270 -0.28899 -0.16650
-#> beta[4]            0.11286  0.295627  0.38659  0.47976  0.65958
-#> beta[5]           -0.56798 -0.403689 -0.31827 -0.23163 -0.06078
-#> sigma              0.49169  0.536254  0.56281  0.59177  0.65267
-#> sigma_c            0.19110  0.331084  0.45003  0.64451  1.47908
-#> country_effect[1] -0.68411 -0.205902 -0.05013  0.10472  0.52917
-#> country_effect[2] -0.64998 -0.158107  0.00752  0.17512  0.60784
-#> country_effect[3] -1.15281 -0.648707 -0.46641 -0.30164  0.06175
-#> country_effect[4] -0.16741  0.273667  0.43124  0.60513  1.06993
-#> country_effect[5] -0.59583 -0.119777  0.04989  0.22171  0.69561
+#> alpha              2.47839  3.247150  3.63254  4.00015  4.66134
+#> beta[1]           -0.17957 -0.114588 -0.07946 -0.04372  0.01984
+#> beta[2]           -0.06517  0.004994  0.04179  0.07951  0.15225
+#> beta[3]           -0.54828 -0.420572 -0.35305 -0.28850 -0.16416
+#> beta[4]            0.12865  0.302820  0.39516  0.48607  0.65933
+#> beta[5]           -0.56077 -0.400754 -0.31262 -0.22548 -0.06667
+#> sigma              0.49027  0.536212  0.56257  0.59111  0.65422
+#> sigma_c            0.19771  0.339117  0.46509  0.66451  1.60462
+#> country_effect[1] -0.65702 -0.202264 -0.03776  0.12849  0.60163
+#> country_effect[2] -0.61630 -0.141864  0.02641  0.19213  0.68423
+#> country_effect[3] -1.14263 -0.636462 -0.45856 -0.29007  0.14677
+#> country_effect[4] -0.11526  0.292721  0.44983  0.62761  1.16530
+#> country_effect[5] -0.54178 -0.098730  0.06770  0.25472  0.78436
 ```
 
 ### Diagnostics
@@ -193,19 +193,19 @@ knitr::kable(model$n_eff())
 
 |                     |         x |
 |:--------------------|----------:|
-| alpha               |  189.8024 |
-| beta\[1\]           |  228.7928 |
-| beta\[2\]           | 4113.5566 |
-| beta\[3\]           | 1851.9552 |
-| beta\[4\]           | 3831.4272 |
-| beta\[5\]           | 5292.3801 |
-| sigma               | 7029.5415 |
-| sigma_c             | 1335.5299 |
-| country_effect\[1\] |  729.6864 |
-| country_effect\[2\] |  706.9161 |
-| country_effect\[3\] |  796.9081 |
-| country_effect\[4\] |  800.2086 |
-| country_effect\[5\] |  568.5780 |
+| alpha               |  210.2480 |
+| beta\[1\]           |  247.1581 |
+| beta\[2\]           | 6246.7406 |
+| beta\[3\]           | 1688.4610 |
+| beta\[4\]           | 3818.3265 |
+| beta\[5\]           | 5121.7265 |
+| sigma               | 7627.9881 |
+| sigma_c             | 1092.3314 |
+| country_effect\[1\] |  634.8278 |
+| country_effect\[2\] |  655.6080 |
+| country_effect\[3\] |  751.8475 |
+| country_effect\[4\] |  660.1804 |
+| country_effect\[5\] |  587.7512 |
 
 We can also plot the posterior distributions of each parameter:
 
@@ -238,21 +238,21 @@ head(predictions)
 #> 
 #> Observation | Mean |       95% CI
 #> ---------------------------------
-#> 1           | 3.47 | [2.27, 4.65]
-#> 2           | 2.67 | [1.53, 3.79]
-#> 3           | 2.10 | [0.95, 3.27]
-#> 4           | 1.84 | [0.63, 3.02]
-#> 5           | 2.25 | [1.09, 3.40]
-#> 6           | 2.27 | [1.14, 3.40]
+#> 1           | 3.46 | [2.26, 4.69]
+#> 2           | 2.66 | [1.51, 3.81]
+#> 3           | 2.09 | [0.93, 3.24]
+#> 4           | 1.85 | [0.71, 2.96]
+#> 5           | 2.26 | [1.11, 3.41]
+#> 6           | 2.28 | [1.14, 3.42]
 
 # Various measures of fit
 performance <- model$performance(scale = "log")
 knitr::kable(performance)
 ```
 
-|       mae |      rmse | ci_coverage | median_ci | bayesian_r2 |
-|----------:|----------:|------------:|----------:|------------:|
-| 0.4341244 | 0.5370292 |   0.9716981 |  2.322776 |   0.4966464 |
+|       mae |     rmse | ci_coverage | median_ci | bayesian_r2 |
+|----------:|---------:|------------:|----------:|------------:|
+| 0.4342712 | 0.537294 |   0.9716981 |  2.327685 |   0.4971605 |
 
 ## Visualising results
 
@@ -298,11 +298,11 @@ knitr::kable(country_performance)
 
 | Country     |      MAE |     RMSE | 95% CI Coverage | Median CI Width | Bayesian R-squ |
 |:------------|---------:|---------:|----------------:|----------------:|---------------:|
-| Ethiopia    | 6.972733 | 9.458944 |       0.9200000 |        32.41757 |      0.3926696 |
-| Georgia     | 6.845460 | 8.006004 |       1.0000000 |        53.55560 |      0.4400349 |
-| India       | 3.911706 | 4.973965 |       1.0000000 |        21.10909 |      0.3571250 |
-| Kenya       | 7.031830 | 9.439055 |       1.0000000 |        37.25482 |      0.4307647 |
-| Philippines | 4.474440 | 5.455667 |       0.9583333 |        22.85686 |      0.4845972 |
+| Ethiopia    | 6.910456 | 9.416620 |       0.9200000 |        32.95744 |      0.3910709 |
+| Georgia     | 6.806352 | 7.992778 |       1.0000000 |        52.90886 |      0.4400111 |
+| India       | 3.903570 | 4.998774 |       1.0000000 |        20.35975 |      0.3529980 |
+| Kenya       | 6.985575 | 9.355108 |       1.0000000 |        38.86220 |      0.4291894 |
+| Philippines | 4.520270 | 5.514123 |       0.9583333 |        22.73329 |      0.4836470 |
 
 ``` r
 model$plot_fit() + 
@@ -329,7 +329,7 @@ res <- model$k_fold_cv(k_folds = 3,
 #> Calling 3 simulations using the parallel method...
 #> Following the progress of chain 1 (the program will wait for all chains
 #> to finish before continuing):
-#> Welcome to JAGS 4.3.2 on Mon Dec  8 12:03:24 2025
+#> Welcome to JAGS 4.3.2 on Tue Dec  9 15:40:54 2025
 #> JAGS is free software and comes with ABSOLUTELY NO WARRANTY
 #> Loading module: basemod: ok
 #> Loading module: bugs: ok
@@ -362,13 +362,15 @@ res <- model$k_fold_cv(k_folds = 3,
 #> Finished running the simulation
 #> Compiling rjags model and adapting for 1000 iterations...
 #> Obtaining DIC samples from 100 iterations...
+#> Warning in doTryCatch(return(expr), name, parentenv, handler): Model may not
+#> have converged. Max rhat is 1.16745259359348
 #> Model fitted successfully with 3 chains and 10000 iterations.
 #> Processing fold 2 of 3
 #> Single output type detected. Not including output-level random effects in model.
 #> Calling 3 simulations using the parallel method...
 #> Following the progress of chain 1 (the program will wait for all chains
 #> to finish before continuing):
-#> Welcome to JAGS 4.3.2 on Mon Dec  8 12:03:25 2025
+#> Welcome to JAGS 4.3.2 on Tue Dec  9 15:40:55 2025
 #> JAGS is free software and comes with ABSOLUTELY NO WARRANTY
 #> Loading module: basemod: ok
 #> Loading module: bugs: ok
@@ -402,14 +404,14 @@ res <- model$k_fold_cv(k_folds = 3,
 #> Compiling rjags model and adapting for 1000 iterations...
 #> Obtaining DIC samples from 100 iterations...
 #> Warning in doTryCatch(return(expr), name, parentenv, handler): Model may not
-#> have converged. Max rhat is 1.1710960351806
+#> have converged. Max rhat is 1.31941722242303
 #> Model fitted successfully with 3 chains and 10000 iterations.
 #> Processing fold 3 of 3
 #> Single output type detected. Not including output-level random effects in model.
 #> Calling 3 simulations using the parallel method...
 #> Following the progress of chain 1 (the program will wait for all chains
 #> to finish before continuing):
-#> Welcome to JAGS 4.3.2 on Mon Dec  8 12:03:26 2025
+#> Welcome to JAGS 4.3.2 on Tue Dec  9 15:40:56 2025
 #> JAGS is free software and comes with ABSOLUTELY NO WARRANTY
 #> Loading module: basemod: ok
 #> Loading module: bugs: ok
@@ -443,7 +445,7 @@ res <- model$k_fold_cv(k_folds = 3,
 #> Compiling rjags model and adapting for 1000 iterations...
 #> Obtaining DIC samples from 100 iterations...
 #> Warning in doTryCatch(return(expr), name, parentenv, handler): Model may not
-#> have converged. Max rhat is 1.22370777606336
+#> have converged. Max rhat is 1.10597034099288
 #> Model fitted successfully with 3 chains and 10000 iterations.
 
 fit <- res |> 
@@ -456,9 +458,9 @@ knitr::kable(fit)
 
 | fold |      rmse |       mae |
 |-----:|----------:|----------:|
-|    1 | 0.6781356 | 0.5441479 |
-|    2 | 0.5879757 | 0.4808801 |
-|    3 | 0.5657037 | 0.4513155 |
+|    1 | 0.4888237 | 0.3982090 |
+|    2 | 0.6860582 | 0.5858699 |
+|    3 | 0.5730351 | 0.4568500 |
 
 ## Reproducing the fitted models installed with the package
 
