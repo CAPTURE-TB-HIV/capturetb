@@ -51,7 +51,7 @@ print(expected_unit_cost)
 
 If fitting models, you will also need to install [JAGS](https://sourceforge.net/projects/mcmc-jags/) and the [runjags](https://cran.r-project.org/web/packages/runjags/index.html) package.
 
-See vignettes for [full documentation](https://capturetb-hiv.github.io/capturetb).
+See vignettes for [full documentation](https://capture-tb-hiv.github.io/capturetb).
 
 ## Testing
 
