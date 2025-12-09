@@ -214,9 +214,9 @@ colnames(performance) <- c("MAE",
 knitr::kable(performance)
 ```
 
-|      MAE |    RMSE | 95% CI Coverage | Median CI width | Bayesian R-squ |
-|---------:|--------:|----------------:|----------------:|---------------:|
-| 4.779102 | 6.93138 |       0.9654545 |        23.21081 |      0.4919362 |
+|      MAE |     RMSE | 95% CI Coverage | Median CI width | Bayesian R-squ |
+|---------:|---------:|----------------:|----------------:|---------------:|
+| 4.777883 | 6.928756 |       0.9654545 |         23.3044 |      0.4919674 |
 
 and by country:
 
@@ -231,11 +231,11 @@ knitr::kable(country_performance)
 
 | Country     |      MAE |      RMSE | 95% CI Coverage | Median CI width | Bayesian R-squ |
 |:------------|---------:|----------:|----------------:|----------------:|---------------:|
-| Ethiopia    | 5.039830 |  6.802096 |       1.0000000 |        26.23108 |      0.4869249 |
-| Georgia     | 7.259201 | 10.290512 |       0.9680851 |        41.21874 |      0.4213199 |
-| India       | 3.250484 |  4.370693 |       0.9324324 |        17.16098 |      0.4544297 |
-| Kenya       | 4.623068 |  6.935802 |       0.9459459 |        19.43158 |      0.3774601 |
-| Philippines | 3.639337 |  4.847209 |       0.9593496 |        19.34335 |      0.5435025 |
+| Ethiopia    | 5.039411 |  6.811091 |       1.0000000 |        26.36261 |      0.4864107 |
+| Georgia     | 7.259096 | 10.281503 |       0.9680851 |        40.75416 |      0.4217129 |
+| India       | 3.247031 |  4.369328 |       0.9459459 |        17.05372 |      0.4546346 |
+| Kenya       | 4.630014 |  6.943600 |       0.9459459 |        19.58768 |      0.3778234 |
+| Philippines | 3.634584 |  4.836206 |       0.9593496 |        19.22376 |      0.5436795 |
 
 By default, performance is reported after marginalising over facility
 effects. To see the performance of the full conditional model, including
@@ -249,9 +249,9 @@ colnames(performance) <- c("MAE",
 knitr::kable(performance)
 ```
 
-|      MAE |     RMSE | 95% CI Coverage | Median CI width | Bayesian R-squ |
-|---------:|---------:|----------------:|----------------:|---------------:|
-| 2.632388 | 4.692192 |       0.9618182 |        14.07186 |      0.6593877 |
+|     MAE |     RMSE | 95% CI Coverage | Median CI width | Bayesian R-squ |
+|--------:|---------:|----------------:|----------------:|---------------:|
+| 2.63308 | 4.691774 |       0.9618182 |        14.17013 |      0.6593591 |
 
 Visualisiing predictions for inputs in the training data, including
 credible intervals, against observed costs:
@@ -302,16 +302,20 @@ pred <- model$predict(covariates,
 # Expected unit cost is mean prediction
 expected_unit_cost <- pred$Mean
 print(expected_unit_cost)
-#> [1] 13.96082 13.96082 13.96082
+#> [1] 13.92605 13.92605 13.92605
 
 knitr::kable(pred)
 ```
 
-| Observation |  Median |     Mean |   CI |   CI_low |  CI_high |
-|:------------|--------:|---------:|-----:|---------:|---------:|
-| 1           | 11.6245 | 13.96082 | 0.95 | 3.490669 | 38.10163 |
-| 1           | 11.6245 | 13.96082 | 0.90 | 4.245173 | 31.39757 |
-| 1           | 11.6245 | 13.96082 | 0.80 | 5.317954 | 25.21668 |
+| Observation |   Median |     Mean |   CI |   CI_low |  CI_high |
+|:------------|---------:|---------:|-----:|---------:|---------:|
+| 1           | 11.63012 | 13.92605 | 0.95 | 3.519559 | 37.93196 |
+| 1           | 11.63012 | 13.92605 | 0.90 | 4.261171 | 31.28025 |
+| 1           | 11.63012 | 13.92605 | 0.80 | 5.316719 | 25.09041 |
+
+Note that by default the 95% *predictive* interval is returned. If you
+instead want the 95% credible interval of the mean, pass
+`ci_type = "mean"`.
 
 To see the full distribution of predicted costs:
 

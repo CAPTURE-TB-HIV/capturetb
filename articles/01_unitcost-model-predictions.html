@@ -37,7 +37,7 @@
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/01_unitcost-model-predictions.html">Using the Unit Cost Model</a></li>
     <li><a class="dropdown-item" href="../articles/02_combining-predictions-data.html">Combining predictions with primary data</a></li>
-    <li><a class="dropdown-item" href="../articles/03_model-fitting.html">Model Fitting</a></li>
+    <li><a class="dropdown-item" href="../articles/03_model-fitting.html">Model fitting</a></li>
   </ul>
 </li>
       </ul>
@@ -293,11 +293,11 @@ Figure 2: Fitted intercept and standard deviations of random effects
 <th style="text-align: right;">Bayesian R-squ</th>
 </tr></thead>
 <tbody><tr class="odd">
-<td style="text-align: right;">4.779102</td>
-<td style="text-align: right;">6.93138</td>
+<td style="text-align: right;">4.777883</td>
+<td style="text-align: right;">6.928756</td>
 <td style="text-align: right;">0.9654545</td>
-<td style="text-align: right;">23.21081</td>
-<td style="text-align: right;">0.4919362</td>
+<td style="text-align: right;">23.3044</td>
+<td style="text-align: right;">0.4919674</td>
 </tr></tbody>
 </table>
 </div>
@@ -332,43 +332,43 @@ Figure 2: Fitted intercept and standard deviations of random effects
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">Ethiopia</td>
-<td style="text-align: right;">5.039830</td>
-<td style="text-align: right;">6.802096</td>
+<td style="text-align: right;">5.039411</td>
+<td style="text-align: right;">6.811091</td>
 <td style="text-align: right;">1.0000000</td>
-<td style="text-align: right;">26.23108</td>
-<td style="text-align: right;">0.4869249</td>
+<td style="text-align: right;">26.36261</td>
+<td style="text-align: right;">0.4864107</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Georgia</td>
-<td style="text-align: right;">7.259201</td>
-<td style="text-align: right;">10.290512</td>
+<td style="text-align: right;">7.259096</td>
+<td style="text-align: right;">10.281503</td>
 <td style="text-align: right;">0.9680851</td>
-<td style="text-align: right;">41.21874</td>
-<td style="text-align: right;">0.4213199</td>
+<td style="text-align: right;">40.75416</td>
+<td style="text-align: right;">0.4217129</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">India</td>
-<td style="text-align: right;">3.250484</td>
-<td style="text-align: right;">4.370693</td>
-<td style="text-align: right;">0.9324324</td>
-<td style="text-align: right;">17.16098</td>
-<td style="text-align: right;">0.4544297</td>
+<td style="text-align: right;">3.247031</td>
+<td style="text-align: right;">4.369328</td>
+<td style="text-align: right;">0.9459459</td>
+<td style="text-align: right;">17.05372</td>
+<td style="text-align: right;">0.4546346</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Kenya</td>
-<td style="text-align: right;">4.623068</td>
-<td style="text-align: right;">6.935802</td>
+<td style="text-align: right;">4.630014</td>
+<td style="text-align: right;">6.943600</td>
 <td style="text-align: right;">0.9459459</td>
-<td style="text-align: right;">19.43158</td>
-<td style="text-align: right;">0.3774601</td>
+<td style="text-align: right;">19.58768</td>
+<td style="text-align: right;">0.3778234</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">Philippines</td>
-<td style="text-align: right;">3.639337</td>
-<td style="text-align: right;">4.847209</td>
+<td style="text-align: right;">3.634584</td>
+<td style="text-align: right;">4.836206</td>
 <td style="text-align: right;">0.9593496</td>
-<td style="text-align: right;">19.34335</td>
-<td style="text-align: right;">0.5435025</td>
+<td style="text-align: right;">19.22376</td>
+<td style="text-align: right;">0.5436795</td>
 </tr>
 </tbody>
 </table>
@@ -392,11 +392,11 @@ Figure 2: Fitted intercept and standard deviations of random effects
 <th style="text-align: right;">Bayesian R-squ</th>
 </tr></thead>
 <tbody><tr class="odd">
-<td style="text-align: right;">2.632388</td>
-<td style="text-align: right;">4.692192</td>
+<td style="text-align: right;">2.63308</td>
+<td style="text-align: right;">4.691774</td>
 <td style="text-align: right;">0.9618182</td>
-<td style="text-align: right;">14.07186</td>
-<td style="text-align: right;">0.6593877</td>
+<td style="text-align: right;">14.17013</td>
+<td style="text-align: right;">0.6593591</td>
 </tr></tbody>
 </table>
 </div>
@@ -449,7 +449,7 @@ Figure 2: Fitted intercept and standard deviations of random effects
 <span><span class="co"># Expected unit cost is mean prediction</span></span>
 <span><span class="va">expected_unit_cost</span> <span class="op">&lt;-</span> <span class="va">pred</span><span class="op">$</span><span class="va">Mean</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">expected_unit_cost</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 13.96082 13.96082 13.96082</span></span>
+<span><span class="co">#&gt; [1] 13.92605 13.92605 13.92605</span></span>
 <span></span>
 <span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">pred</span><span class="op">)</span></span></code></pre></div>
 <div class="cell-output-display">
@@ -465,32 +465,33 @@ Figure 2: Fitted intercept and standard deviations of random effects
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">1</td>
-<td style="text-align: right;">11.6245</td>
-<td style="text-align: right;">13.96082</td>
+<td style="text-align: right;">11.63012</td>
+<td style="text-align: right;">13.92605</td>
 <td style="text-align: right;">0.95</td>
-<td style="text-align: right;">3.490669</td>
-<td style="text-align: right;">38.10163</td>
+<td style="text-align: right;">3.519559</td>
+<td style="text-align: right;">37.93196</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">1</td>
-<td style="text-align: right;">11.6245</td>
-<td style="text-align: right;">13.96082</td>
+<td style="text-align: right;">11.63012</td>
+<td style="text-align: right;">13.92605</td>
 <td style="text-align: right;">0.90</td>
-<td style="text-align: right;">4.245173</td>
-<td style="text-align: right;">31.39757</td>
+<td style="text-align: right;">4.261171</td>
+<td style="text-align: right;">31.28025</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">1</td>
-<td style="text-align: right;">11.6245</td>
-<td style="text-align: right;">13.96082</td>
+<td style="text-align: right;">11.63012</td>
+<td style="text-align: right;">13.92605</td>
 <td style="text-align: right;">0.80</td>
-<td style="text-align: right;">5.317954</td>
-<td style="text-align: right;">25.21668</td>
+<td style="text-align: right;">5.316719</td>
+<td style="text-align: right;">25.09041</td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
+<p>Note that by default the 95% <em>predictive</em> interval is returned. If you instead want the 95% credible interval of the mean, pass <code>ci_type = "mean"</code>.</p>
 <p>To see the full distribution of predicted costs:</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb14"><pre class="downlit sourceCode r">
