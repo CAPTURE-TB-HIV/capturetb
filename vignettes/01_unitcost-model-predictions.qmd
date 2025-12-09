@@ -210,6 +210,8 @@ print(expected_unit_cost)
 knitr::kable(pred)
 ```
 
+Note that by default the 95% *predictive* interval is returned. If you instead want the 95% credible interval of the mean, pass `ci_type = "mean"`.
+
 To see the full distribution of predicted costs:
 
 ```{r, plot-pred}

@@ -250,10 +250,13 @@ JAGSModel <- R6::R6Class("JAGSModel",
     #' for full documentation of available arguments. Default FALSE.
     #' @param centrality The point-estimates (centrality indices) to compute.
     #' Default "mean".
-    #' @param ci Value or vector of probability of the CI (between 0 and 1)
+    #' @param ci Value or vector of probability of the credible interval (between 0 and 1)
     #' to be estimated. Default `0.95` (`95%`).
-    #' @param ci_method The type of index used for Credible Interval.
-    #' Default ETI.
+    #' @param ci_method The type of index used for the Credible Interval.
+    #' You probably want either ETI (Equal Tailed Interval) or HDI (Highest Density Interval).
+    #' Default ETI. See [bayestestR::describe_posterior] for all options.
+    #' @param ci_type One of "mean" or "predictive". Specify whether you want the credible interval
+    #' around the mean prediction, or the predictive interval. Default "predictive".
     #' @param test The indices of effect existence to compute. Default NULL.
     #' See [bayestestR::describe_posterior] for options.
     #' @param ... Other arguments that will be passed to
@@ -261,7 +264,7 @@ JAGSModel <- R6::R6Class("JAGSModel",
     #'
     #' @return If summarised=FALSE, matrix of predicted costs with
     #' rows = simulations, columns = input rows. If summarised=TRUE,
-    #' data.frame with central point estimate and confidence interval(s).
+    #' data.frame with central point estimates and credible intervals.
     #' @seealso bayestestR describe_posterior
     #' @importFrom bayestestR describe_posterior
     predict = function(dat,
@@ -269,11 +272,17 @@ JAGSModel <- R6::R6Class("JAGSModel",
                        summarised = FALSE,
                        centrality = "mean",
                        ci = 0.95,
+                       ci_type = "predictive",
                        test = NULL,
                        ...) {
       stopifnot(
         "scale must be 'log' or 'natural'" =
           (scale == "log" || scale == "natural")
+      )
+
+      stopifnot(
+        "ci_type must be 'mean' or 'predictive'" =
+          (ci_type == "mean" || ci_type == "predictive")
       )
 
       if (is.null(private$.samples)) {
@@ -294,7 +303,7 @@ JAGSModel <- R6::R6Class("JAGSModel",
         stop("Column 'fc_country' required in prediction data")
       }
 
-      preds <- private$.predict(dat)
+      preds <- private$.predict(dat, include_epsilon = ci_type == "predictive")
 
       if (scale == "natural") {
         preds <- exp(preds)
@@ -486,7 +495,7 @@ JAGSModel <- R6::R6Class("JAGSModel",
       )
 
       if (!is.null(par)) {
-				unknown_par <- which(!(par %in% par_df$Parameter))
+        unknown_par <- which(!(par %in% par_df$Parameter))
         if (length(unknown_par) > 0) {
           stop("Parameter '", par[[unknown_par[[1]]]], "' not found in samples.")
         }
@@ -676,7 +685,10 @@ JAGSModel <- R6::R6Class("JAGSModel",
 
       private$.check_fitted()
       dat <- private$.training_data
-      preds <- private$.predict(dat, conditional = TRUE)
+      preds <- private$.predict(dat,
+        include_epsilon = FALSE,
+        conditional = TRUE
+      )
 
       pred <- data.frame(
         mean = apply(preds, 2, mean),
@@ -741,7 +753,7 @@ JAGSModel <- R6::R6Class("JAGSModel",
     #' @param scale One of "log" or "natural". Default "log".
     #' @param conditional Logical. If TRUE, shows full conditional fit. If FALSE,
     #' shows marginal fit. Default FALSE.
-    #' @param include_ci Logical. Whether to show prediction intervals as
+    #' @param include_ci Logical. Whether to show predictive intervals as
     #' error bars. Default TRUE.
     #' @param color_by_country Logical. Whether to color points by country.
     #' Default TRUE.
@@ -1194,7 +1206,7 @@ JAGSModel <- R6::R6Class("JAGSModel",
         )
       }
     },
-    .predict = function(dat, conditional = FALSE) {
+    .predict = function(dat, include_epsilon = TRUE, conditional = FALSE) {
       output_effects <- private$.model == "outputeffects.model"
       smat <- do.call(rbind, lapply(private$.samples, as.matrix))
 
@@ -1272,12 +1284,14 @@ JAGSModel <- R6::R6Class("JAGSModel",
         length(private$.countries) + 1
       ] <- 1
 
-		  non_numeric <- which(!is.numeric(x)) 
-			
-			if (length(non_numeric) > 0) {
-				stop(paste0("Non-numeric covariate values found in columns: ",
-					paste(private$.covariates[non_numeric], collapse = ", ")))
-			}
+      non_numeric <- which(!is.numeric(x))
+
+      if (length(non_numeric) > 0) {
+        stop(paste0(
+          "Non-numeric covariate values found in columns: ",
+          paste(private$.covariates[non_numeric], collapse = ", ")
+        ))
+      }
 
       pred_means <- alpha + betas %*% t(x) +
         countries %*% t(x_country_matrix)
@@ -1313,8 +1327,11 @@ JAGSModel <- R6::R6Class("JAGSModel",
           outputs %*% t(x_output_matrix)
       }
 
-      epsilon <- matrix(rnorm(S * N), nrow = S)
-
+      if (include_epsilon) {
+        epsilon <- matrix(rnorm(S * N), nrow = S)
+      } else {
+        epsilon <- 0
+      }
       preds <- pred_means + epsilon * sig
       preds
     }

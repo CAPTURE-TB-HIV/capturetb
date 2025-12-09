@@ -180,3 +180,25 @@ test_that("conditional flag ignored for single output models", {
     "conditional = TRUE has no effect when there is only one output type"
   )
 })
+
+test_that("can summarise credible intervals for mean", {
+  mod <- unitcost()
+  dat <- mod$training_data()
+  mean_ci <- mod$predict(dat, ci_type = "mean", summarised = TRUE)
+  predictive_interval <- mod$predict(dat, ci_type = "predictive", summarised = TRUE)
+
+  expect_true(all(mean_ci$CI_low > predictive_interval$CI_low))
+  expect_true(all(mean_ci$CI_high < predictive_interval$CI_high))
+})
+
+test_that("uses predictive intervals by default", {
+  mod <- unitcost()
+  dat <- mod$training_data()
+  set.seed(1)
+  predictive_interval <- mod$predict(dat, ci_type = "predictive", summarised = TRUE)
+  set.seed(1)
+  default_interval <- mod$predict(dat, summarised = TRUE)
+
+  expect_true(all(predictive_interval$CI_low == default_interval$CI_low))
+  expect_true(all(predictive_interval$CI_high == default_interval$CI_high))
+})
