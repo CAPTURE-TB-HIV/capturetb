@@ -49,7 +49,8 @@ plot.capturetbpriors <- function(x, ..., par = "alpha") {
       ggplot2::labs(
         title = paste("Half-Student-t 3 d.f. prior for", label),
         x = label, y = "Density"
-      ) + ggplot2::xlim(0, max(df$x[df$y > 0.01]))
+      ) +
+      ggplot2::xlim(0, max(df$x[df$y > 0.01]))
   }
 
   # Handle beta priors
@@ -133,8 +134,12 @@ prepare_covariates <- function(raw, model) {
   }
   centering_values <- model$centering_values()
   for (cov in covariates) {
-    if (is.numeric(df[[cov]]) && !is.null(centering_values[[cov]])) {
-      df[[cov]] <- scale(df[[cov]], center = centering_values[[cov]], scale = FALSE)
+    if (!is.null(centering_values[[cov]])) {
+      df[[cov]] <- as.numeric(df[[cov]])
+      df[[cov]] <- scale(df[[cov]],
+        center = centering_values[[cov]],
+        scale = FALSE
+      )
     }
   }
   class(df) <- append("capturetbdata", class(df))
