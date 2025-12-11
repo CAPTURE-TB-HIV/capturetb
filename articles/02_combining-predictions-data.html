@@ -57,7 +57,7 @@
       <h1>Combining predictions with primary data</h1>
 
 
-      <p class="date">2025-12-09</p>
+      <p class="date">2025-12-11</p>
 
 
       <div class="d-none name"><code></code></div>
@@ -70,8 +70,7 @@
 
     <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">capturetb</span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span></code></pre></div>
 </div>
 <p>In some contexts it may be feasible to collect partial costs. The package provides two models to assist with this:</p>
@@ -101,11 +100,11 @@
 <p>We compare the accuracy of predictions made by each of the models by looking at: 1. The cost of a single visit as predicted by the <code>unitcost</code> model. 2. The cost of a single visit as estimated by combining the directly measured variable costs in the raw data with the predictions for fixed costs made by the <code>unitcost_fixed</code> model. 3. The cost of a single visit as estimated by combining the directly measured non-overhead costs in the raw data with the predictions for overhead costs made by the <code>unitcost_ohd</code> model.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">mod_uc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/unitcost.html">unitcost</a></span><span class="op">(</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">mod_uc</span> <span class="op">&lt;-</span> <span class="fu">capturetb</span><span class="fu">::</span><span class="fu"><a href="../reference/unitcost.html">unitcost</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Multiple outputs detected. Including output-level random effects in model.</span></span>
-<span><span class="va">mod_uc_fixed</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/unitcost_fixed.html">unitcost_fixed</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="va">mod_uc_fixed</span> <span class="op">&lt;-</span> <span class="fu">capturetb</span><span class="fu">::</span><span class="fu"><a href="../reference/unitcost_fixed.html">unitcost_fixed</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Single output type detected. Not including output-level random effects in model.</span></span>
-<span><span class="va">mod_uc_ohd</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/unitcost_ohd.html">unitcost_ohd</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="va">mod_uc_ohd</span> <span class="op">&lt;-</span> <span class="fu">capturetb</span><span class="fu">::</span><span class="fu"><a href="../reference/unitcost_ohd.html">unitcost_ohd</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Single output type detected. Not including output-level random effects in model.</span></span>
 <span></span>
 <span><span class="va">dat</span> <span class="op">&lt;-</span> <span class="va">mod_uc</span><span class="op">$</span><span class="fu">training_data</span><span class="op">(</span><span class="op">)</span></span>
@@ -258,27 +257,27 @@
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">unitcost</td>
-<td style="text-align: right;">4.782050</td>
-<td style="text-align: right;">6.933164</td>
-<td style="text-align: right;">0.9672727</td>
-<td style="text-align: right;">23.24678</td>
-<td style="text-align: right;">0.4916852</td>
+<td style="text-align: right;">4.783514</td>
+<td style="text-align: right;">6.939309</td>
+<td style="text-align: right;">0.9654545</td>
+<td style="text-align: right;">23.38496</td>
+<td style="text-align: right;">0.4918049</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">unitcost_fixed</td>
-<td style="text-align: right;">2.955721</td>
-<td style="text-align: right;">4.292933</td>
+<td style="text-align: right;">2.955233</td>
+<td style="text-align: right;">4.288818</td>
 <td style="text-align: right;">0.9652174</td>
-<td style="text-align: right;">14.54913</td>
-<td style="text-align: right;">0.5797060</td>
+<td style="text-align: right;">14.58886</td>
+<td style="text-align: right;">0.5795069</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">unitcost_ohd</td>
-<td style="text-align: right;">2.909171</td>
-<td style="text-align: right;">4.085365</td>
+<td style="text-align: right;">2.898727</td>
+<td style="text-align: right;">4.075515</td>
 <td style="text-align: right;">0.9672131</td>
-<td style="text-align: right;">17.39406</td>
-<td style="text-align: right;">0.5128662</td>
+<td style="text-align: right;">17.43262</td>
+<td style="text-align: right;">0.5127307</td>
 </tr>
 </tbody>
 </table>

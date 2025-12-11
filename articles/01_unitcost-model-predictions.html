@@ -57,7 +57,7 @@
       <h1>Using the Unit Cost Model</h1>
 
 
-      <p class="date">2025-12-09</p>
+      <p class="date">2025-12-11</p>
 
 
       <div class="d-none name"><code></code></div>
@@ -68,7 +68,13 @@
 
 
 
-    <p>This package was developed for two reasons: firstly, to make the model development process transparent and reproducible, and secondly, to allow people to make use of the final models to predict TB outpatient visit costs. This vignette speaks to the second of these aims. If you want to use the models to predict costs, this vignette is the only documentation you need to read.</p>
+    <div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">gridExtra</span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span></code></pre></div>
+</div>
+<p>This package was developed for two reasons: firstly, to make the model development process transparent and reproducible, and secondly, to allow people to make use of the final models to predict TB outpatient visit costs. This vignette speaks to the second of these aims. If you want to use the models to predict costs, this vignette is the only documentation you need to read.</p>
 <section class="level2"><h2 id="model-structure">Model structure<a class="anchor" aria-label="anchor" href="#model-structure"></a>
 </h2>
 <p>The unit cost model is a mixed effects model with country, facility and visit type effects and covariate effects that are assumed shared across countries, facilities and visit types. Log costs are assumed to vary normally:</p>
@@ -91,7 +97,7 @@
 </annotation></semantics></math></p>
 <p>Model instances are created via the <code>unitcost</code> function:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="downlit sourceCode r">
+<div class="sourceCode cell-code" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu">capturetb</span><span class="fu">::</span><span class="fu"><a href="../reference/unitcost.html">unitcost</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Multiple outputs detected. Including output-level random effects in model.</span></span>
 <span></span>
@@ -136,14 +142,8 @@
 </div>
 <p>The prior distribution for each model parameter can be visualised by calling <code>plot(priors, parameter = "name_of_param")</code>:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">gridExtra</span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Attaching package: 'gridExtra'</span></span>
-<span><span class="co">#&gt; The following object is masked from 'package:dplyr':</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     combine</span></span>
-<span><span class="va">plots</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span></span>
+<div class="sourceCode cell-code" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">plots</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="kw">for</span><span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="fl">9</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">plots</span><span class="op">[[</span><span class="va">i</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">priors</span>, par <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"beta["</span>, <span class="va">i</span>, <span class="st">"]"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
@@ -171,9 +171,9 @@
 </div>
 <p>The posterior (fitted) distribution of each parameter can be generated by calling <code>model$plot_posteriors</code>:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode cell-code" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">model</span><span class="op">$</span><span class="fu">plot_posteriors</span><span class="op">(</span>pars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"beta["</span>, <span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">covariates</span><span class="op">)</span>, <span class="st">"]"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>  <span class="fu">scale_y_discrete</span><span class="op">(</span>labels <span class="op">=</span> <span class="va">covariates</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_discrete.html" class="external-link">scale_y_discrete</a></span><span class="op">(</span>labels <span class="op">=</span> <span class="va">covariates</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Scale for y is already present.</span></span>
 <span><span class="co">#&gt; Adding another scale for y, which will replace the existing scale.</span></span></code></pre></div>
 <div class="cell-output-display">
@@ -188,7 +188,7 @@ Figure 1: Fitted beta cefficients
 </div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode cell-code" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">model</span><span class="op">$</span><span class="fu">plot_posteriors</span><span class="op">(</span>pars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"alpha"</span>, <span class="st">"sigma"</span>, <span class="st">"sigma_c"</span>, <span class="st">"sigma_f"</span>, <span class="st">"sigma_v"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <div class="cell-output-display">
 <div id="fig-other" class="quarto-float quarto-figure quarto-figure-center">
@@ -205,7 +205,7 @@ Figure 2: Fitted intercept and standard deviations of random effects
 </h2>
 <p>The <code>unitcost</code> model is fitted using top-down economic costs in 2018 International Dollars from the ValueTB database. The raw data are installed with the package and include costs for multiple different output types. Output types are also grouped into output groups. Run <code><a href="../reference/output_groups.html">capturetb::output_groups</a></code> to see all groups, and <code><a href="../reference/outputs.html">capturetb::outputs()</a></code> to retrieve a complete list of available outputs:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode cell-code" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">available_output_groups</span> <span class="op">&lt;-</span> <span class="fu">capturetb</span><span class="fu">::</span><span class="fu"><a href="../reference/output_groups.html">output_groups</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">available_output_groups</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "OP"  "LAB" "RAD" "CS"  "IP"  "OT"</span></span>
@@ -217,11 +217,11 @@ Figure 2: Fitted intercept and standard deviations of random effects
 </div>
 <p>Subsets of the data can be retrieved using <code><a href="../reference/get_data.html">capturetb::get_data()</a></code>, filtering by output group or output type as needed:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode cell-code" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">capturetb</span><span class="fu">::</span><span class="fu"><a href="../reference/get_data.html">get_data</a></span><span class="op">(</span>output_group <span class="op">=</span> <span class="st">"OP"</span><span class="op">)</span></span>
 <span><span class="va">summarised</span> <span class="op">&lt;-</span> <span class="va">data</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu">group_by</span><span class="op">(</span><span class="va">fc_country</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">summarise</span><span class="op">(</span>n_obs <span class="op">=</span> <span class="fu">n</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">fc_country</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarise</a></span><span class="op">(</span>n_obs <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/context.html" class="external-link">n</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">summarised</span><span class="op">)</span></span></code></pre></div>
 <div class="cell-output-display">
@@ -258,9 +258,9 @@ Figure 2: Fitted intercept and standard deviations of random effects
 <p>The fitted model predicts the cost of a single outpatient visit, given key cost drivers. In the dataset outpatient visits of different types have output group “OP”.</p>
 <p>The training data was processed from the raw data by adding one additional variable, <code>n_services</code>, which is the number of distinct TB outpatient services provided at each facility, and by centering all numeric covariates by their sample mean. The training data can be inspected by calling <code>model$training_data()</code>:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode cell-code" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dat</span> <span class="op">&lt;-</span> <span class="va">model</span><span class="op">$</span><span class="fu">training_data</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>    <span class="fu">select</span><span class="op">(</span><span class="va">model</span><span class="op">$</span><span class="fu">covariates</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">model</span><span class="op">$</span><span class="fu">covariates</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">dat</span><span class="op">)</span></span>
 <span><span class="co">#&gt; # A tibble: 6 × 9</span></span>
 <span><span class="co">#&gt;   public urban primary secondary tertiary n_services[,1] log_ID_p_bldgspace[,1]</span></span>
@@ -277,7 +277,7 @@ Figure 2: Fitted intercept and standard deviations of random effects
 </h2>
 <p>To see how the model performs on the training data:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode cell-code" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Various measures of fit</span></span>
 <span><span class="va">performance</span> <span class="op">&lt;-</span> <span class="va">model</span><span class="op">$</span><span class="fu">performance</span><span class="op">(</span>scale <span class="op">=</span> <span class="st">"natural"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">performance</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"MAE"</span>,</span>
@@ -293,18 +293,18 @@ Figure 2: Fitted intercept and standard deviations of random effects
 <th style="text-align: right;">Bayesian R-squ</th>
 </tr></thead>
 <tbody><tr class="odd">
-<td style="text-align: right;">4.777883</td>
-<td style="text-align: right;">6.928756</td>
+<td style="text-align: right;">4.782887</td>
+<td style="text-align: right;">6.938667</td>
 <td style="text-align: right;">0.9654545</td>
-<td style="text-align: right;">23.3044</td>
-<td style="text-align: right;">0.4919674</td>
+<td style="text-align: right;">23.27268</td>
+<td style="text-align: right;">0.4919168</td>
 </tr></tbody>
 </table>
 </div>
 </div>
 <p>and by country:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode cell-code" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Performance by country</span></span>
 <span><span class="va">country_performance</span> <span class="op">&lt;-</span> <span class="va">model</span><span class="op">$</span><span class="fu">performance</span><span class="op">(</span>by_country <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">country_performance</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Country"</span>, <span class="st">"MAE"</span>,</span>
@@ -332,43 +332,43 @@ Figure 2: Fitted intercept and standard deviations of random effects
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">Ethiopia</td>
-<td style="text-align: right;">5.039411</td>
-<td style="text-align: right;">6.811091</td>
+<td style="text-align: right;">5.034131</td>
+<td style="text-align: right;">6.804835</td>
 <td style="text-align: right;">1.0000000</td>
-<td style="text-align: right;">26.36261</td>
-<td style="text-align: right;">0.4864107</td>
+<td style="text-align: right;">26.30787</td>
+<td style="text-align: right;">0.4869124</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Georgia</td>
-<td style="text-align: right;">7.259096</td>
-<td style="text-align: right;">10.281503</td>
+<td style="text-align: right;">7.254804</td>
+<td style="text-align: right;">10.285288</td>
 <td style="text-align: right;">0.9680851</td>
-<td style="text-align: right;">40.75416</td>
-<td style="text-align: right;">0.4217129</td>
+<td style="text-align: right;">40.91699</td>
+<td style="text-align: right;">0.4216290</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">India</td>
-<td style="text-align: right;">3.247031</td>
-<td style="text-align: right;">4.369328</td>
+<td style="text-align: right;">3.251613</td>
+<td style="text-align: right;">4.368612</td>
 <td style="text-align: right;">0.9459459</td>
-<td style="text-align: right;">17.05372</td>
-<td style="text-align: right;">0.4546346</td>
+<td style="text-align: right;">17.05032</td>
+<td style="text-align: right;">0.4545939</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Kenya</td>
-<td style="text-align: right;">4.630014</td>
-<td style="text-align: right;">6.943600</td>
+<td style="text-align: right;">4.632344</td>
+<td style="text-align: right;">6.944004</td>
 <td style="text-align: right;">0.9459459</td>
-<td style="text-align: right;">19.58768</td>
-<td style="text-align: right;">0.3778234</td>
+<td style="text-align: right;">19.62977</td>
+<td style="text-align: right;">0.3776126</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">Philippines</td>
-<td style="text-align: right;">3.634584</td>
-<td style="text-align: right;">4.836206</td>
+<td style="text-align: right;">3.626834</td>
+<td style="text-align: right;">4.829250</td>
 <td style="text-align: right;">0.9593496</td>
-<td style="text-align: right;">19.22376</td>
-<td style="text-align: right;">0.5436795</td>
+<td style="text-align: right;">19.30543</td>
+<td style="text-align: right;">0.5436590</td>
 </tr>
 </tbody>
 </table>
@@ -376,7 +376,7 @@ Figure 2: Fitted intercept and standard deviations of random effects
 </div>
 <p>By default, performance is reported after marginalising over facility effects. To see the performance of the full conditional model, including known facility effects:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode cell-code" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Various measures of fit</span></span>
 <span><span class="va">performance</span> <span class="op">&lt;-</span> <span class="va">model</span><span class="op">$</span><span class="fu">performance</span><span class="op">(</span>scale <span class="op">=</span> <span class="st">"natural"</span>, conditional <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">performance</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"MAE"</span>,</span>
@@ -392,22 +392,22 @@ Figure 2: Fitted intercept and standard deviations of random effects
 <th style="text-align: right;">Bayesian R-squ</th>
 </tr></thead>
 <tbody><tr class="odd">
-<td style="text-align: right;">2.63308</td>
-<td style="text-align: right;">4.691774</td>
+<td style="text-align: right;">2.632935</td>
+<td style="text-align: right;">4.692119</td>
 <td style="text-align: right;">0.9618182</td>
-<td style="text-align: right;">14.17013</td>
-<td style="text-align: right;">0.6593591</td>
+<td style="text-align: right;">14.12975</td>
+<td style="text-align: right;">0.6593423</td>
 </tr></tbody>
 </table>
 </div>
 </div>
 <p>Visualisiing predictions for inputs in the training data, including credible intervals, against observed costs:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode cell-code" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Plot with prediction intervals</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">grid.arrange</span>, </span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">model</span><span class="op">$</span><span class="fu">plot_fit</span><span class="op">(</span>include_ci <span class="op">=</span> <span class="cn">TRUE</span>, scale <span class="op">=</span> <span class="st">"log"</span><span class="op">)</span> <span class="op">+</span> <span class="fu">ggtitle</span><span class="op">(</span><span class="st">"Marginal model"</span><span class="op">)</span>,</span>
-<span>    <span class="va">model</span><span class="op">$</span><span class="fu">plot_fit</span><span class="op">(</span>include_ci <span class="op">=</span> <span class="cn">TRUE</span>, scale <span class="op">=</span> <span class="st">"log"</span>, conditional <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">+</span> <span class="fu">ggtitle</span><span class="op">(</span><span class="st">"Conditional model"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">model</span><span class="op">$</span><span class="fu">plot_fit</span><span class="op">(</span>include_ci <span class="op">=</span> <span class="cn">TRUE</span>, scale <span class="op">=</span> <span class="st">"log"</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Marginal model"</span><span class="op">)</span>,</span>
+<span>    <span class="va">model</span><span class="op">$</span><span class="fu">plot_fit</span><span class="op">(</span>include_ci <span class="op">=</span> <span class="cn">TRUE</span>, scale <span class="op">=</span> <span class="st">"log"</span>, conditional <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Conditional model"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <div class="cell-output-display">
 <div>
 <figure><p><img src="01_unitcost-model-predictions_files/figure-html/prediction-intervals-1.png" width="768"></p>
@@ -419,7 +419,7 @@ Figure 2: Fitted intercept and standard deviations of random effects
 </h2>
 <p>Predictions of unit cost for new inputs, not in the training set, are generated via the <code>predict</code> method. Note that numeric covariates must be centered; to convert raw values to centered values, use the <code>prepare_covariates</code> utility:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode cell-code" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Include all covariates plus facility country `fc_country` and visit type `output`</span></span>
 <span><span class="va">new_inputs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>  log_ID_p_bldgspace <span class="op">=</span> <span class="fl">1</span>, </span>
@@ -439,7 +439,7 @@ Figure 2: Fitted intercept and standard deviations of random effects
 <span><span class="va">covariates</span> <span class="op">&lt;-</span> <span class="fu">capturetb</span><span class="fu">::</span><span class="fu"><a href="../reference/prepare_covariates.html">prepare_covariates</a></span><span class="op">(</span>raw <span class="op">=</span> <span class="va">new_inputs</span>, mod <span class="op">=</span> <span class="va">model</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode cell-code" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pred</span> <span class="op">&lt;-</span> <span class="va">model</span><span class="op">$</span><span class="fu">predict</span><span class="op">(</span><span class="va">covariates</span>,</span>
 <span> scale <span class="op">=</span> <span class="st">"natural"</span>,</span>
 <span> summarised <span class="op">=</span> <span class="cn">TRUE</span>,</span>
@@ -449,7 +449,7 @@ Figure 2: Fitted intercept and standard deviations of random effects
 <span><span class="co"># Expected unit cost is mean prediction</span></span>
 <span><span class="va">expected_unit_cost</span> <span class="op">&lt;-</span> <span class="va">pred</span><span class="op">$</span><span class="va">Mean</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">expected_unit_cost</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 13.92605 13.92605 13.92605</span></span>
+<span><span class="co">#&gt; [1] 13.85543 13.85543 13.85543</span></span>
 <span></span>
 <span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">pred</span><span class="op">)</span></span></code></pre></div>
 <div class="cell-output-display">
@@ -465,27 +465,27 @@ Figure 2: Fitted intercept and standard deviations of random effects
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">1</td>
-<td style="text-align: right;">11.63012</td>
-<td style="text-align: right;">13.92605</td>
+<td style="text-align: right;">11.55728</td>
+<td style="text-align: right;">13.85543</td>
 <td style="text-align: right;">0.95</td>
-<td style="text-align: right;">3.519559</td>
-<td style="text-align: right;">37.93196</td>
+<td style="text-align: right;">3.532986</td>
+<td style="text-align: right;">37.64690</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">1</td>
-<td style="text-align: right;">11.63012</td>
-<td style="text-align: right;">13.92605</td>
+<td style="text-align: right;">11.55728</td>
+<td style="text-align: right;">13.85543</td>
 <td style="text-align: right;">0.90</td>
-<td style="text-align: right;">4.261171</td>
-<td style="text-align: right;">31.28025</td>
+<td style="text-align: right;">4.267347</td>
+<td style="text-align: right;">31.06315</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">1</td>
-<td style="text-align: right;">11.63012</td>
-<td style="text-align: right;">13.92605</td>
+<td style="text-align: right;">11.55728</td>
+<td style="text-align: right;">13.85543</td>
 <td style="text-align: right;">0.80</td>
-<td style="text-align: right;">5.316719</td>
-<td style="text-align: right;">25.09041</td>
+<td style="text-align: right;">5.337592</td>
+<td style="text-align: right;">25.00999</td>
 </tr>
 </tbody>
 </table>
@@ -494,7 +494,7 @@ Figure 2: Fitted intercept and standard deviations of random effects
 <p>Note that by default the 95% <em>predictive</em> interval is returned. If you instead want the 95% credible interval of the mean, pass <code>ci_type = "mean"</code>.</p>
 <p>To see the full distribution of predicted costs:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode cell-code" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pred</span> <span class="op">&lt;-</span> <span class="va">model</span><span class="op">$</span><span class="fu">predict</span><span class="op">(</span><span class="va">covariates</span>, scale <span class="op">=</span> <span class="st">"natural"</span>, summarised <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>cost <span class="op">=</span> <span class="va">pred</span><span class="op">)</span>, <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">cost</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_density.html" class="external-link">geom_density</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <div class="cell-output-display">

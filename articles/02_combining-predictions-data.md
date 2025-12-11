@@ -1,7 +1,6 @@
 # Combining predictions with primary data
 
 ``` r
-library(capturetb)
 library(ggplot2)
 library(dplyr)
 ```
@@ -49,11 +48,11 @@ non-overhead costs in the raw data with the predictions for overhead
 costs made by the `unitcost_ohd` model.
 
 ``` r
-mod_uc <- unitcost()
+mod_uc <- capturetb::unitcost()
 #> Multiple outputs detected. Including output-level random effects in model.
-mod_uc_fixed <- unitcost_fixed()
+mod_uc_fixed <- capturetb::unitcost_fixed()
 #> Single output type detected. Not including output-level random effects in model.
-mod_uc_ohd <- unitcost_ohd()
+mod_uc_ohd <- capturetb::unitcost_ohd()
 #> Single output type detected. Not including output-level random effects in model.
 
 dat <- mod_uc$training_data()
@@ -179,8 +178,8 @@ knitr::kable(performance)
 
 |                |      MAE |     RMSE | 95% CI Coverage | Median CI width | Bayesian R-squ |
 |:---------------|---------:|---------:|----------------:|----------------:|---------------:|
-| unitcost       | 4.782050 | 6.933164 |       0.9672727 |        23.24678 |      0.4916852 |
-| unitcost_fixed | 2.955721 | 4.292933 |       0.9652174 |        14.54913 |      0.5797060 |
-| unitcost_ohd   | 2.909171 | 4.085365 |       0.9672131 |        17.39406 |      0.5128662 |
+| unitcost       | 4.783514 | 6.939309 |       0.9654545 |        23.38496 |      0.4918049 |
+| unitcost_fixed | 2.955233 | 4.288818 |       0.9652174 |        14.58886 |      0.5795069 |
+| unitcost_ohd   | 2.898727 | 4.075515 |       0.9672131 |        17.43262 |      0.5127307 |
 
 Performance metrics of each model

@@ -1,5 +1,11 @@
 # Using the Unit Cost Model
 
+``` r
+library(ggplot2)
+library(gridExtra)
+library(dplyr)
+```
+
 This package was developed for two reasons: firstly, to make the model
 development process transparent and reproducible, and secondly, to allow
 people to make use of the final models to predict TB outpatient visit
@@ -83,12 +89,6 @@ The prior distribution for each model parameter can be visualised by
 calling `plot(priors, parameter = "name_of_param")`:
 
 ``` r
-library(gridExtra)
-#> 
-#> Attaching package: 'gridExtra'
-#> The following object is masked from 'package:dplyr':
-#> 
-#>     combine
 plots <- list()
 for(i in 1:9) {
   plots[[i]] <- plot(priors, par = paste0("beta[", i, "]"))
@@ -216,7 +216,7 @@ knitr::kable(performance)
 
 |      MAE |     RMSE | 95% CI Coverage | Median CI width | Bayesian R-squ |
 |---------:|---------:|----------------:|----------------:|---------------:|
-| 4.777883 | 6.928756 |       0.9654545 |         23.3044 |      0.4919674 |
+| 4.782887 | 6.938667 |       0.9654545 |        23.27268 |      0.4919168 |
 
 and by country:
 
@@ -231,11 +231,11 @@ knitr::kable(country_performance)
 
 | Country     |      MAE |      RMSE | 95% CI Coverage | Median CI width | Bayesian R-squ |
 |:------------|---------:|----------:|----------------:|----------------:|---------------:|
-| Ethiopia    | 5.039411 |  6.811091 |       1.0000000 |        26.36261 |      0.4864107 |
-| Georgia     | 7.259096 | 10.281503 |       0.9680851 |        40.75416 |      0.4217129 |
-| India       | 3.247031 |  4.369328 |       0.9459459 |        17.05372 |      0.4546346 |
-| Kenya       | 4.630014 |  6.943600 |       0.9459459 |        19.58768 |      0.3778234 |
-| Philippines | 3.634584 |  4.836206 |       0.9593496 |        19.22376 |      0.5436795 |
+| Ethiopia    | 5.034131 |  6.804835 |       1.0000000 |        26.30787 |      0.4869124 |
+| Georgia     | 7.254804 | 10.285288 |       0.9680851 |        40.91699 |      0.4216290 |
+| India       | 3.251613 |  4.368612 |       0.9459459 |        17.05032 |      0.4545939 |
+| Kenya       | 4.632344 |  6.944004 |       0.9459459 |        19.62977 |      0.3776126 |
+| Philippines | 3.626834 |  4.829250 |       0.9593496 |        19.30543 |      0.5436590 |
 
 By default, performance is reported after marginalising over facility
 effects. To see the performance of the full conditional model, including
@@ -249,9 +249,9 @@ colnames(performance) <- c("MAE",
 knitr::kable(performance)
 ```
 
-|     MAE |     RMSE | 95% CI Coverage | Median CI width | Bayesian R-squ |
-|--------:|---------:|----------------:|----------------:|---------------:|
-| 2.63308 | 4.691774 |       0.9618182 |        14.17013 |      0.6593591 |
+|      MAE |     RMSE | 95% CI Coverage | Median CI width | Bayesian R-squ |
+|---------:|---------:|----------------:|----------------:|---------------:|
+| 2.632935 | 4.692119 |       0.9618182 |        14.12975 |      0.6593423 |
 
 Visualisiing predictions for inputs in the training data, including
 credible intervals, against observed costs:
@@ -302,16 +302,16 @@ pred <- model$predict(covariates,
 # Expected unit cost is mean prediction
 expected_unit_cost <- pred$Mean
 print(expected_unit_cost)
-#> [1] 13.92605 13.92605 13.92605
+#> [1] 13.85543 13.85543 13.85543
 
 knitr::kable(pred)
 ```
 
 | Observation |   Median |     Mean |   CI |   CI_low |  CI_high |
 |:------------|---------:|---------:|-----:|---------:|---------:|
-| 1           | 11.63012 | 13.92605 | 0.95 | 3.519559 | 37.93196 |
-| 1           | 11.63012 | 13.92605 | 0.90 | 4.261171 | 31.28025 |
-| 1           | 11.63012 | 13.92605 | 0.80 | 5.316719 | 25.09041 |
+| 1           | 11.55728 | 13.85543 | 0.95 | 3.532986 | 37.64690 |
+| 1           | 11.55728 | 13.85543 | 0.90 | 4.267347 | 31.06315 |
+| 1           | 11.55728 | 13.85543 | 0.80 | 5.337592 | 25.00999 |
 
 Note that by default the 95% *predictive* interval is returned. If you
 instead want the 95% credible interval of the mean, pass

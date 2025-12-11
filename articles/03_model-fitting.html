@@ -57,7 +57,7 @@
       <h1>Model fitting</h1>
 
 
-      <p class="date">2025-12-09</p>
+      <p class="date">2025-12-11</p>
 
 
       <div class="d-none name"><code></code></div>
@@ -70,8 +70,8 @@
 
     <div class="cell" data-warn="false">
 <div class="sourceCode cell-code" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">capturetb</span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">gridExtra</span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span></code></pre></div>
 </div>
 <p>This vignette demonstrates how the <code>unitcost</code>, <code>unitcost_fixed</code> and <code>unitcost_ohd</code> models were fitted and sensitivity analyses performed. It also shows how models could be fit using different covariates, target variable, training data or priors.</p>
@@ -93,7 +93,7 @@
 <span>  beta.precision <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0.01</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">covariates</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_data.html">get_data</a></span><span class="op">(</span>output_name <span class="op">=</span> <span class="st">"op_diagnosticvisit"</span><span class="op">)</span> </span>
+<span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">capturetb</span><span class="fu">::</span><span class="fu"><a href="../reference/get_data.html">get_data</a></span><span class="op">(</span>output_name <span class="op">=</span> <span class="st">"op_diagnosticvisit"</span><span class="op">)</span> </span>
 <span><span class="co"># or provide your own data;</span></span>
 <span><span class="co"># see capturetb::outputs() for all output data </span></span>
 <span><span class="co"># installed with the package</span></span></code></pre></div>
@@ -113,13 +113,7 @@
 <p>Priors can be visualised by calling <code>plot(priors, par = "name_of_param")</code>:</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">gridExtra</span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Attaching package: 'gridExtra'</span></span>
-<span><span class="co">#&gt; The following object is masked from 'package:dplyr':</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     combine</span></span>
-<span><span class="va">priors</span> <span class="op">&lt;-</span> <span class="va">model</span><span class="op">$</span><span class="fu">priors</span><span class="op">(</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">priors</span> <span class="op">&lt;-</span> <span class="va">model</span><span class="op">$</span><span class="fu">priors</span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">plots</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="kw">for</span><span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">plots</span><span class="op">[[</span><span class="va">i</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">priors</span>, par <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"beta["</span>, <span class="va">i</span>, <span class="st">"]"</span><span class="op">)</span><span class="op">)</span></span>
@@ -168,36 +162,36 @@
 <span><span class="co">#&gt;    plus standard error of the mean:</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;                       Mean      SD  Naive SE Time-series SE</span></span>
-<span><span class="co">#&gt; alpha              3.63999 0.58943 0.0065900      0.0440826</span></span>
-<span><span class="co">#&gt; beta[1]           -0.07976 0.05250 0.0005870      0.0034858</span></span>
-<span><span class="co">#&gt; beta[2]            0.04306 0.05614 0.0006277      0.0007997</span></span>
-<span><span class="co">#&gt; beta[3]           -0.35706 0.09554 0.0010681      0.0021132</span></span>
-<span><span class="co">#&gt; beta[4]            0.39151 0.13760 0.0015384      0.0021974</span></span>
-<span><span class="co">#&gt; beta[5]           -0.31515 0.12683 0.0014180      0.0018639</span></span>
-<span><span class="co">#&gt; sigma              0.56633 0.04131 0.0004619      0.0004793</span></span>
-<span><span class="co">#&gt; sigma_c            0.55352 0.34696 0.0038792      0.0090506</span></span>
-<span><span class="co">#&gt; country_effect[1] -0.04368 0.29480 0.0032959      0.0112957</span></span>
-<span><span class="co">#&gt; country_effect[2]  0.01434 0.30464 0.0034060      0.0121669</span></span>
-<span><span class="co">#&gt; country_effect[3] -0.47335 0.30591 0.0034202      0.0123174</span></span>
-<span><span class="co">#&gt; country_effect[4]  0.46327 0.30255 0.0033827      0.0117060</span></span>
-<span><span class="co">#&gt; country_effect[5]  0.07373 0.31556 0.0035281      0.0141739</span></span>
+<span><span class="co">#&gt; alpha              3.68629 0.58188 0.0065057      0.0410492</span></span>
+<span><span class="co">#&gt; beta[1]           -0.08047 0.05099 0.0005701      0.0033888</span></span>
+<span><span class="co">#&gt; beta[2]            0.04320 0.05502 0.0006151      0.0007218</span></span>
+<span><span class="co">#&gt; beta[3]           -0.35695 0.09523 0.0010647      0.0022346</span></span>
+<span><span class="co">#&gt; beta[4]            0.39335 0.13803 0.0015432      0.0022879</span></span>
+<span><span class="co">#&gt; beta[5]           -0.31483 0.12787 0.0014296      0.0017749</span></span>
+<span><span class="co">#&gt; sigma              0.56500 0.04076 0.0004558      0.0004617</span></span>
+<span><span class="co">#&gt; sigma_c            0.56452 0.42017 0.0046977      0.0220015</span></span>
+<span><span class="co">#&gt; country_effect[1] -0.08318 0.34268 0.0038313      0.0185626</span></span>
+<span><span class="co">#&gt; country_effect[2] -0.02249 0.35282 0.0039446      0.0185414</span></span>
+<span><span class="co">#&gt; country_effect[3] -0.51342 0.35341 0.0039512      0.0183493</span></span>
+<span><span class="co">#&gt; country_effect[4]  0.42390 0.34093 0.0038117      0.0174279</span></span>
+<span><span class="co">#&gt; country_effect[5]  0.03346 0.35189 0.0039343      0.0211756</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; 2. Quantiles for each variable:</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;                       2.5%       25%      50%      75%    97.5%</span></span>
-<span><span class="co">#&gt; alpha              2.45957  3.248100  3.63830  4.03168  4.80466</span></span>
-<span><span class="co">#&gt; beta[1]           -0.18062 -0.114780 -0.07994 -0.04503  0.02463</span></span>
-<span><span class="co">#&gt; beta[2]           -0.06505  0.004846  0.04282  0.07964  0.15365</span></span>
-<span><span class="co">#&gt; beta[3]           -0.54283 -0.422116 -0.35781 -0.29170 -0.17113</span></span>
-<span><span class="co">#&gt; beta[4]            0.12058  0.300915  0.39226  0.48136  0.65887</span></span>
-<span><span class="co">#&gt; beta[5]           -0.56289 -0.399871 -0.31568 -0.22840 -0.06918</span></span>
-<span><span class="co">#&gt; sigma              0.49281  0.537340  0.56395  0.59285  0.65293</span></span>
-<span><span class="co">#&gt; sigma_c            0.19362  0.337843  0.46400  0.65480  1.46513</span></span>
-<span><span class="co">#&gt; country_effect[1] -0.65720 -0.198961 -0.03946  0.12036  0.54653</span></span>
-<span><span class="co">#&gt; country_effect[2] -0.60567 -0.152113  0.01383  0.18590  0.62753</span></span>
-<span><span class="co">#&gt; country_effect[3] -1.13906 -0.633423 -0.45924 -0.29217  0.09175</span></span>
-<span><span class="co">#&gt; country_effect[4] -0.11834  0.292065  0.45010  0.63015  1.10244</span></span>
-<span><span class="co">#&gt; country_effect[5] -0.54930 -0.100301  0.06681  0.24832  0.71181</span></span></code></pre></div>
+<span><span class="co">#&gt;                       2.5%       25%        50%      75%    97.5%</span></span>
+<span><span class="co">#&gt; alpha              2.58601  3.299015  3.6837600  4.05291  4.84284</span></span>
+<span><span class="co">#&gt; beta[1]           -0.17788 -0.117171 -0.0796534 -0.04495  0.01802</span></span>
+<span><span class="co">#&gt; beta[2]           -0.06425  0.006034  0.0430269  0.08034  0.14979</span></span>
+<span><span class="co">#&gt; beta[3]           -0.54305 -0.419847 -0.3563490 -0.29284 -0.17202</span></span>
+<span><span class="co">#&gt; beta[4]            0.12401  0.303090  0.3923715  0.48653  0.67127</span></span>
+<span><span class="co">#&gt; beta[5]           -0.56765 -0.402291 -0.3129220 -0.23031 -0.06726</span></span>
+<span><span class="co">#&gt; sigma              0.49229  0.536634  0.5631550  0.59075  0.65104</span></span>
+<span><span class="co">#&gt; sigma_c            0.19775  0.335338  0.4513220  0.65862  1.61462</span></span>
+<span><span class="co">#&gt; country_effect[1] -0.78192 -0.224156 -0.0585229  0.10022  0.46912</span></span>
+<span><span class="co">#&gt; country_effect[2] -0.78336 -0.166740  0.0003765  0.16845  0.56450</span></span>
+<span><span class="co">#&gt; country_effect[3] -1.26855 -0.654528 -0.4778230 -0.31345  0.03308</span></span>
+<span><span class="co">#&gt; country_effect[4] -0.23707  0.270176  0.4351590  0.60398  1.03674</span></span>
+<span><span class="co">#&gt; country_effect[5] -0.69461 -0.120335  0.0499534  0.22187  0.64314</span></span></code></pre></div>
 </div>
 <section class="level3"><h3 id="diagnostics">Diagnostics<a class="anchor" aria-label="anchor" href="#diagnostics"></a>
 </h3>
@@ -248,55 +242,55 @@
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">alpha</td>
-<td style="text-align: right;">178.8888</td>
+<td style="text-align: right;">203.7431</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">beta[1]</td>
-<td style="text-align: right;">228.1807</td>
+<td style="text-align: right;">226.3186</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">beta[2]</td>
-<td style="text-align: right;">5078.3837</td>
+<td style="text-align: right;">5807.3056</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">beta[3]</td>
-<td style="text-align: right;">2044.0425</td>
+<td style="text-align: right;">1875.6292</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">beta[4]</td>
-<td style="text-align: right;">3964.2402</td>
+<td style="text-align: right;">3640.0941</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">beta[5]</td>
-<td style="text-align: right;">4638.6336</td>
+<td style="text-align: right;">5190.2854</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">sigma</td>
-<td style="text-align: right;">7465.0087</td>
+<td style="text-align: right;">7799.8889</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">sigma_c</td>
-<td style="text-align: right;">1563.4148</td>
+<td style="text-align: right;">790.7373</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">country_effect[1]</td>
-<td style="text-align: right;">691.8244</td>
+<td style="text-align: right;">453.7134</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">country_effect[2]</td>
-<td style="text-align: right;">643.0546</td>
+<td style="text-align: right;">449.0084</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">country_effect[3]</td>
-<td style="text-align: right;">693.5719</td>
+<td style="text-align: right;">541.0023</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">country_effect[4]</td>
-<td style="text-align: right;">688.8301</td>
+<td style="text-align: right;">562.3751</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">country_effect[5]</td>
-<td style="text-align: right;">547.6972</td>
+<td style="text-align: right;">434.5328</td>
 </tr>
 </tbody>
 </table>
@@ -339,12 +333,12 @@
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Observation | Mean |       95% CI</span></span>
 <span><span class="co">#&gt; ---------------------------------</span></span>
-<span><span class="co">#&gt; 1           | 3.47 | [2.26, 4.63]</span></span>
-<span><span class="co">#&gt; 2           | 2.67 | [1.52, 3.85]</span></span>
-<span><span class="co">#&gt; 3           | 2.09 | [0.90, 3.24]</span></span>
-<span><span class="co">#&gt; 4           | 1.86 | [0.66, 3.03]</span></span>
-<span><span class="co">#&gt; 5           | 2.26 | [1.13, 3.41]</span></span>
-<span><span class="co">#&gt; 6           | 2.28 | [1.12, 3.41]</span></span>
+<span><span class="co">#&gt; 1           | 3.47 | [2.28, 4.65]</span></span>
+<span><span class="co">#&gt; 2           | 2.67 | [1.52, 3.84]</span></span>
+<span><span class="co">#&gt; 3           | 2.08 | [0.89, 3.23]</span></span>
+<span><span class="co">#&gt; 4           | 1.84 | [0.67, 3.02]</span></span>
+<span><span class="co">#&gt; 5           | 2.25 | [1.10, 3.39]</span></span>
+<span><span class="co">#&gt; 6           | 2.27 | [1.14, 3.40]</span></span>
 <span></span>
 <span><span class="co"># Various measures of fit</span></span>
 <span><span class="va">performance</span> <span class="op">&lt;-</span> <span class="va">model</span><span class="op">$</span><span class="fu">performance</span><span class="op">(</span>scale <span class="op">=</span> <span class="st">"log"</span><span class="op">)</span></span>
@@ -359,11 +353,11 @@
 <th style="text-align: right;">bayesian_r2</th>
 </tr></thead>
 <tbody><tr class="odd">
-<td style="text-align: right;">0.4350405</td>
-<td style="text-align: right;">0.5378033</td>
+<td style="text-align: right;">0.4324535</td>
+<td style="text-align: right;">0.53582</td>
 <td style="text-align: right;">0.9716981</td>
-<td style="text-align: right;">2.333307</td>
-<td style="text-align: right;">0.4969209</td>
+<td style="text-align: right;">2.319828</td>
+<td style="text-align: right;">0.4984564</td>
 </tr></tbody>
 </table>
 </div>
@@ -442,43 +436,43 @@
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">Ethiopia</td>
-<td style="text-align: right;">6.866966</td>
-<td style="text-align: right;">9.348032</td>
+<td style="text-align: right;">6.905357</td>
+<td style="text-align: right;">9.392090</td>
 <td style="text-align: right;">0.9200000</td>
-<td style="text-align: right;">32.83679</td>
-<td style="text-align: right;">0.3955880</td>
+<td style="text-align: right;">33.95291</td>
+<td style="text-align: right;">0.3961824</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Georgia</td>
-<td style="text-align: right;">6.812158</td>
-<td style="text-align: right;">7.944749</td>
+<td style="text-align: right;">6.810341</td>
+<td style="text-align: right;">8.027912</td>
 <td style="text-align: right;">1.0000000</td>
-<td style="text-align: right;">53.92191</td>
-<td style="text-align: right;">0.4416998</td>
+<td style="text-align: right;">53.73618</td>
+<td style="text-align: right;">0.4403003</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">India</td>
-<td style="text-align: right;">3.932385</td>
-<td style="text-align: right;">5.029157</td>
+<td style="text-align: right;">3.920241</td>
+<td style="text-align: right;">4.998105</td>
 <td style="text-align: right;">1.0000000</td>
-<td style="text-align: right;">20.26792</td>
-<td style="text-align: right;">0.3551333</td>
+<td style="text-align: right;">20.81572</td>
+<td style="text-align: right;">0.3554724</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Kenya</td>
-<td style="text-align: right;">7.048425</td>
-<td style="text-align: right;">9.401277</td>
+<td style="text-align: right;">7.021894</td>
+<td style="text-align: right;">9.399381</td>
 <td style="text-align: right;">1.0000000</td>
-<td style="text-align: right;">38.63368</td>
-<td style="text-align: right;">0.4324251</td>
+<td style="text-align: right;">38.53299</td>
+<td style="text-align: right;">0.4302563</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">Philippines</td>
-<td style="text-align: right;">4.496973</td>
-<td style="text-align: right;">5.485710</td>
+<td style="text-align: right;">4.542880</td>
+<td style="text-align: right;">5.554474</td>
 <td style="text-align: right;">0.9583333</td>
-<td style="text-align: right;">22.87324</td>
-<td style="text-align: right;">0.4837559</td>
+<td style="text-align: right;">22.58788</td>
+<td style="text-align: right;">0.4842272</td>
 </tr>
 </tbody>
 </table>
@@ -510,7 +504,7 @@
 <span><span class="co">#&gt; Calling 3 simulations using the parallel method...</span></span>
 <span><span class="co">#&gt; Following the progress of chain 1 (the program will wait for all chains</span></span>
 <span><span class="co">#&gt; to finish before continuing):</span></span>
-<span><span class="co">#&gt; Welcome to JAGS 4.3.2 on Tue Dec  9 16:27:24 2025</span></span>
+<span><span class="co">#&gt; Welcome to JAGS 4.3.2 on Thu Dec 11 11:19:52 2025</span></span>
 <span><span class="co">#&gt; JAGS is free software and comes with ABSOLUTELY NO WARRANTY</span></span>
 <span><span class="co">#&gt; Loading module: basemod: ok</span></span>
 <span><span class="co">#&gt; Loading module: bugs: ok</span></span>
@@ -549,7 +543,7 @@
 <span><span class="co">#&gt; Calling 3 simulations using the parallel method...</span></span>
 <span><span class="co">#&gt; Following the progress of chain 1 (the program will wait for all chains</span></span>
 <span><span class="co">#&gt; to finish before continuing):</span></span>
-<span><span class="co">#&gt; Welcome to JAGS 4.3.2 on Tue Dec  9 16:27:25 2025</span></span>
+<span><span class="co">#&gt; Welcome to JAGS 4.3.2 on Thu Dec 11 11:19:53 2025</span></span>
 <span><span class="co">#&gt; JAGS is free software and comes with ABSOLUTELY NO WARRANTY</span></span>
 <span><span class="co">#&gt; Loading module: basemod: ok</span></span>
 <span><span class="co">#&gt; Loading module: bugs: ok</span></span>
@@ -588,7 +582,7 @@
 <span><span class="co">#&gt; Calling 3 simulations using the parallel method...</span></span>
 <span><span class="co">#&gt; Following the progress of chain 1 (the program will wait for all chains</span></span>
 <span><span class="co">#&gt; to finish before continuing):</span></span>
-<span><span class="co">#&gt; Welcome to JAGS 4.3.2 on Tue Dec  9 16:27:26 2025</span></span>
+<span><span class="co">#&gt; Welcome to JAGS 4.3.2 on Thu Dec 11 11:19:54 2025</span></span>
 <span><span class="co">#&gt; JAGS is free software and comes with ABSOLUTELY NO WARRANTY</span></span>
 <span><span class="co">#&gt; Loading module: basemod: ok</span></span>
 <span><span class="co">#&gt; Loading module: bugs: ok</span></span>
@@ -639,18 +633,18 @@
 <tbody>
 <tr class="odd">
 <td style="text-align: right;">1</td>
-<td style="text-align: right;">0.6070211</td>
-<td style="text-align: right;">0.4606934</td>
+<td style="text-align: right;">0.6549080</td>
+<td style="text-align: right;">0.5502908</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">2</td>
-<td style="text-align: right;">0.5744729</td>
-<td style="text-align: right;">0.4648416</td>
+<td style="text-align: right;">0.5967717</td>
+<td style="text-align: right;">0.4598268</td>
 </tr>
 <tr class="odd">
 <td style="text-align: right;">3</td>
-<td style="text-align: right;">0.7224284</td>
-<td style="text-align: right;">0.5981636</td>
+<td style="text-align: right;">0.6183338</td>
+<td style="text-align: right;">0.5211409</td>
 </tr>
 </tbody>
 </table>

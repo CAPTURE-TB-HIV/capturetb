@@ -197,6 +197,7 @@ generators for reproducible results.</p></dd>
 <span>  summarised <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  centrality <span class="op">=</span> <span class="st">"mean"</span>,</span>
 <span>  ci <span class="op">=</span> <span class="fl">0.95</span>,</span>
+<span>  ci_type <span class="op">=</span> <span class="st">"predictive"</span>,</span>
 <span>  test <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div><p></p></div>
@@ -225,8 +226,13 @@ Default "mean".</p></dd>
 
 
 <dt><code>ci</code></dt>
-<dd><p>Value or vector of probability of the CI (between 0 and 1)
+<dd><p>Value or vector of probability of the credible interval (between 0 and 1)
 to be estimated. Default <code>0.95</code> (<code>95%</code>).</p></dd>
+
+
+<dt><code>ci_type</code></dt>
+<dd><p>One of "mean" or "predictive". Specify whether you want the credible interval
+around the mean prediction, or the predictive interval. Default "predictive".</p></dd>
 
 
 <dt><code>test</code></dt>
@@ -240,8 +246,9 @@ See <a href="https://easystats.github.io/bayestestR/reference/describe_posterior
 
 
 <dt><code>ci_method</code></dt>
-<dd><p>The type of index used for Credible Interval.
-Default ETI.</p></dd>
+<dd><p>The type of index used for the Credible Interval.
+You probably want either ETI (Equal Tailed Interval) or HDI (Highest Density Interval).
+Default ETI. See <a href="https://easystats.github.io/bayestestR/reference/describe_posterior.html" class="external-link">bayestestR::describe_posterior</a> for all options.</p></dd>
 
 
 </dl><p></p></div>
@@ -250,7 +257,7 @@ Default ETI.</p></dd>
 <h4 id="returns-1">Returns<a class="anchor" aria-label="anchor" href="#returns-1"></a></h4>
 <p>If summarised=FALSE, matrix of predicted costs with
 rows = simulations, columns = input rows. If summarised=TRUE,
-data.frame with central point estimate and confidence interval(s).</p>
+data.frame with central point estimates and credible intervals.</p>
 </div>
 
 </div><p></p><hr><a id="method-JAGSModel-baselines"></a><div class="section">
@@ -609,7 +616,7 @@ shows marginal fit. Default FALSE.</p></dd>
 
 
 <dt><code>include_ci</code></dt>
-<dd><p>Logical. Whether to show prediction intervals as
+<dd><p>Logical. Whether to show predictive intervals as
 error bars. Default TRUE.</p></dd>
 
 

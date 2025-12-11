@@ -185,6 +185,7 @@ Generate predictions from the fitted model.
       summarised = FALSE,
       centrality = "mean",
       ci = 0.95,
+      ci_type = "predictive",
       test = NULL,
       ...
     )
@@ -214,8 +215,14 @@ Generate predictions from the fitted model.
 
 - `ci`:
 
-  Value or vector of probability of the CI (between 0 and 1) to be
-  estimated. Default `0.95` (`95%`).
+  Value or vector of probability of the credible interval (between 0
+  and 1) to be estimated. Default `0.95` (`95%`).
+
+- `ci_type`:
+
+  One of "mean" or "predictive". Specify whether you want the credible
+  interval around the mean prediction, or the predictive interval.
+  Default "predictive".
 
 - `test`:
 
@@ -230,13 +237,17 @@ Generate predictions from the fitted model.
 
 - `ci_method`:
 
-  The type of index used for Credible Interval. Default ETI.
+  The type of index used for the Credible Interval. You probably want
+  either ETI (Equal Tailed Interval) or HDI (Highest Density Interval).
+  Default ETI. See
+  [bayestestR::describe_posterior](https://easystats.github.io/bayestestR/reference/describe_posterior.html)
+  for all options.
 
 #### Returns
 
 If summarised=FALSE, matrix of predicted costs with rows = simulations,
 columns = input rows. If summarised=TRUE, data.frame with central point
-estimate and confidence interval(s).
+estimates and credible intervals.
 
 ------------------------------------------------------------------------
 
@@ -642,7 +653,7 @@ line for perfect predictions and optional confidence intervals.
 
 - `include_ci`:
 
-  Logical. Whether to show prediction intervals as error bars. Default
+  Logical. Whether to show predictive intervals as error bars. Default
   TRUE.
 
 - `color_by_country`:
