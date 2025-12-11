@@ -18,8 +18,8 @@ knitr::opts_chunk$set(
 ```
 
 ```{r setup, message = FALSE, warn = FALSE}
-library(capturetb)
 library(ggplot2)
+library(gridExtra)
 library(dplyr)
 ```
 
@@ -44,7 +44,7 @@ priors <- capturetb::capturetb_priors(
   beta.precision = rep(0.01, length(covariates))
 )
 
-data <- get_data(output_name = "op_diagnosticvisit") 
+data <- capturetb::get_data(output_name = "op_diagnosticvisit") 
 # or provide your own data;
 # see capturetb::outputs() for all output data 
 # installed with the package
@@ -64,7 +64,6 @@ model <- capturetb::JAGSModel$new(
 Priors can be visualised by calling `plot(priors, par = "name_of_param")`:
 
 ```{r beta-priors, fig.width=10, fig.height=6}
-library(gridExtra)
 priors <- model$priors()
 plots <- list()
 for(i in 1:3) {

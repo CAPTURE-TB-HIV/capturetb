@@ -182,6 +182,7 @@ Generate predictions from the fitted model.
   summarised = FALSE,
   centrality = "mean",
   ci = 0.95,
+  ci_type = "predictive",
   test = NULL,
   ...
 )}\if{html}{\out{</div>}}
@@ -202,8 +203,11 @@ for full documentation of available arguments. Default FALSE.}
 \item{\code{centrality}}{The point-estimates (centrality indices) to compute.
 Default "mean".}
 
-\item{\code{ci}}{Value or vector of probability of the CI (between 0 and 1)
+\item{\code{ci}}{Value or vector of probability of the credible interval (between 0 and 1)
 to be estimated. Default \code{0.95} (\verb{95\%}).}
+
+\item{\code{ci_type}}{One of "mean" or "predictive". Specify whether you want the credible interval
+around the mean prediction, or the predictive interval. Default "predictive".}
 
 \item{\code{test}}{The indices of effect existence to compute. Default NULL.
 See \link[bayestestR:describe_posterior]{bayestestR::describe_posterior} for options.}
@@ -211,15 +215,16 @@ See \link[bayestestR:describe_posterior]{bayestestR::describe_posterior} for opt
 \item{\code{...}}{Other arguments that will be passed to
 \link[bayestestR:describe_posterior]{bayestestR::describe_posterior}.}
 
-\item{\code{ci_method}}{The type of index used for Credible Interval.
-Default ETI.}
+\item{\code{ci_method}}{The type of index used for the Credible Interval.
+You probably want either ETI (Equal Tailed Interval) or HDI (Highest Density Interval).
+Default ETI. See \link[bayestestR:describe_posterior]{bayestestR::describe_posterior} for all options.}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
 If summarised=FALSE, matrix of predicted costs with
 rows = simulations, columns = input rows. If summarised=TRUE,
-data.frame with central point estimate and confidence interval(s).
+data.frame with central point estimates and credible intervals.
 }
 }
 \if{html}{\out{<hr>}}
@@ -586,7 +591,7 @@ for perfect predictions and optional confidence intervals.
 \item{\code{conditional}}{Logical. If TRUE, shows full conditional fit. If FALSE,
 shows marginal fit. Default FALSE.}
 
-\item{\code{include_ci}}{Logical. Whether to show prediction intervals as
+\item{\code{include_ci}}{Logical. Whether to show predictive intervals as
 error bars. Default TRUE.}
 
 \item{\code{color_by_country}}{Logical. Whether to color points by country.

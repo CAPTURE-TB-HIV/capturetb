@@ -17,9 +17,9 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r setup, include = FALSE}
-library(capturetb)
+```{r setup, message = FALSE, warning = FALSE}
 library(ggplot2)
+library(gridExtra)
 library(dplyr)
 ```
 
@@ -70,7 +70,6 @@ print(priors)
 The prior distribution for each model parameter can be visualised by calling `plot(priors, parameter = "name_of_param")`:
 
 ```{r beta-priors, fig.width=10, fig.height=6}
-library(gridExtra)
 plots <- list()
 for(i in 1:9) {
   plots[[i]] <- plot(priors, par = paste0("beta[", i, "]"))

@@ -18,7 +18,6 @@ knitr::opts_chunk$set(
 ```
 
 ```{r setup, message = FALSE, warning = FALSE}
-library(capturetb)
 library(ggplot2)
 library(dplyr)
 ```
@@ -57,9 +56,9 @@ We compare the accuracy of predictions made by each of the models by looking at:
 3. The cost of a single visit as estimated by combining the directly measured non-overhead costs in the raw data with the predictions for overhead costs made by the `unitcost_ohd` model.
 
 ```{r, mods}
-mod_uc <- unitcost()
-mod_uc_fixed <- unitcost_fixed()
-mod_uc_ohd <- unitcost_ohd()
+mod_uc <- capturetb::unitcost()
+mod_uc_fixed <- capturetb::unitcost_fixed()
+mod_uc_ohd <- capturetb::unitcost_ohd()
 
 dat <- mod_uc$training_data()
 
