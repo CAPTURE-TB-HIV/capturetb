@@ -29,15 +29,14 @@ using the correct centering values.
 \examples{
 mod <- unitcost()
 new_data <- list(
-  log_ID_p_bldgspace = 1,
   logVisits = 6.9,
   logVisitsPP_TB = -1.29,
+  healthcentre = FALSE,
   primary = TRUE,
   secondary = FALSE,
   tertiary = FALSE,
   urban = FALSE,
   public = TRUE,
-  n_services = 3,
   fc_country = "Ethiopia",
   output = "op_treatmentvisit"
 )

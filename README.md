@@ -23,15 +23,13 @@ print(covariates)
 
 # Generate predictions from posterior
 inputs <- list(
-  log_ID_p_bldgspace = 1,
   logVisits = 6.9, 
-  logVisitsPP_TB = -1.29, 
+  healthcentre = FALSE,
   primary = TRUE,
   secondary = FALSE, 
   tertiary = FALSE,
   urban = FALSE, 
   public = TRUE,
-  n_services = 3,
   output = "op_treatmentvisit",
   fc_country = "Ethiopia"
 )

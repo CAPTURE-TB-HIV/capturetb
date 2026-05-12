@@ -22,6 +22,8 @@ JAGSModel <- R6::R6Class("JAGSModel",
     #' @param target Character. Name of the target variable.
     #' @param priors List of class "capturetbpriors". Should be created using
     #' [`capturetb_priors`]. If NULL, non-informative priors will be used.
+    #' @param country_random_effects Logical. Whether to include country random effects.
+    #' Default TRUE.
     initialize = function(dat,
                           covariates,
                           target,
