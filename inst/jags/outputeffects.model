@@ -1,7 +1,7 @@
 model {
   for (i in 1:N) {
     log_cost[i] ~ dnorm(mu[i], tau)
-    mu[i] <- alpha + inprod(x[i, ], beta[]) + country_effect[country[i]] + fc_effect[fc[i]] + output_effect[output[i]] 
+    mu[i] <- alpha + inprod(x[i, ], beta[]) + fc_effect[fc[i]] + output_effect[output[i]]
   }
 
   sigma_f ~ dt(0, pow(prior.sigma_f.scale, -2), 3) T(0, )
@@ -35,4 +35,3 @@ model {
   sigma ~ dt(0, pow(prior.sigma.scale, 2), 1) T(0, )
   tau <- pow(sigma, -2)
 }
-

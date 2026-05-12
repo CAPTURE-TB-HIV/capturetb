@@ -19,13 +19,11 @@ test_that("can load total unit cost model", {
     c(
       "public",
       "urban",
+      "healthcentre",
       "primary",
       "secondary",
       "tertiary",
-      "n_services",
-      "log_ID_p_bldgspace",
-      "logVisits",
-      "logVisitsPP_TB"
+      "logVisits"
     )
   )
   expect_equal(mod$target(), "ID_unitcost_total")
@@ -56,13 +54,11 @@ test_that("can load fixed unitcost model", {
     c(
       "public",
       "urban",
+      "healthcentre",
       "primary",
       "secondary",
       "tertiary",
-      "n_services",
-      "log_ID_p_bldgspace",
-      "logVisits",
-      "logVisitsPP_TB"
+      "logVisits"
     )
   )
   expect_equal(mod$target(), "ID_unitcost_fixed")
@@ -92,13 +88,11 @@ test_that("can load ohd unitcost model", {
     c(
       "public",
       "urban",
+      "healthcentre",
       "primary",
       "secondary",
       "tertiary",
-      "n_services",
-      "log_ID_p_bldgspace",
-      "logVisits",
-      "logVisitsPP_TB"
+      "logVisits"
     )
   )
   expect_equal(mod$target(), "ID_unitcost_ohd")

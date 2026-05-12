@@ -25,7 +25,8 @@ JAGSModel <- R6::R6Class("JAGSModel",
     initialize = function(dat,
                           covariates,
                           target,
-                          priors = NULL) {
+                          priors = NULL,
+                          country_random_effects = TRUE) {
       n_cov <- length(covariates)
       if (is.null(priors)) {
         priors <- capturetb_priors(
@@ -37,6 +38,7 @@ JAGSModel <- R6::R6Class("JAGSModel",
       n_priors <- length(priors$prior.beta.mean)
       stopifnot(
         "dat must be a data.frame" = is.data.frame(dat),
+        "dat is empty" = nrow(dat) > 0,
         "covariates must be a character vector" = is.character(covariates),
         "target must be a character" = is.character(target),
         "target must be a scalar" = length(target) == 1,
@@ -93,14 +95,22 @@ JAGSModel <- R6::R6Class("JAGSModel",
       params <- c(
         "alpha",
         "beta",
-        "sigma",
-        "sigma_c",
-        "country_effect"
+        "sigma"
       )
+      if (country_random_effects) {
+        params <- c(params, c(
+          "sigma_c",
+          "country_effect"
+        ))
+      }
       stopifnot("dat must be a data.frame" = is.data.frame(dat))
       if (length(unique(dat[["output"]])) > 1) {
         message("Multiple outputs detected. Including output-level random effects in model.")
-        private$.model <- "outputeffects.model"
+        if (country_random_effects) {
+          private$.model <- "outputeffectscountryeffects.model"
+        } else {
+          private$.model <- "outputeffects.model"
+        }
         params <- c(
           params,
           "sigma_f",
@@ -110,7 +120,11 @@ JAGSModel <- R6::R6Class("JAGSModel",
         )
       } else {
         message("Single output type detected. Not including output-level random effects in model.")
-        private$.model <- "singleoutput.model"
+        if (country_random_effects) {
+          private$.model <- "singleoutputcountryeffects.model"
+        } else {
+          private$.model <- "singleoutput.model"
+        }
       }
 
       private$.params <- params
@@ -120,6 +134,7 @@ JAGSModel <- R6::R6Class("JAGSModel",
       private$.target <- target
       private$.priors <- priors
       private$.countries <- as.factor(unique(dat$fc_country))
+      private$.country_random_effects <- country_random_effects
       private$.outputs <- as.factor(unique(dat$output))
       private$.facilities <- as.factor(unique(dat$fc_code))
       private$.samples <- NULL
@@ -170,14 +185,19 @@ JAGSModel <- R6::R6Class("JAGSModel",
         N = nrow(dat),
         K = length(private$.covariates),
         x = as.matrix(x),
-        log_cost = log(dat[[private$.target]]),
-        NC = length(unique(dat$fc_country)),
-        country = as.numeric(as.factor(dat$fc_country))
+        log_cost = log(dat[[private$.target]])
       )
+
+      if (private$.country_random_effects) {
+        jags_data <- c(jags_data, list(
+          NC = length(unique(dat$fc_country)),
+          country = as.numeric(as.factor(dat$fc_country))
+        ))
+      }
 
       jags_data <- c(jags_data, as.list(private$.priors))
 
-      if (private$.model == "outputeffects.model") {
+      if (private$.model %in% c("outputeffects.model", "outputeffectscountryeffects.model")) {
         jags_data <- c(jags_data, list(
           fc = as.numeric(as.factor(dat$fc_code)),
           NFC = length(unique(dat$fc_code)),
@@ -1139,6 +1159,7 @@ JAGSModel <- R6::R6Class("JAGSModel",
     .covariates = NULL,
     .facilities = NULL,
     .countries = NULL,
+    .country_random_effects = NULL,
     .outputs = NULL,
     .training_data = NULL,
     .fitted_data = NULL,
@@ -1207,7 +1228,7 @@ JAGSModel <- R6::R6Class("JAGSModel",
       }
     },
     .predict = function(dat, include_epsilon = TRUE, conditional = FALSE) {
-      output_effects <- private$.model == "outputeffects.model"
+      output_effects <- private$.model %in% c("outputeffects.model", "outputeffectscountryeffects.model")
       smat <- do.call(rbind, lapply(private$.samples, as.matrix))
 
       # shared intercept
@@ -1251,14 +1272,6 @@ JAGSModel <- R6::R6Class("JAGSModel",
         ] <- 1
       }
 
-      # country effects
-      country_cols <- paste0("country_effect[", as.numeric(private$.countries), "]")
-      countries <- smat[, country_cols, drop = FALSE]
-
-      # use sig_country to generate country effects for unseen countries
-      country_new <- rnorm(length(alpha), 0, sig_country)
-      countries <- cbind(countries, country_new)
-
       if (length(private$.covariates) == 1) {
         beta_cols <- "beta"
       } else {
@@ -1269,20 +1282,6 @@ JAGSModel <- R6::R6Class("JAGSModel",
       x <- as.matrix(private$.logical_to_numeric(
         dat[, private$.covariates, drop = FALSE]
       ))
-      x_country <- dat[, "fc_country", drop = FALSE]
-      x_country_matrix <- as.data.frame(lapply(
-        private$.countries,
-        function(country) as.character(country) == x_country
-      ))
-      x_country_matrix[, ] <- lapply(
-        x_country_matrix[, , drop = FALSE],
-        as.numeric
-      )
-      x_country_matrix[, length(private$.countries) + 1] <- 0
-      x_country_matrix[
-        which(rowSums(x_country_matrix) == 0),
-        length(private$.countries) + 1
-      ] <- 1
 
       non_numeric <- which(!is.numeric(x))
 
@@ -1293,8 +1292,35 @@ JAGSModel <- R6::R6Class("JAGSModel",
         ))
       }
 
-      pred_means <- alpha + betas %*% t(x) +
-        countries %*% t(x_country_matrix)
+      pred_means <- alpha + betas %*% t(x)
+
+      if (private$.country_random_effects) {
+        # country effects
+        country_cols <- paste0("country_effect[", as.numeric(private$.countries), "]")
+        countries <- smat[, country_cols, drop = FALSE]
+
+        # use sig_country to generate country effects for unseen countries
+        country_new <- rnorm(length(alpha), 0, sig_country)
+        countries <- cbind(countries, country_new)
+
+        x_country <- dat[, "fc_country", drop = FALSE]
+        x_country_matrix <- as.data.frame(lapply(
+          private$.countries,
+          function(country) as.character(country) == x_country
+        ))
+        x_country_matrix[, ] <- lapply(
+          x_country_matrix[, , drop = FALSE],
+          as.numeric
+        )
+        x_country_matrix[, length(private$.countries) + 1] <- 0
+        x_country_matrix[
+          which(rowSums(x_country_matrix) == 0),
+          length(private$.countries) + 1
+        ] <- 1
+
+        pred_means <- pred_means +
+          countries %*% t(x_country_matrix)
+      }
 
       S <- length(sig)
       N <- ncol(pred_means)

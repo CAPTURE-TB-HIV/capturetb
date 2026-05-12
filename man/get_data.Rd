@@ -4,9 +4,13 @@
 \alias{get_data}
 \title{Get raw data filtered by output type}
 \usage{
-get_data(output_name = NULL, output_group = NULL)
+get_data(cost_type = "ECON", output_name = NULL, output_group = NULL)
 }
 \arguments{
+\item{cost_type}{One of "ECON" or "FIN". If "ECON", model for
+economic costs is returned. If "FIN", model for financial
+costs is returned. Default "ECON".}
+
 \item{output_name}{Optional character string specifying an output type to
 filter by. Defaults to NULL (all data). See \code{\link[=outputs]{outputs()}} for valid options.}
 

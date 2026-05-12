@@ -4,7 +4,12 @@
 \alias{unitcost_ohd}
 \title{CaptureTB outpatient visit overhead costs model}
 \usage{
-unitcost_ohd()
+unitcost_ohd(cost_type = "ECON")
+}
+\arguments{
+\item{cost_type}{One of "ECON" or "FIN". If "ECON", model for
+economic costs is returned. If "FIN", model for financial
+costs is returned. Default "ECON".}
 }
 \value{
 An object of class \code{\link{JAGSModel}}.
