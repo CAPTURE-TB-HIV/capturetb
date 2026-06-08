@@ -4,12 +4,7 @@
 \alias{unitcost_fixed}
 \title{CaptureTB outpatient visit fixed costs model}
 \usage{
-unitcost_fixed(cost_type = "ECON")
-}
-\arguments{
-\item{cost_type}{One of "ECON" or "FIN". If "ECON", model for
-economic costs is returned. If "FIN", model for financial
-costs is returned. Default "ECON".}
+unitcost_fixed()
 }
 \value{
 An object of class \code{\link{JAGSModel}}.
@@ -30,13 +25,13 @@ using the correct centering values.
 mod <- unitcost_ohd()
 new_data <- list(
   logVisits = 6.9,
-  logVisitsPP_TB = -1.29,
   healthcentre = FALSE,
   primary = TRUE,
   secondary = FALSE,
   tertiary = FALSE,
   urban = FALSE,
-  public = TRUE
+  public = TRUE,
+  fc_country = "Ethiopia"
 )
 new_covariates <- prepare_covariates(new_data, mod)
 mod$predict(new_covariates, summarised = TRUE)

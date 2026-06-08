@@ -4,12 +4,7 @@
 \alias{unitcost}
 \title{CaptureTB outpatient visit cost model}
 \usage{
-unitcost(cost_type = "ECON")
-}
-\arguments{
-\item{cost_type}{One of "ECON" or "FIN". If "ECON", model for
-economic costs is returned. If "FIN", model for financial
-costs is returned. Default "ECON".}
+unitcost()
 }
 \value{
 An object of class \code{\link{JAGSModel}}.
@@ -30,7 +25,6 @@ using the correct centering values.
 mod <- unitcost()
 new_data <- list(
   logVisits = 6.9,
-  logVisitsPP_TB = -1.29,
   healthcentre = FALSE,
   primary = TRUE,
   secondary = FALSE,

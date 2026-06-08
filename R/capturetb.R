@@ -53,16 +53,12 @@ opvisit_data <- function(cost_type = "ECON") {
 #' Note that some covariates are centered. The function
 #' [prepare_covariates()] can be used to transform raw variables
 #' using the correct centering values.
-#'
-#' @param cost_type One of "ECON" or "FIN". If "ECON", model for
-#' economic costs is returned. If "FIN", model for financial
-#' costs is returned. Default "ECON".
+#' 
 #' @return An object of class [`JAGSModel`].
 #' @examples
 #' mod <- unitcost()
 #' new_data <- list(
 #'   logVisits = 6.9,
-#'   logVisitsPP_TB = -1.29,
 #'   healthcentre = FALSE,
 #'   primary = TRUE,
 #'   secondary = FALSE,
@@ -76,16 +72,12 @@ opvisit_data <- function(cost_type = "ECON") {
 #' mod$predict(new_covariates, summarised = TRUE)
 #' @seealso JAGSModel
 #' @export
-unitcost <- function(cost_type = "ECON") {
-  stopifnot(
-    "cost_type must be one of 'ECON' or 'FIN'" =
-      cost_type %in% c("ECON", "FIN")
-  )
-  samples <- readRDS(system.file(tolower(cost_type),
+unitcost <- function() {
+  samples <- readRDS(system.file("econ",
     "posterior_samples.rds",
     package = "capturetb"
   ))
-  dic <- readRDS(system.file(tolower(cost_type),
+  dic <- readRDS(system.file("econ",
     "posterior_samples_dic.rds",
     package = "capturetb"
   ))
@@ -112,6 +104,57 @@ unitcost <- function(cost_type = "ECON") {
   mod
 }
 
+
+#' Extended CaptureTB outpatient visit cost model with more covariates.
+#'
+#' This function loads a [`JAGSModel`] model object
+#' using default covariates and priors. This can be used to
+#' predict the total cost of a single outpatient visit at
+#' a given facility or facilities via the predict method. This model
+#' is not pre-fitted, so requires JAGS to be installed to fit and use.
+#'
+#' Note that numerical covariates are centered. When making predictions 
+#' with the model, the function [prepare_covariates()] can be used 
+#' to transform raw variables using the correct centering values.
+#'
+#' @param cost_type One of "ECON" or "FIN". If "ECON", model for
+#' economic costs is returned. If "FIN", model for financial
+#' costs is returned. Default "ECON".
+#' @return An object of class [`JAGSModel`].
+#' @examples
+#' \dontrun{
+#' mod <- unitcost_extended()
+#' mod$fit()
+#' }
+#' @seealso JAGSModel
+#' @export
+unitcost_extended <- function(cost_type = "ECON") {
+  stopifnot(
+    "cost_type must be one of 'ECON' or 'FIN'" =
+      cost_type %in% c("ECON", "FIN")
+  )
+
+  covariates <- c(
+    "public",
+    "urban",
+    "healthcentre",
+    "primary",
+    "secondary",
+    "tertiary",
+    "logVisits",
+    "logVisitsPP_TB",
+    "log_p_bldgspace"
+  )
+
+  data <- opvisit_data(cost_type)
+
+  JAGSModel$new(data,
+    target = "ID_unitcost_total",
+    covariates = covariates,
+    priors = uninformative_priors(length(covariates))
+  )
+}
+
 #' CaptureTB outpatient visit overhead costs model
 #'
 #' This function loads a [`JAGSModel`] model object
@@ -124,15 +167,11 @@ unitcost <- function(cost_type = "ECON") {
 #' [prepare_covariates()] can be used to transform raw variables
 #' using the correct centering values.
 #'
-#' @param cost_type One of "ECON" or "FIN". If "ECON", model for
-#' economic costs is returned. If "FIN", model for financial
-#' costs is returned. Default "ECON".
 #' @return An object of class [`JAGSModel`].
 #' @examples
 #' mod <- unitcost_ohd()
 #' new_data <- list(
 #'   logVisits = 6.9,
-#'   logVisitsPP_TB = -1.29,
 #'   healthcentre = FALSE,
 #'   primary = TRUE,
 #'   secondary = FALSE,
@@ -145,16 +184,12 @@ unitcost <- function(cost_type = "ECON") {
 #' mod$predict(new_covariates, summarised = TRUE)
 #' @seealso JAGSModel
 #' @export
-unitcost_ohd <- function(cost_type = "ECON") {
-  stopifnot(
-    "cost_type must be one of 'ECON' or 'FIN'" =
-      cost_type %in% c("ECON", "FIN")
-  )
-  samples <- readRDS(system.file(tolower(cost_type),
+unitcost_ohd <- function() {
+  samples <- readRDS(system.file("econ",
     "posterior_samples_ohd.rds",
     package = "capturetb"
   ))
-  dic <- readRDS(system.file(tolower(cost_type),
+  dic <- readRDS(system.file("econ",
     "posterior_samples_dic_ohd.rds",
     package = "capturetb"
   ))
@@ -199,42 +234,35 @@ unitcost_ohd <- function(cost_type = "ECON") {
 #' [prepare_covariates()] can be used to transform raw variables
 #' using the correct centering values.
 #'
-#' @param cost_type One of "ECON" or "FIN". If "ECON", model for
-#' economic costs is returned. If "FIN", model for financial
-#' costs is returned. Default "ECON".
 #' @return An object of class [`JAGSModel`].
 #' @examples
 #' mod <- unitcost_ohd()
 #' new_data <- list(
 #'   logVisits = 6.9,
-#'   logVisitsPP_TB = -1.29,
 #'   healthcentre = FALSE,
 #'   primary = TRUE,
 #'   secondary = FALSE,
 #'   tertiary = FALSE,
 #'   urban = FALSE,
-#'   public = TRUE
+#'   public = TRUE,
+#'   fc_country = "Ethiopia"
 #' )
 #' new_covariates <- prepare_covariates(new_data, mod)
 #' mod$predict(new_covariates, summarised = TRUE)
 #' @seealso JAGSModel
 #' @importFrom stats median
 #' @export
-unitcost_fixed <- function(cost_type = "ECON") {
-  stopifnot(
-    "cost_type must be one of 'ECON' or 'FIN'" =
-      cost_type %in% c("ECON", "FIN")
-  )
-  samples <- readRDS(system.file(tolower(cost_type),
+unitcost_fixed <- function() {
+  samples <- readRDS(system.file("econ",
     "posterior_samples_fixed.rds",
     package = "capturetb"
   ))
-  dic <- readRDS(system.file(tolower(cost_type),
+  dic <- readRDS(system.file("econ",
     "posterior_samples_dic_fixed.rds",
     package = "capturetb"
   ))
 
-  data <- opvisit_data(cost_type) |>
+  data <- opvisit_data("ECON") |>
     dplyr::group_by(.data$fc_code) |>
     dplyr::mutate(ID_unitcost_fixed = median(.data$ID_unitcost_fixed)) |>
     dplyr::filter(!duplicated(.data$ID_unitcost_fixed)) |>
@@ -260,4 +288,59 @@ unitcost_fixed <- function(cost_type = "ECON") {
   mod$.__enclos_env__$private$.samples <- samples
   mod$.__enclos_env__$private$.DIC <- dic
   mod
+}
+
+#' Extended CaptureTB outpatient visit fixed cost model with more covariates.
+#'
+#' This function loads a [`JAGSModel`] model object
+#' using default covariates and priors. This can be used to
+#' predict the total cost of a single outpatient visit at
+#' a given facility or facilities via the predict method. This model
+#' is not pre-fitted, so requires JAGS to be installed to fit and use.
+#'
+#' Note that numerical covariates are centered. When making predictions 
+#' with the model, the function [prepare_covariates()] can be used 
+#' to transform raw variables using the correct centering values.
+#'
+#' @param cost_type One of "ECON" or "FIN". If "ECON", model for
+#' economic costs is returned. If "FIN", model for financial
+#' costs is returned. Default "ECON".
+#' @return An object of class [`JAGSModel`].
+#' @examples
+#' \dontrun{
+#' mod <- unitcost_extended()
+#' mod$fit()
+#' }
+#' @seealso JAGSModel
+#' @export
+unitcost_fixed_extended <- function(cost_type = "ECON") {
+  stopifnot(
+    "cost_type must be one of 'ECON' or 'FIN'" =
+      cost_type %in% c("ECON", "FIN")
+  )
+
+  covariates <- c(
+    "public",
+    "urban",
+    "healthcentre",
+    "primary",
+    "secondary",
+    "tertiary",
+    "logVisits",
+    "logVisitsPP_TB",
+    "log_p_bldgspace"
+  )
+
+  data <- opvisit_data(cost_type) |>
+    dplyr::group_by(.data$fc_code) |>
+    dplyr::mutate(ID_unitcost_fixed = median(.data$ID_unitcost_fixed)) |>
+    dplyr::filter(!duplicated(.data$ID_unitcost_fixed)) |>
+    dplyr::mutate(output = "op_visit") |>
+    dplyr::ungroup()
+
+  JAGSModel$new(data,
+    target = "ID_unitcost_total",
+    covariates = covariates,
+    priors = uninformative_priors(length(covariates))
+  )
 }

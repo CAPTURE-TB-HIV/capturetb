@@ -17,9 +17,8 @@ model <- capturetb::unitcost()
 # View covariates
 covariates <- model$covariates()
 print(covariates)
-[1] "public"             "urban"              "primary"           
-[4] "secondary"          "tertiary"           "n_services"        
-[7] "log_ID_p_bldgspace" "logVisits"          "logVisitsPP_TB"     
+[1] "public"       "urban"        "healthcentre" "primary"      "secondary"   
+[6] "tertiary"     "logVisits"   
 
 # Generate predictions from posterior
 inputs <- list(
@@ -33,7 +32,7 @@ inputs <- list(
   output = "op_treatmentvisit",
   fc_country = "Ethiopia"
 )
-prepared_inputs <- prepare_covariates(inputs, model)
+prepared_inputs <- capturetb::prepare_covariates(inputs, model)
 pred <- model$predict(
 	prepared_inputs,
 	scale = "natural",
@@ -42,7 +41,7 @@ pred <- model$predict(
 # Expected unit cost is mean prediction
 expected_unit_cost <- pred$Mean
 print(expected_unit_cost)
-[1] 4.08444
+[1] 17.72955
 ```
 
 ## Advanced usage
