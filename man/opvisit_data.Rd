@@ -5,7 +5,12 @@
 \title{Load and prepare the outpatient visit data for training
 the unit cost models.}
 \usage{
-opvisit_data()
+opvisit_data(cost_type = "ECON")
+}
+\arguments{
+\item{cost_type}{One of "ECON" or "FIN". If "ECON", model for
+economic costs is returned. If "FIN", model for financial
+costs is returned. Default "ECON".}
 }
 \description{
 Load and prepare the outpatient visit data for training

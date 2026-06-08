@@ -217,26 +217,50 @@ There are three pre-fitted models installed with the package:
 * `unitcost_ohd()`: predicts the fixed costs associated with a single outpatient visit
 
 ```{r, eval = FALSE, inst}
+
+# economic cost models
 mod_unit <- unitcost()
 mod_unit$fit(seed = 1)
 samples <- mod_unit$samples()
 DIC <- mod_unit$mcmc_DIC(summarised = FALSE)
-saveRDS(samples, "inst/posterior_samples.rds")
-saveRDS(DIC, "inst/posterior_samples_dic.rds")
+saveRDS(samples, "inst/econ/posterior_samples.rds")
+saveRDS(DIC, "inst/econ/posterior_samples_dic.rds")
 
 mod_unit_fixed <- unitcost_fixed()
 mod_unit_fixed$fit(seed = 1)
 samples_fixed <- mod_unit_fixed$samples()
-DIC <- mod_unit$mcmc_DIC(summarised = FALSE)
-saveRDS(samples_fixed, "inst/posterior_samples_fixed.rds")
-saveRDS(DIC_fixed, "inst/posterior_samples_dic_fixed.rds")
+DIC_fixed <- mod_unit_fixed$mcmc_DIC(summarised = FALSE)
+saveRDS(samples_fixed, "inst/econ/posterior_samples_fixed.rds")
+saveRDS(DIC_fixed, "inst/econ/posterior_samples_dic_fixed.rds")
 
 mod_unit_ohd <- unitcost_ohd()
 mod_unit_ohd$fit(seed = 1)
 samples_ohd <- mod_unit_ohd$samples()
 DIC_ohd <- mod_unit_ohd$mcmc_DIC(summarised = FALSE)
-saveRDS(samples_ohd, "inst/posterior_samples_ohd.rds")
-saveRDS(DIC_ohd, "inst/posterior_samples_dic_ohd.rds")
+saveRDS(samples_ohd, "inst/econ/posterior_samples_ohd.rds")
+saveRDS(DIC_ohd, "inst/econ/posterior_samples_dic_ohd.rds")
+
+# financial cost models
+mod_unit <- unitcost(cost_type = "FIN")
+mod_unit$fit(seed = 1)
+samples <- mod_unit$samples()
+DIC <- mod_unit$mcmc_DIC(summarised = FALSE)
+saveRDS(samples, "inst/fin/posterior_samples.rds")
+saveRDS(DIC, "inst/fin/posterior_samples_dic.rds")
+
+mod_unit_fixed <- unitcost_fixed(cost_type = "FIN")
+mod_unit_fixed$fit(seed = 1)
+samples_fixed <- mod_unit_fixed$samples()
+DIC_fixed <- mod_unit_fixed$mcmc_DIC(summarised = FALSE)
+saveRDS(samples_fixed, "inst/fin/posterior_samples_fixed.rds")
+saveRDS(DIC_fixed, "inst/fin/posterior_samples_dic_fixed.rds")
+
+mod_unit_ohd <- unitcost_ohd(cost_type = "FIN")
+mod_unit_ohd$fit(seed = 1)
+samples_ohd <- mod_unit_ohd$samples()
+DIC_ohd <- mod_unit_ohd$mcmc_DIC(summarised = FALSE)
+saveRDS(samples_ohd, "inst/fin/posterior_samples_ohd.rds")
+saveRDS(DIC_ohd, "inst/fin/posterior_samples_dic_ohd.rds")
 ```
 
 Executing the above code will reproduce exactly the posterior samples installed with 

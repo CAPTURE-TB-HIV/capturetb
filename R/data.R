@@ -28,9 +28,13 @@ output_groups <- function() {
 #'
 #' Returns the raw ValueTB data filtered to a specified output type.
 #'
+#' @param cost_type One of "ECON" or "FIN". If "ECON", model for
+#' economic costs is returned. If "FIN", model for financial
+#' costs is returned. Default "ECON".
+#'
 #' @param output_name Optional character string specifying an output type to
 #' filter by. Defaults to NULL (all data). See [outputs()] for valid options.
-#' 
+#'
 #' @param output_group Optional character string specifying an output group to
 #' filter by. Defaults to NULL (all data). See [output_groups()] for valid options.
 #'
@@ -40,16 +44,28 @@ output_groups <- function() {
 #' @export
 #' @importFrom rlang .data
 #' @seealso outputs, output_groups
-get_data <- function(output_name = NULL, output_group = NULL) {
+get_data <- function(
+    cost_type = "ECON",
+    output_name = NULL,
+    output_group = NULL) {
   stopifnot(
     "'output_group' must be a string" =
       (is.null(output_group) || is.character(output_group))
   )
-	stopifnot(
+  stopifnot(
     "'output_name' must be a string" =
       (is.null(output_name) || is.character(output_name))
   )
-  dat <- utils::read.csv(system.file("td_econ.csv", package = "capturetb"))
+  stopifnot(
+    "cost_type must be one of 'ECON' or 'FIN'" =
+      cost_type %in% c("ECON", "FIN")
+  )
+  if (cost_type == "ECON") {
+    dat <- utils::read.csv(system.file("td_econ.csv", package = "capturetb"))
+  } else {
+    dat <- utils::read.csv(system.file("td_fin.csv", package = "capturetb"))
+  }
+
   if (!is.null(output_group)) {
     dat <- dat |>
       dplyr::filter(.data$outputgroup == output_group)
@@ -79,7 +95,7 @@ get_data <- function(output_name = NULL, output_group = NULL) {
 #' on `sigma`. Default is 1.
 #' @param sigma_c.scale Numeric scalar. Scale parameter for Half-Cauchy
 #' prior on `sigma_c`. Default is 1.
-#' @param sigma_f.scale Numeric scalar. Scale parameter for Half-Student-t with 
+#' @param sigma_f.scale Numeric scalar. Scale parameter for Half-Student-t with
 #' 3 degrees of freedom prior on `sigma_f`. Default is 1.
 #' @param sigma_v.scale Numeric scalar. Scale parameter for Half-Cauchy
 #' prior on `sigma_v`. Default is 1.
@@ -129,7 +145,7 @@ capturetb_priors <- function(alpha.mean = 0,
     prior.alpha.precision = alpha.precision,
     prior.sigma.scale = sigma.scale,
     prior.sigma_c.scale = sigma_c.scale,
-		prior.sigma_f.scale = sigma_f.scale,
+    prior.sigma_f.scale = sigma_f.scale,
     prior.sigma_v.scale = sigma_v.scale,
     prior.beta.mean = beta.mean,
     prior.beta.precision = beta.precision

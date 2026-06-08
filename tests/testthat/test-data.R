@@ -25,6 +25,22 @@ test_that("can get data filtered to output group", {
   expect_gt(nrow(dat), 0)
 })
 
+test_that("gets economic cost cost data by default", {
+  dat <- get_data(output_group = "OP")
+  expect_s3_class(dat, "data.frame")
+  expect_true(all(dat$outputgroup == "OP"))
+  expect_true(all(dat$met_FINvECON == "ECON"))
+  expect_gt(nrow(dat), 0)
+})
+
+test_that("can get financial cost data", {
+  dat <- get_data(cost_type = "FIN", output_group = "OP")
+  expect_s3_class(dat, "data.frame")
+  expect_true(all(dat$outputgroup == "OP"))
+  expect_true(all(dat$met_FINvECON == "FIN"))
+  expect_gt(nrow(dat), 0)
+})
+
 test_that("output name must be a string", {
   expect_error(
     get_data(output_name = 123),

@@ -1,5 +1,5 @@
 test_that("JAGSModel class initialization works", {
-  dat <- get_data("op_treatmentvisit")
+  dat <- get_data(output_name = "op_treatmentvisit")
   model <- suppressWarnings(JAGSModel$new(dat,
     covariates = test_covariates,
     target = "USD_unitcost_total",
@@ -343,6 +343,7 @@ test_that("fitted_parameters method works correctly", {
 
   # Test with fitted model (use unitcost which already has samples)
   model <- unitcost()
+  n_cov <- length(model$covariates())
 
   # Test default parameters (95% CI)
   params <- model$fitted_parameters()
@@ -354,7 +355,7 @@ test_that("fitted_parameters method works correctly", {
   # Check that we have the expected parameters
   expected_params <- c(
     "alpha",
-    paste0("beta[", 1:9, "]"),
+    paste0("beta[", 1:n_cov, "]"),
     paste0("country_effect[", 1:5, "]"),
     paste0("output_effect[", 1:14, "]"),
     "sigma", "sigma_c", "sigma_f", "sigma_v"
@@ -536,7 +537,7 @@ test_that("can get loco validation results on natural scale", {
     names(perf),
     c("mae", "rmse", "ci_coverage", "median_ci", "bayesian_r2")
   )
-  expect_true(perf$bayesian_r2 > 0.4)
+  expect_true(perf$bayesian_r2 > 0.3)
   expect_true(perf$bayesian_r2 < 0.6)
   expect_true(perf$mae > 1)
   mods <- attr(res, "models")

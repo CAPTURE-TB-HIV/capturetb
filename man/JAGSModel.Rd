@@ -110,7 +110,13 @@ bayestestR describe_posterior
 \subsection{Method \code{new()}}{
 Initialize a new model instance.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{JAGSModel$new(dat, covariates, target, priors = NULL)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{JAGSModel$new(
+  dat,
+  covariates,
+  target,
+  priors = NULL,
+  country_random_effects = TRUE
+)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -124,6 +130,9 @@ Initialize a new model instance.
 
 \item{\code{priors}}{List of class "capturetbpriors". Should be created using
 \code{\link{capturetb_priors}}. If NULL, non-informative priors will be used.}
+
+\item{\code{country_random_effects}}{Logical. Whether to include country random effects.
+Default TRUE.}
 }
 \if{html}{\out{</div>}}
 }
