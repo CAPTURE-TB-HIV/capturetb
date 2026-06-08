@@ -71,14 +71,15 @@ The prior distribution for each model parameter can be visualised by calling `pl
 
 ```{r beta-priors, fig.width=10, fig.height=6}
 plots <- list()
-for(i in 1:9) {
+l <- length(covariates)
+for(i in 1:l) {
   plots[[i]] <- plot(priors, par = paste0("beta[", i, "]"))
 }
-plots[[10]] <- plot(priors, par = "alpha")
-plots[[11]] <- plot(priors, par = "sigma")
-plots[[12]] <- plot(priors, par = "sigma_c")
-plots[[13]] <- plot(priors, par = "sigma_f")
-plots[[14]] <- plot(priors, par = "sigma_v")
+plots[[l + 1]] <- plot(priors, par = "alpha")
+plots[[l + 2]] <- plot(priors, par = "sigma")
+plots[[l + 3]] <- plot(priors, par = "sigma_c")
+plots[[l + 4]] <- plot(priors, par = "sigma_f")
+plots[[l + 5]] <- plot(priors, par = "sigma_v")
 
 do.call(grid.arrange, c(plots, ncol = 3))
 ```
@@ -178,10 +179,9 @@ Predictions of unit cost for new inputs, not in the training set, are generated 
 ```{r, prepare}
 # Include all covariates plus facility country `fc_country` and visit type `output`
 new_inputs <- list(
-  log_ID_p_bldgspace = 1, 
   logVisits = 6.9, 
-  logVisitsPP_TB = -1.29, 
 	n_services = 1,
+  healthcentre = FALSE,
 	primary = FALSE,
   secondary = FALSE, 
 	tertiary = FALSE,
@@ -192,11 +192,11 @@ new_inputs <- list(
 )
 
 # This will center covariates as required by the model
-covariates <- capturetb::prepare_covariates(raw = new_inputs, mod = model)
+prepared_inputs <- capturetb::prepare_covariates(raw = new_inputs, mod = model)
 ```
 
 ```{r, pred}
-pred <- model$predict(covariates,
+pred <- model$predict(prepared_inputs,
  scale = "natural",
  summarised = TRUE,
  centrality = c("mean", "median"),
@@ -214,6 +214,6 @@ Note that by default the 95% *predictive* interval is returned. If you instead w
 To see the full distribution of predicted costs:
 
 ```{r, plot-pred}
-pred <- model$predict(covariates, scale = "natural", summarised = FALSE)
+pred <- model$predict(prepared_inputs, scale = "natural", summarised = FALSE)
 ggplot2::ggplot(data.frame(cost = pred), ggplot2::aes(x = cost)) + ggplot2::geom_density()
 ```
