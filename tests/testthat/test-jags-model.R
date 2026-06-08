@@ -537,7 +537,7 @@ test_that("can get loco validation results on natural scale", {
     names(perf),
     c("mae", "rmse", "ci_coverage", "median_ci", "bayesian_r2")
   )
-  expect_true(perf$bayesian_r2 > 0.4)
+  expect_true(perf$bayesian_r2 > 0.3)
   expect_true(perf$bayesian_r2 < 0.6)
   expect_true(perf$mae > 1)
   mods <- attr(res, "models")

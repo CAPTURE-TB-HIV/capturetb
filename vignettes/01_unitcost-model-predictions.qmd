@@ -23,7 +23,7 @@ library(gridExtra)
 library(dplyr)
 ```
 
-This package was developed for two reasons: firstly, to make the model development process transparent and reproducible, and secondly, to allow people to make use of the final models to predict TB outpatient visit costs. This vignette speaks to the second of these aims. If you want to use the models to predict costs, this vignette is the only documentation you need to read. 
+This vignette describes use of the pre-fitted `unitcost` model.
 
 ## Model structure
 
