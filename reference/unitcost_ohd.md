@@ -31,15 +31,13 @@ JAGSModel
 mod <- unitcost_ohd()
 #> Single output type detected. Not including output-level random effects in model.
 new_data <- list(
-  log_ID_p_bldgspace = 1,
   logVisits = 6.9,
-  logVisitsPP_TB = -1.29,
+  healthcentre = FALSE,
   primary = TRUE,
   secondary = FALSE,
   tertiary = FALSE,
   urban = FALSE,
   public = TRUE,
-  n_services = 3,
   fc_country = "Ethiopia"
 )
 new_covariates <- prepare_covariates(new_data, mod)
@@ -48,5 +46,5 @@ mod$predict(new_covariates, summarised = TRUE)
 #> 
 #> Observation | Mean |       95% CI
 #> ---------------------------------
-#> 1           | 2.80 | [1.19, 4.43]
+#> 1           | 2.21 | [0.49, 3.90]
 ```

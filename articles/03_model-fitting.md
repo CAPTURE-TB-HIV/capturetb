@@ -1,6 +1,7 @@
 # Model fitting
 
 ``` r
+
 library(ggplot2)
 library(gridExtra)
 library(dplyr)
@@ -25,6 +26,7 @@ A model instance requires a list of covariates, a target variable to
 predict, training data, and priors for parameters.
 
 ``` r
+
 covariates <- c("logVisits", "logVisitsPP", "logVisitsPP_TB", "urban", "public")
 
 target <- "ID_unitcost_total"
@@ -52,6 +54,7 @@ data has only one unique output type, no facility or visit type effects
 will be included.
 
 ``` r
+
 model <- capturetb::JAGSModel$new(
   dat = data,
   covariates = covariates,
@@ -66,6 +69,7 @@ Priors can be visualised by calling
 `plot(priors, par = "name_of_param")`:
 
 ``` r
+
 priors <- model$priors()
 plots <- list()
 for(i in 1:3) {
@@ -94,6 +98,7 @@ For the purpose of the vignette, we’ll use fewer iterations than
 recommended for faster computation:
 
 ``` r
+
 # Fit the model with reduced iterations for demonstration
 # In practice, you might want to use the defaults (n.iter = 100000)
 model$fit(
@@ -105,6 +110,7 @@ model$fit(
 ```
 
 ``` r
+
 # Check summary statistics of the fitted samples
 fitted_samples <- model$samples()
 summary(fitted_samples)
@@ -118,36 +124,36 @@ summary(fitted_samples)
 #>    plus standard error of the mean:
 #> 
 #>                       Mean      SD  Naive SE Time-series SE
-#> alpha              3.68629 0.58188 0.0065057      0.0410492
-#> beta[1]           -0.08047 0.05099 0.0005701      0.0033888
-#> beta[2]            0.04320 0.05502 0.0006151      0.0007218
-#> beta[3]           -0.35695 0.09523 0.0010647      0.0022346
-#> beta[4]            0.39335 0.13803 0.0015432      0.0022879
-#> beta[5]           -0.31483 0.12787 0.0014296      0.0017749
-#> sigma              0.56500 0.04076 0.0004558      0.0004617
-#> sigma_c            0.56452 0.42017 0.0046977      0.0220015
-#> country_effect[1] -0.08318 0.34268 0.0038313      0.0185626
-#> country_effect[2] -0.02249 0.35282 0.0039446      0.0185414
-#> country_effect[3] -0.51342 0.35341 0.0039512      0.0183493
-#> country_effect[4]  0.42390 0.34093 0.0038117      0.0174279
-#> country_effect[5]  0.03346 0.35189 0.0039343      0.0211756
+#> alpha              3.66122 0.51834 0.0057952      0.0324659
+#> beta[1]           -0.08031 0.04753 0.0005314      0.0028856
+#> beta[2]            0.04327 0.05525 0.0006177      0.0007171
+#> beta[3]           -0.35737 0.09514 0.0010637      0.0020325
+#> beta[4]            0.39206 0.13846 0.0015481      0.0022289
+#> beta[5]           -0.31636 0.12801 0.0014312      0.0017650
+#> sigma              0.56504 0.04178 0.0004671      0.0004852
+#> sigma_c            0.55108 0.35397 0.0039575      0.0087861
+#> country_effect[1] -0.05773 0.28549 0.0031919      0.0101188
+#> country_effect[2] -0.00245 0.29653 0.0033154      0.0108189
+#> country_effect[3] -0.48679 0.29761 0.0033273      0.0102769
+#> country_effect[4]  0.44737 0.29119 0.0032556      0.0097088
+#> country_effect[5]  0.06113 0.29536 0.0033022      0.0104338
 #> 
 #> 2. Quantiles for each variable:
 #> 
-#>                       2.5%       25%        50%      75%    97.5%
-#> alpha              2.58601  3.299015  3.6837600  4.05291  4.84284
-#> beta[1]           -0.17788 -0.117171 -0.0796534 -0.04495  0.01802
-#> beta[2]           -0.06425  0.006034  0.0430269  0.08034  0.14979
-#> beta[3]           -0.54305 -0.419847 -0.3563490 -0.29284 -0.17202
-#> beta[4]            0.12401  0.303090  0.3923715  0.48653  0.67127
-#> beta[5]           -0.56765 -0.402291 -0.3129220 -0.23031 -0.06726
-#> sigma              0.49229  0.536634  0.5631550  0.59075  0.65104
-#> sigma_c            0.19775  0.335338  0.4513220  0.65862  1.61462
-#> country_effect[1] -0.78192 -0.224156 -0.0585229  0.10022  0.46912
-#> country_effect[2] -0.78336 -0.166740  0.0003765  0.16845  0.56450
-#> country_effect[3] -1.26855 -0.654528 -0.4778230 -0.31345  0.03308
-#> country_effect[4] -0.23707  0.270176  0.4351590  0.60398  1.03674
-#> country_effect[5] -0.69461 -0.120335  0.0499534  0.22187  0.64314
+#>                       2.5%       25%       50%      75%    97.5%
+#> alpha              2.64635  3.312122  3.665665  4.01344  4.66009
+#> beta[1]           -0.17144 -0.112780 -0.081065 -0.04931  0.01552
+#> beta[2]           -0.06452  0.005774  0.042649  0.08086  0.14956
+#> beta[3]           -0.54785 -0.421301 -0.356301 -0.29217 -0.17162
+#> beta[4]            0.12307  0.299579  0.391506  0.48449  0.66130
+#> beta[5]           -0.56382 -0.402277 -0.316717 -0.23201 -0.06481
+#> sigma              0.49127  0.535930  0.562805  0.59141  0.65416
+#> sigma_c            0.19510  0.335454  0.459724  0.65519  1.46634
+#> country_effect[1] -0.65390 -0.218781 -0.047312  0.10735  0.48779
+#> country_effect[2] -0.62054 -0.169631  0.001671  0.16803  0.58855
+#> country_effect[3] -1.12398 -0.646593 -0.471724 -0.30699  0.07598
+#> country_effect[4] -0.10909  0.281176  0.436037  0.60803  1.07441
+#> country_effect[5] -0.54065 -0.105804  0.057916  0.23231  0.67291
 ```
 
 ### Diagnostics
@@ -158,6 +164,7 @@ model has converged:
 Rhat:
 
 ``` r
+
 model$mcmc_rhat(par = paste0("beta[", 1:length(covariates), "]"))
 ```
 
@@ -166,6 +173,7 @@ model$mcmc_rhat(par = paste0("beta[", 1:length(covariates), "]"))
 Trace:
 
 ``` r
+
 model$mcmc_trace(regex_pars = "beta")
 ```
 
@@ -174,6 +182,7 @@ model$mcmc_trace(regex_pars = "beta")
 Auto-correlation:
 
 ``` r
+
 model$mcmc_acf(regex_pars = "beta")
 ```
 
@@ -182,28 +191,30 @@ model$mcmc_acf(regex_pars = "beta")
 Effective sample size:
 
 ``` r
+
 knitr::kable(model$n_eff())
 ```
 
 |                     |         x |
 |:--------------------|----------:|
-| alpha               |  203.7431 |
-| beta\[1\]           |  226.3186 |
-| beta\[2\]           | 5807.3056 |
-| beta\[3\]           | 1875.6292 |
-| beta\[4\]           | 3640.0941 |
-| beta\[5\]           | 5190.2854 |
-| sigma               | 7799.8889 |
-| sigma_c             |  790.7373 |
-| country_effect\[1\] |  453.7134 |
-| country_effect\[2\] |  449.0084 |
-| country_effect\[3\] |  541.0023 |
-| country_effect\[4\] |  562.3751 |
-| country_effect\[5\] |  434.5328 |
+| alpha               |  254.8034 |
+| beta\[1\]           |  273.2221 |
+| beta\[2\]           | 5947.3615 |
+| beta\[3\]           | 2200.2980 |
+| beta\[4\]           | 3864.5965 |
+| beta\[5\]           | 5264.0313 |
+| sigma               | 7460.9759 |
+| sigma_c             | 1903.5757 |
+| country_effect\[1\] |  799.1325 |
+| country_effect\[2\] |  766.1315 |
+| country_effect\[3\] |  845.3216 |
+| country_effect\[4\] |  899.4759 |
+| country_effect\[5\] |  812.4838 |
 
 We can also plot the posterior distributions of each parameter:
 
 ``` r
+
 model$plot_posteriors(pars = paste0("beta[", 1:length(covariates), "]")) + 
   ggplot2::scale_y_discrete(labels = covariates)
 #> Scale for y is already present.
@@ -213,6 +224,7 @@ model$plot_posteriors(pars = paste0("beta[", 1:length(covariates), "]")) +
 ![](03_model-fitting_files/figure-html/post-1.png)
 
 ``` r
+
 model$plot_posteriors(pars = paste0("country_effect[", 1:5, "]"))
 ```
 
@@ -224,6 +236,7 @@ We can now generate predictions for the training data and evaluate model
 fit:
 
 ``` r
+
 # Generate predictions for the training data on log scale
 dat <- model$training_data()
 predictions <- model$predict(dat, scale = "log", summarised = TRUE)
@@ -232,27 +245,28 @@ head(predictions)
 #> 
 #> Observation | Mean |       95% CI
 #> ---------------------------------
-#> 1           | 3.47 | [2.28, 4.65]
-#> 2           | 2.67 | [1.52, 3.84]
-#> 3           | 2.08 | [0.89, 3.23]
-#> 4           | 1.84 | [0.67, 3.02]
-#> 5           | 2.25 | [1.10, 3.39]
-#> 6           | 2.27 | [1.14, 3.40]
+#> 1           | 3.48 | [2.29, 4.69]
+#> 2           | 2.67 | [1.52, 3.83]
+#> 3           | 2.09 | [0.93, 3.25]
+#> 4           | 1.84 | [0.70, 3.02]
+#> 5           | 2.27 | [1.12, 3.41]
+#> 6           | 2.27 | [1.12, 3.44]
 
 # Various measures of fit
 performance <- model$performance(scale = "log")
 knitr::kable(performance)
 ```
 
-|       mae |    rmse | ci_coverage | median_ci | bayesian_r2 |
-|----------:|--------:|------------:|----------:|------------:|
-| 0.4324535 | 0.53582 |   0.9716981 |  2.319828 |   0.4984564 |
+|       mae |      rmse | ci_coverage | median_ci | bayesian_r2 |
+|----------:|----------:|------------:|----------:|------------:|
+| 0.4331135 | 0.5368093 |   0.9716981 |  2.317007 |   0.4968616 |
 
 ## Visualising results
 
 ### 1. Predicted vs Observed
 
 ``` r
+
 # Create scatter plot of predicted vs observed values
 model$plot_fit(include_ci = FALSE, scale = "log")
 ```
@@ -262,6 +276,7 @@ model$plot_fit(include_ci = FALSE, scale = "log")
 ### 2. 95% Credible Prediction Intervals
 
 ``` r
+
 # Plot with prediction intervals
 model$plot_fit(include_ci = TRUE, scale = "log")
 ```
@@ -271,6 +286,7 @@ model$plot_fit(include_ci = TRUE, scale = "log")
 ### 3. Residuals
 
 ``` r
+
 model$plot_residuals(add_smooth = TRUE, color_by_country = TRUE)
 #> Warning in private$.predict(dat, include_epsilon = FALSE, conditional = TRUE):
 #> conditional = TRUE has no effect when there is only one output type
@@ -282,6 +298,7 @@ model$plot_residuals(add_smooth = TRUE, color_by_country = TRUE)
 ### 4. Country-Specific perfomance
 
 ``` r
+
 # Performance by country
 country_performance <- model$performance(by_country = TRUE)
 colnames(country_performance) <- c("Country", "MAE",
@@ -292,13 +309,14 @@ knitr::kable(country_performance)
 
 | Country     |      MAE |     RMSE | 95% CI Coverage | Median CI Width | Bayesian R-squ |
 |:------------|---------:|---------:|----------------:|----------------:|---------------:|
-| Ethiopia    | 6.905357 | 9.392090 |       0.9200000 |        33.95291 |      0.3961824 |
-| Georgia     | 6.810341 | 8.027912 |       1.0000000 |        53.73618 |      0.4403003 |
-| India       | 3.920241 | 4.998105 |       1.0000000 |        20.81572 |      0.3554724 |
-| Kenya       | 7.021894 | 9.399381 |       1.0000000 |        38.53299 |      0.4302563 |
-| Philippines | 4.542880 | 5.554474 |       0.9583333 |        22.58788 |      0.4842272 |
+| Ethiopia    | 6.904000 | 9.408526 |       0.9200000 |        33.46044 |      0.3933346 |
+| Georgia     | 6.815187 | 7.958192 |       1.0000000 |        53.21125 |      0.4407609 |
+| India       | 3.921693 | 4.988430 |       1.0000000 |        21.12323 |      0.3574465 |
+| Kenya       | 7.100750 | 9.461385 |       1.0000000 |        36.21315 |      0.4310687 |
+| Philippines | 4.511000 | 5.528042 |       0.9583333 |        22.57302 |      0.4842072 |
 
 ``` r
+
 model$plot_fit() + 
   ggplot2::facet_wrap(~country, scales = "free")
 ```
@@ -313,6 +331,7 @@ compilation; in practice, 10 or 20 folds would give a more accurate
 picture.
 
 ``` r
+
 res <- model$k_fold_cv(k_folds = 3, 
   n.iter = 10000,
   n.burnin = 1000,
@@ -323,7 +342,7 @@ res <- model$k_fold_cv(k_folds = 3,
 #> Calling 3 simulations using the parallel method...
 #> Following the progress of chain 1 (the program will wait for all chains
 #> to finish before continuing):
-#> Welcome to JAGS 4.3.2 on Thu Dec 11 11:19:52 2025
+#> Welcome to JAGS 4.3.2 on Tue Jun  9 11:43:11 2026
 #> JAGS is free software and comes with ABSOLUTELY NO WARRANTY
 #> Loading module: basemod: ok
 #> Loading module: bugs: ok
@@ -356,13 +375,15 @@ res <- model$k_fold_cv(k_folds = 3,
 #> Finished running the simulation
 #> Compiling rjags model and adapting for 1000 iterations...
 #> Obtaining DIC samples from 100 iterations...
+#> Warning in doTryCatch(return(expr), name, parentenv, handler): Model may not
+#> have converged. Max rhat is 1.13587284089841
 #> Model fitted successfully with 3 chains and 10000 iterations.
 #> Processing fold 2 of 3
 #> Single output type detected. Not including output-level random effects in model.
 #> Calling 3 simulations using the parallel method...
 #> Following the progress of chain 1 (the program will wait for all chains
 #> to finish before continuing):
-#> Welcome to JAGS 4.3.2 on Thu Dec 11 11:19:53 2025
+#> Welcome to JAGS 4.3.2 on Tue Jun  9 11:43:12 2026
 #> JAGS is free software and comes with ABSOLUTELY NO WARRANTY
 #> Loading module: basemod: ok
 #> Loading module: bugs: ok
@@ -395,13 +416,15 @@ res <- model$k_fold_cv(k_folds = 3,
 #> Finished running the simulation
 #> Compiling rjags model and adapting for 1000 iterations...
 #> Obtaining DIC samples from 100 iterations...
+#> Warning in doTryCatch(return(expr), name, parentenv, handler): Model may not
+#> have converged. Max rhat is 1.1421771221709
 #> Model fitted successfully with 3 chains and 10000 iterations.
 #> Processing fold 3 of 3
 #> Single output type detected. Not including output-level random effects in model.
 #> Calling 3 simulations using the parallel method...
 #> Following the progress of chain 1 (the program will wait for all chains
 #> to finish before continuing):
-#> Welcome to JAGS 4.3.2 on Thu Dec 11 11:19:54 2025
+#> Welcome to JAGS 4.3.2 on Tue Jun  9 11:43:13 2026
 #> JAGS is free software and comes with ABSOLUTELY NO WARRANTY
 #> Loading module: basemod: ok
 #> Loading module: bugs: ok
@@ -446,9 +469,9 @@ knitr::kable(fit)
 
 | fold |      rmse |       mae |
 |-----:|----------:|----------:|
-|    1 | 0.6549080 | 0.5502908 |
-|    2 | 0.5967717 | 0.4598268 |
-|    3 | 0.6183338 | 0.5211409 |
+|    1 | 0.5589529 | 0.4650314 |
+|    2 | 0.6274520 | 0.5105291 |
+|    3 | 0.6042033 | 0.4886062 |
 
 ## Reproducing the fitted models installed with the package
 
@@ -462,26 +485,29 @@ There are three pre-fitted models installed with the package:
   costs associated with a single outpatient visit
 
 ``` r
+
+
+# economic cost models
 mod_unit <- unitcost()
 mod_unit$fit(seed = 1)
 samples <- mod_unit$samples()
 DIC <- mod_unit$mcmc_DIC(summarised = FALSE)
-saveRDS(samples, "inst/posterior_samples.rds")
-saveRDS(DIC, "inst/posterior_samples_dic.rds")
+saveRDS(samples, "inst/econ/posterior_samples.rds")
+saveRDS(DIC, "inst/econ/posterior_samples_dic.rds")
 
 mod_unit_fixed <- unitcost_fixed()
 mod_unit_fixed$fit(seed = 1)
 samples_fixed <- mod_unit_fixed$samples()
-DIC <- mod_unit$mcmc_DIC(summarised = FALSE)
-saveRDS(samples_fixed, "inst/posterior_samples_fixed.rds")
-saveRDS(DIC_fixed, "inst/posterior_samples_dic_fixed.rds")
+DIC_fixed <- mod_unit_fixed$mcmc_DIC(summarised = FALSE)
+saveRDS(samples_fixed, "inst/econ/posterior_samples_fixed.rds")
+saveRDS(DIC_fixed, "inst/econ/posterior_samples_dic_fixed.rds")
 
 mod_unit_ohd <- unitcost_ohd()
 mod_unit_ohd$fit(seed = 1)
 samples_ohd <- mod_unit_ohd$samples()
 DIC_ohd <- mod_unit_ohd$mcmc_DIC(summarised = FALSE)
-saveRDS(samples_ohd, "inst/posterior_samples_ohd.rds")
-saveRDS(DIC_ohd, "inst/posterior_samples_dic_ohd.rds")
+saveRDS(samples_ohd, "inst/econ/posterior_samples_ohd.rds")
+saveRDS(DIC_ohd, "inst/econ/posterior_samples_dic_ohd.rds")
 ```
 
 Executing the above code will reproduce exactly the posterior samples

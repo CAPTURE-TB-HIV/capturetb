@@ -3,6 +3,7 @@
 ## Installation
 
 ``` r
+
 remotes::install_github("CAPTURE-TB-HIV/capturetb")
 ```
 
@@ -18,25 +19,22 @@ model <- capturetb::unitcost()
 # View covariates
 covariates <- model$covariates()
 print(covariates)
-[1] "public"             "urban"              "primary"           
-[4] "secondary"          "tertiary"           "n_services"        
-[7] "log_ID_p_bldgspace" "logVisits"          "logVisitsPP_TB"     
+[1] "public"       "urban"        "healthcentre" "primary"      "secondary"   
+[6] "tertiary"     "logVisits"   
 
 # Generate predictions from posterior
 inputs <- list(
-  log_ID_p_bldgspace = 1,
   logVisits = 6.9, 
-  logVisitsPP_TB = -1.29, 
+  healthcentre = FALSE,
   primary = TRUE,
   secondary = FALSE, 
   tertiary = FALSE,
   urban = FALSE, 
   public = TRUE,
-  n_services = 3,
   output = "op_treatmentvisit",
   fc_country = "Ethiopia"
 )
-prepared_inputs <- prepare_covariates(inputs, model)
+prepared_inputs <- capturetb::prepare_covariates(inputs, model)
 pred <- model$predict(
     prepared_inputs,
     scale = "natural",
@@ -45,7 +43,7 @@ pred <- model$predict(
 # Expected unit cost is mean prediction
 expected_unit_cost <- pred$Mean
 print(expected_unit_cost)
-[1] 4.08444
+[1] 17.72955
 ```
 
 ## Advanced usage
@@ -63,6 +61,7 @@ documentation](https://capture-tb-hiv.github.io/capturetb).
 To run tests:
 
 ``` r
+
 devtools::load_all()
 devtools::test()
 ```
@@ -70,6 +69,7 @@ devtools::test()
 To build pkgdown documentation locally:
 
 ``` r
+
 devtools::load_all()
 pkgdown::build_site()
 ```
@@ -89,6 +89,12 @@ Functions needed to predict costs
   fixed costs model
 - [`unitcost_ohd()`](unitcost_ohd.md) : CaptureTB outpatient visit
   overhead costs model
+- [`unitcost_extended()`](unitcost_extended.md) : Extended CaptureTB
+  outpatient visit cost model with more covariates.
+- [`unitcost_fixed_extended()`](unitcost_fixed_extended.md) : Extended
+  CaptureTB outpatient visit fixed cost model with more covariates.
+- [`unitcost_ohd_extended()`](unitcost_ohd_extended.md) : Extended
+  CaptureTB outpatient visit overhead cost model with more covariates.
 
 ## Data
 

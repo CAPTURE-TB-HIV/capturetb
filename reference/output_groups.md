@@ -16,5 +16,5 @@ A character vector of unique output groups
 
 ``` r
 output_groups()
-#> [1] "OP"  "LAB" "RAD" "CS"  "IP"  "OT" 
+#> [1] "OP"
 ```

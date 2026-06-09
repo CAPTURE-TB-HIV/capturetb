@@ -7,8 +7,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Using the Unit Cost Model • capturetb</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><script src="01_unitcost-model-predictions_files/libs/quarto-html/popper.min.js"></script><script src="01_unitcost-model-predictions_files/libs/quarto-html/tippy.umd.min.js"></script><link href="01_unitcost-model-predictions_files/libs/quarto-html/tippy.css" rel="stylesheet">
 <link href="01_unitcost-model-predictions_files/libs/quarto-html/light-border.css" rel="stylesheet">
@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">capturetb</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -57,7 +57,7 @@
       <h1>Using the Unit Cost Model</h1>
 
 
-      <p class="date">2025-12-11</p>
+      <p class="date">2026-06-09</p>
 
 
       <div class="d-none name"><code></code></div>
@@ -74,11 +74,11 @@
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">gridExtra</span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span></code></pre></div>
 </div>
-<p>This package was developed for two reasons: firstly, to make the model development process transparent and reproducible, and secondly, to allow people to make use of the final models to predict TB outpatient visit costs. This vignette speaks to the second of these aims. If you want to use the models to predict costs, this vignette is the only documentation you need to read.</p>
+<p>This vignette describes use of the pre-fitted <code>unitcost</code> model.</p>
 <section class="level2"><h2 id="model-structure">Model structure<a class="anchor" aria-label="anchor" href="#model-structure"></a>
 </h2>
 <p>The unit cost model is a mixed effects model with country, facility and visit type effects and covariate effects that are assumed shared across countries, facilities and visit types. Log costs are assumed to vary normally:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>log</mo><mrow><mo stretchy="true" form="prefix">(</mo><msub><mtext mathvariant="normal">USD_unitcost_total</mtext><mi>i</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>∼</mo><mi mathvariant="normal">N</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>μ</mi><mi>i</mi></msub><mo>,</mo><msup><mi>σ</mi><mn>2</mn></msup><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><msub><mtext mathvariant="normal">USD_unitcost_total</mtext><mi>i</mi></msub><mo stretchy="false" form="postfix">)</mo><mo>∼</mo><mi mathvariant="normal">N</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>μ</mi><mi>i</mi></msub><mo>,</mo><msup><mi>σ</mi><mn>2</mn></msup><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">
 \log(\text{USD\_unitcost\_total}_i) \sim \mathrm{N}(\mu_i, \sigma^2)
 </annotation></semantics></math></p>
 <p>where <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>μ</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\mu_i</annotation></semantics></math> is given by:</p>
@@ -86,13 +86,13 @@
 \mu_i = \alpha + \sum_{j=1}^J{\beta_j x_{ji}} + \gamma_{c_i} +  \delta_{f_i} +  \zeta_{v_i}
 </annotation></semantics></math></p>
 <p>where <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>x</mi><mrow><mi>j</mi><mi>i</mi></mrow></msub><annotation encoding="application/x-tex">x_{ji}</annotation></semantics></math> represents the value of the jth covariate, <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>c</mi><mi>i</mi></msub><annotation encoding="application/x-tex">c_i</annotation></semantics></math> the country, <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>f</mi><mi>i</mi></msub><annotation encoding="application/x-tex">f_i</annotation></semantics></math> the facility, and <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>v</mi><mi>i</mi></msub><annotation encoding="application/x-tex">v_i</annotation></semantics></math> the visit type of observation <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>. The variables <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>γ</mi><msub><mi>c</mi><mi>i</mi></msub></msub><annotation encoding="application/x-tex">\gamma_{c_i}</annotation></semantics></math>, <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>δ</mi><msub><mi>f</mi><mi>i</mi></msub></msub><annotation encoding="application/x-tex">\delta_{f_i}</annotation></semantics></math> and <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>ζ</mi><msub><mi>v</mi><mi>i</mi></msub></msub><annotation encoding="application/x-tex">\zeta_{v_i}</annotation></semantics></math> account for systematic differences across countries, facilities and visit types, respectively, and are assumed to vary normally about zero:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>γ</mi><mi>c</mi></msub><mo>∼</mo><mi mathvariant="normal">N</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>0</mn><mo>,</mo><msubsup><mi>σ</mi><mi>c</mi><mn>2</mn></msubsup><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>γ</mi><mi>c</mi></msub><mo>∼</mo><mi mathvariant="normal">N</mi><mo stretchy="false" form="prefix">(</mo><mn>0</mn><mo>,</mo><msubsup><mi>σ</mi><mi>c</mi><mn>2</mn></msubsup><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">
 \gamma_{c} \sim \mathrm{N}(0, \sigma_c^2)
 </annotation></semantics></math></p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>δ</mi><mi>f</mi></msub><mo>∼</mo><mi mathvariant="normal">N</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>0</mn><mo>,</mo><msubsup><mi>σ</mi><mi>f</mi><mn>2</mn></msubsup><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>δ</mi><mi>f</mi></msub><mo>∼</mo><mi mathvariant="normal">N</mi><mo stretchy="false" form="prefix">(</mo><mn>0</mn><mo>,</mo><msubsup><mi>σ</mi><mi>f</mi><mn>2</mn></msubsup><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">
 \delta_{f} \sim \mathrm{N}(0, \sigma_f^2)
 </annotation></semantics></math></p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>ζ</mi><mi>o</mi></msub><mo>∼</mo><mi mathvariant="normal">N</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>0</mn><mo>,</mo><msubsup><mi>σ</mi><mi>v</mi><mn>2</mn></msubsup><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>ζ</mi><mi>o</mi></msub><mo>∼</mo><mi mathvariant="normal">N</mi><mo stretchy="false" form="prefix">(</mo><mn>0</mn><mo>,</mo><msubsup><mi>σ</mi><mi>v</mi><mn>2</mn></msubsup><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">
 \zeta_{o} \sim \mathrm{N}(0, \sigma_v^2)
 </annotation></semantics></math></p>
 <p>Model instances are created via the <code>unitcost</code> function:</p>
@@ -104,9 +104,8 @@
 <span><span class="co"># See model covariates</span></span>
 <span><span class="va">covariates</span> <span class="op">&lt;-</span> <span class="va">model</span><span class="op">$</span><span class="fu">covariates</span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">covariates</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "public"             "urban"              "primary"           </span></span>
-<span><span class="co">#&gt; [4] "secondary"          "tertiary"           "n_services"        </span></span>
-<span><span class="co">#&gt; [7] "log_ID_p_bldgspace" "logVisits"          "logVisitsPP_TB"</span></span>
+<span><span class="co">#&gt; [1] "public"       "urban"        "healthcentre" "primary"      "secondary"   </span></span>
+<span><span class="co">#&gt; [6] "tertiary"     "logVisits"</span></span>
 <span></span>
 <span><span class="co"># See priors used in the model</span></span>
 <span><span class="va">priors</span> <span class="op">&lt;-</span> <span class="va">model</span><span class="op">$</span><span class="fu">priors</span><span class="op">(</span><span class="op">)</span></span>
@@ -130,12 +129,10 @@
 <span><span class="co">#&gt; [1] 10</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $prior.beta.mean</span></span>
-<span><span class="co">#&gt; [1] -0.3155360  0.3520000  0.2574328  0.3014328  0.3014328  0.0000000  0.0000000</span></span>
-<span><span class="co">#&gt; [8]  0.0000000  0.0000000</span></span>
+<span><span class="co">#&gt; [1] 0 0 0 0 0 0 0</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $prior.beta.precision</span></span>
-<span><span class="co">#&gt; [1] 175.85254  55.09843  13.70479   7.84904   7.84904   0.01000   0.01000</span></span>
-<span><span class="co">#&gt; [8]   0.01000   0.01000</span></span>
+<span><span class="co">#&gt; [1] 0.01 0.01 0.01 0.01 0.01 0.01 0.01</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; attr(,"class")</span></span>
 <span><span class="co">#&gt; [1] "capturetbpriors" "list"</span></span></code></pre></div>
@@ -144,14 +141,15 @@
 <div class="cell">
 <div class="sourceCode cell-code" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">plots</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="kw">for</span><span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="fl">9</span><span class="op">)</span> <span class="op">{</span></span>
+<span><span class="va">l</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">covariates</span><span class="op">)</span></span>
+<span><span class="kw">for</span><span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="va">l</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">plots</span><span class="op">[[</span><span class="va">i</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">priors</span>, par <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"beta["</span>, <span class="va">i</span>, <span class="st">"]"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
-<span><span class="va">plots</span><span class="op">[[</span><span class="fl">10</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">priors</span>, par <span class="op">=</span> <span class="st">"alpha"</span><span class="op">)</span></span>
-<span><span class="va">plots</span><span class="op">[[</span><span class="fl">11</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">priors</span>, par <span class="op">=</span> <span class="st">"sigma"</span><span class="op">)</span></span>
-<span><span class="va">plots</span><span class="op">[[</span><span class="fl">12</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">priors</span>, par <span class="op">=</span> <span class="st">"sigma_c"</span><span class="op">)</span></span>
-<span><span class="va">plots</span><span class="op">[[</span><span class="fl">13</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">priors</span>, par <span class="op">=</span> <span class="st">"sigma_f"</span><span class="op">)</span></span>
-<span><span class="va">plots</span><span class="op">[[</span><span class="fl">14</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">priors</span>, par <span class="op">=</span> <span class="st">"sigma_v"</span><span class="op">)</span></span>
+<span><span class="va">plots</span><span class="op">[[</span><span class="va">l</span> <span class="op">+</span> <span class="fl">1</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">priors</span>, par <span class="op">=</span> <span class="st">"alpha"</span><span class="op">)</span></span>
+<span><span class="va">plots</span><span class="op">[[</span><span class="va">l</span> <span class="op">+</span> <span class="fl">2</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">priors</span>, par <span class="op">=</span> <span class="st">"sigma"</span><span class="op">)</span></span>
+<span><span class="va">plots</span><span class="op">[[</span><span class="va">l</span> <span class="op">+</span> <span class="fl">3</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">priors</span>, par <span class="op">=</span> <span class="st">"sigma_c"</span><span class="op">)</span></span>
+<span><span class="va">plots</span><span class="op">[[</span><span class="va">l</span> <span class="op">+</span> <span class="fl">4</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">priors</span>, par <span class="op">=</span> <span class="st">"sigma_f"</span><span class="op">)</span></span>
+<span><span class="va">plots</span><span class="op">[[</span><span class="va">l</span> <span class="op">+</span> <span class="fl">5</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">priors</span>, par <span class="op">=</span> <span class="st">"sigma_v"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">grid.arrange</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">plots</span>, ncol <span class="op">=</span> <span class="fl">3</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Warning: Removed 3341 rows containing missing values or values outside the scale range</span></span>
@@ -208,12 +206,12 @@ Figure 2: Fitted intercept and standard deviations of random effects
 <div class="sourceCode cell-code" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">available_output_groups</span> <span class="op">&lt;-</span> <span class="fu">capturetb</span><span class="fu">::</span><span class="fu"><a href="../reference/output_groups.html">output_groups</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">available_output_groups</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "OP"  "LAB" "RAD" "CS"  "IP"  "OT"</span></span>
+<span><span class="co">#&gt; [1] "OP"</span></span>
 <span></span>
 <span><span class="va">available_outputs</span> <span class="op">&lt;-</span> <span class="fu">capturetb</span><span class="fu">::</span><span class="fu"><a href="../reference/outputs.html">outputs</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">available_outputs</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "op_diagnosticvisit"     "lab_hivconftest"        "lab_esr"               </span></span>
-<span><span class="co">#&gt; [4] "lab_rbs"                "op_treatmentvisit_ltbi" "lab_cd4count"</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] "op_diagnosticvisit"     "op_treatmentvisit_ltbi" "op_treatmentvisit_dot" </span></span>
+<span><span class="co">#&gt; [4] "op_screeningvisit"      "op_vaccinations"        "op_coughtriage"</span></span></code></pre></div>
 </div>
 <p>Subsets of the data can be retrieved using <code><a href="../reference/get_data.html">capturetb::get_data()</a></code>, filtering by output group or output type as needed:</p>
 <div class="cell">
@@ -262,16 +260,15 @@ Figure 2: Fitted intercept and standard deviations of random effects
 <code class="sourceCode R"><span><span class="va">dat</span> <span class="op">&lt;-</span> <span class="va">model</span><span class="op">$</span><span class="fu">training_data</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">model</span><span class="op">$</span><span class="fu">covariates</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">dat</span><span class="op">)</span></span>
-<span><span class="co">#&gt; # A tibble: 6 × 9</span></span>
-<span><span class="co">#&gt;   public urban primary secondary tertiary n_services[,1] log_ID_p_bldgspace[,1]</span></span>
-<span><span class="co">#&gt;   &lt;lgl&gt;  &lt;lgl&gt; &lt;lgl&gt;   &lt;lgl&gt;     &lt;lgl&gt;             &lt;dbl&gt;                  &lt;dbl&gt;</span></span>
-<span><span class="co">#&gt; 1 FALSE  TRUE  FALSE   FALSE     FALSE            -1.25                    1.31</span></span>
-<span><span class="co">#&gt; 2 FALSE  TRUE  FALSE   FALSE     FALSE            -1.25                    1.31</span></span>
-<span><span class="co">#&gt; 3 FALSE  TRUE  FALSE   FALSE     FALSE            -1.25                    1.31</span></span>
-<span><span class="co">#&gt; 4 FALSE  TRUE  FALSE   FALSE     FALSE            -1.25                    1.31</span></span>
-<span><span class="co">#&gt; 5 TRUE   TRUE  FALSE   FALSE     FALSE             0.745                   1.18</span></span>
-<span><span class="co">#&gt; 6 TRUE   TRUE  FALSE   FALSE     FALSE             0.745                   1.18</span></span>
-<span><span class="co">#&gt; # ℹ 2 more variables: logVisits &lt;dbl[,1]&gt;, logVisitsPP_TB &lt;dbl[,1]&gt;</span></span></code></pre></div>
+<span><span class="co">#&gt; # A tibble: 6 × 7</span></span>
+<span><span class="co">#&gt;   public urban healthcentre primary secondary tertiary logVisits[,1]</span></span>
+<span><span class="co">#&gt;   &lt;lgl&gt;  &lt;lgl&gt; &lt;lgl&gt;        &lt;lgl&gt;   &lt;lgl&gt;     &lt;lgl&gt;            &lt;dbl&gt;</span></span>
+<span><span class="co">#&gt; 1 FALSE  TRUE  TRUE         FALSE   FALSE     FALSE           -0.622</span></span>
+<span><span class="co">#&gt; 2 FALSE  TRUE  TRUE         FALSE   FALSE     FALSE           -0.622</span></span>
+<span><span class="co">#&gt; 3 FALSE  TRUE  TRUE         FALSE   FALSE     FALSE           -0.622</span></span>
+<span><span class="co">#&gt; 4 FALSE  TRUE  TRUE         FALSE   FALSE     FALSE           -0.622</span></span>
+<span><span class="co">#&gt; 5 TRUE   TRUE  TRUE         FALSE   FALSE     FALSE           -0.528</span></span>
+<span><span class="co">#&gt; 6 TRUE   TRUE  TRUE         FALSE   FALSE     FALSE           -0.528</span></span></code></pre></div>
 </div>
 </section><section class="level2"><h2 id="model-accuracy">Model accuracy<a class="anchor" aria-label="anchor" href="#model-accuracy"></a>
 </h2>
@@ -293,11 +290,11 @@ Figure 2: Fitted intercept and standard deviations of random effects
 <th style="text-align: right;">Bayesian R-squ</th>
 </tr></thead>
 <tbody><tr class="odd">
-<td style="text-align: right;">4.782887</td>
-<td style="text-align: right;">6.938667</td>
-<td style="text-align: right;">0.9654545</td>
-<td style="text-align: right;">23.27268</td>
-<td style="text-align: right;">0.4919168</td>
+<td style="text-align: right;">5.448626</td>
+<td style="text-align: right;">8.007255</td>
+<td style="text-align: right;">0.9690909</td>
+<td style="text-align: right;">26.98067</td>
+<td style="text-align: right;">0.4284285</td>
 </tr></tbody>
 </table>
 </div>
@@ -332,43 +329,43 @@ Figure 2: Fitted intercept and standard deviations of random effects
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">Ethiopia</td>
-<td style="text-align: right;">5.034131</td>
-<td style="text-align: right;">6.804835</td>
-<td style="text-align: right;">1.0000000</td>
-<td style="text-align: right;">26.30787</td>
-<td style="text-align: right;">0.4869124</td>
+<td style="text-align: right;">6.122205</td>
+<td style="text-align: right;">8.963193</td>
+<td style="text-align: right;">0.9932432</td>
+<td style="text-align: right;">27.73003</td>
+<td style="text-align: right;">0.3574194</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Georgia</td>
-<td style="text-align: right;">7.254804</td>
-<td style="text-align: right;">10.285288</td>
+<td style="text-align: right;">7.762666</td>
+<td style="text-align: right;">11.084837</td>
 <td style="text-align: right;">0.9680851</td>
-<td style="text-align: right;">40.91699</td>
-<td style="text-align: right;">0.4216290</td>
+<td style="text-align: right;">45.72579</td>
+<td style="text-align: right;">0.3860340</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">India</td>
-<td style="text-align: right;">3.251613</td>
-<td style="text-align: right;">4.368612</td>
+<td style="text-align: right;">3.492455</td>
+<td style="text-align: right;">4.745684</td>
 <td style="text-align: right;">0.9459459</td>
-<td style="text-align: right;">17.05032</td>
-<td style="text-align: right;">0.4545939</td>
+<td style="text-align: right;">17.87366</td>
+<td style="text-align: right;">0.4661548</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Kenya</td>
-<td style="text-align: right;">4.632344</td>
-<td style="text-align: right;">6.944004</td>
+<td style="text-align: right;">5.171295</td>
+<td style="text-align: right;">7.552060</td>
 <td style="text-align: right;">0.9459459</td>
-<td style="text-align: right;">19.62977</td>
-<td style="text-align: right;">0.3776126</td>
+<td style="text-align: right;">23.36456</td>
+<td style="text-align: right;">0.3406264</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">Philippines</td>
-<td style="text-align: right;">3.626834</td>
-<td style="text-align: right;">4.829250</td>
-<td style="text-align: right;">0.9593496</td>
-<td style="text-align: right;">19.30543</td>
-<td style="text-align: right;">0.5436590</td>
+<td style="text-align: right;">4.308233</td>
+<td style="text-align: right;">5.563931</td>
+<td style="text-align: right;">0.9756098</td>
+<td style="text-align: right;">20.92348</td>
+<td style="text-align: right;">0.4990256</td>
 </tr>
 </tbody>
 </table>
@@ -392,11 +389,11 @@ Figure 2: Fitted intercept and standard deviations of random effects
 <th style="text-align: right;">Bayesian R-squ</th>
 </tr></thead>
 <tbody><tr class="odd">
-<td style="text-align: right;">2.632935</td>
-<td style="text-align: right;">4.692119</td>
+<td style="text-align: right;">2.610451</td>
+<td style="text-align: right;">4.682627</td>
 <td style="text-align: right;">0.9618182</td>
-<td style="text-align: right;">14.12975</td>
-<td style="text-align: right;">0.6593423</td>
+<td style="text-align: right;">14.43798</td>
+<td style="text-align: right;">0.6553999</td>
 </tr></tbody>
 </table>
 </div>
@@ -422,10 +419,9 @@ Figure 2: Fitted intercept and standard deviations of random effects
 <div class="sourceCode cell-code" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Include all covariates plus facility country `fc_country` and visit type `output`</span></span>
 <span><span class="va">new_inputs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>  log_ID_p_bldgspace <span class="op">=</span> <span class="fl">1</span>, </span>
 <span>  logVisits <span class="op">=</span> <span class="fl">6.9</span>, </span>
-<span>  logVisitsPP_TB <span class="op">=</span> <span class="op">-</span><span class="fl">1.29</span>, </span>
 <span>    n_services <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  healthcentre <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>    primary <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  secondary <span class="op">=</span> <span class="cn">FALSE</span>, </span>
 <span>    tertiary <span class="op">=</span> <span class="cn">FALSE</span>,</span>
@@ -436,11 +432,11 @@ Figure 2: Fitted intercept and standard deviations of random effects
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># This will center covariates as required by the model</span></span>
-<span><span class="va">covariates</span> <span class="op">&lt;-</span> <span class="fu">capturetb</span><span class="fu">::</span><span class="fu"><a href="../reference/prepare_covariates.html">prepare_covariates</a></span><span class="op">(</span>raw <span class="op">=</span> <span class="va">new_inputs</span>, mod <span class="op">=</span> <span class="va">model</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">prepared_inputs</span> <span class="op">&lt;-</span> <span class="fu">capturetb</span><span class="fu">::</span><span class="fu"><a href="../reference/prepare_covariates.html">prepare_covariates</a></span><span class="op">(</span>raw <span class="op">=</span> <span class="va">new_inputs</span>, mod <span class="op">=</span> <span class="va">model</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">pred</span> <span class="op">&lt;-</span> <span class="va">model</span><span class="op">$</span><span class="fu">predict</span><span class="op">(</span><span class="va">covariates</span>,</span>
+<code class="sourceCode R"><span><span class="va">pred</span> <span class="op">&lt;-</span> <span class="va">model</span><span class="op">$</span><span class="fu">predict</span><span class="op">(</span><span class="va">prepared_inputs</span>,</span>
 <span> scale <span class="op">=</span> <span class="st">"natural"</span>,</span>
 <span> summarised <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span> centrality <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"mean"</span>, <span class="st">"median"</span><span class="op">)</span>,</span>
@@ -449,7 +445,7 @@ Figure 2: Fitted intercept and standard deviations of random effects
 <span><span class="co"># Expected unit cost is mean prediction</span></span>
 <span><span class="va">expected_unit_cost</span> <span class="op">&lt;-</span> <span class="va">pred</span><span class="op">$</span><span class="va">Mean</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">expected_unit_cost</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 13.85543 13.85543 13.85543</span></span>
+<span><span class="co">#&gt; [1] 13.12212 13.12212 13.12212</span></span>
 <span></span>
 <span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">pred</span><span class="op">)</span></span></code></pre></div>
 <div class="cell-output-display">
@@ -465,27 +461,27 @@ Figure 2: Fitted intercept and standard deviations of random effects
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">1</td>
-<td style="text-align: right;">11.55728</td>
-<td style="text-align: right;">13.85543</td>
+<td style="text-align: right;">10.6324</td>
+<td style="text-align: right;">13.12212</td>
 <td style="text-align: right;">0.95</td>
-<td style="text-align: right;">3.532986</td>
-<td style="text-align: right;">37.64690</td>
+<td style="text-align: right;">2.967803</td>
+<td style="text-align: right;">38.53890</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">1</td>
-<td style="text-align: right;">11.55728</td>
-<td style="text-align: right;">13.85543</td>
+<td style="text-align: right;">10.6324</td>
+<td style="text-align: right;">13.12212</td>
 <td style="text-align: right;">0.90</td>
-<td style="text-align: right;">4.267347</td>
-<td style="text-align: right;">31.06315</td>
+<td style="text-align: right;">3.637729</td>
+<td style="text-align: right;">30.90759</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">1</td>
-<td style="text-align: right;">11.55728</td>
-<td style="text-align: right;">13.85543</td>
+<td style="text-align: right;">10.6324</td>
+<td style="text-align: right;">13.12212</td>
 <td style="text-align: right;">0.80</td>
-<td style="text-align: right;">5.337592</td>
-<td style="text-align: right;">25.00999</td>
+<td style="text-align: right;">4.606602</td>
+<td style="text-align: right;">24.33595</td>
 </tr>
 </tbody>
 </table>
@@ -495,7 +491,7 @@ Figure 2: Fitted intercept and standard deviations of random effects
 <p>To see the full distribution of predicted costs:</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">pred</span> <span class="op">&lt;-</span> <span class="va">model</span><span class="op">$</span><span class="fu">predict</span><span class="op">(</span><span class="va">covariates</span>, scale <span class="op">=</span> <span class="st">"natural"</span>, summarised <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">pred</span> <span class="op">&lt;-</span> <span class="va">model</span><span class="op">$</span><span class="fu">predict</span><span class="op">(</span><span class="va">prepared_inputs</span>, scale <span class="op">=</span> <span class="st">"natural"</span>, summarised <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>cost <span class="op">=</span> <span class="va">pred</span><span class="op">)</span>, <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">cost</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_density.html" class="external-link">geom_density</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <div class="cell-output-display">
 <div>

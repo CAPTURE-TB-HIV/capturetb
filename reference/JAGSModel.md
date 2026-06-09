@@ -95,7 +95,13 @@ Initialize a new model instance.
 
 #### Usage
 
-    JAGSModel$new(dat, covariates, target, priors = NULL)
+    JAGSModel$new(
+      dat,
+      covariates,
+      target,
+      priors = NULL,
+      country_random_effects = TRUE
+    )
 
 #### Arguments
 
@@ -116,6 +122,10 @@ Initialize a new model instance.
   List of class "capturetbpriors". Should be created using
   [`capturetb_priors`](capturetb_priors.md). If NULL, non-informative
   priors will be used.
+
+- `country_random_effects`:
+
+  Logical. Whether to include country random effects. Default TRUE.
 
 ------------------------------------------------------------------------
 
@@ -851,6 +861,7 @@ The objects of this class are cloneable with this method.
 ## Examples
 
 ``` r
+
 ## ------------------------------------------------
 ## Method `JAGSModel$performance`
 ## ------------------------------------------------
@@ -859,7 +870,7 @@ model <- unitcost()
 #> Multiple outputs detected. Including output-level random effects in model.
 model$performance()
 #>        mae     rmse ci_coverage median_ci bayesian_r2
-#> 1 4.780022 6.933826   0.9672727  23.36332   0.4920227
+#> 1 5.447124 8.007143   0.9690909  26.73596   0.4283205
 
 ## ------------------------------------------------
 ## Method `JAGSModel$plot_fit`
@@ -887,41 +898,39 @@ params <- model$fitted_parameters()
 print(params)
 #> Summary of Posterior Distribution
 #> 
-#> Parameter         |      Mean |         95% CI
-#> ----------------------------------------------
-#> alpha             |      2.10 | [ 1.86,  2.35]
-#> beta[1]           |     -0.36 | [-0.47, -0.24]
-#> beta[2]           |      0.22 | [ 0.06,  0.38]
-#> beta[3]           |      0.17 | [-0.04,  0.37]
-#> beta[4]           |      0.35 | [ 0.12,  0.59]
-#> beta[5]           |      0.12 | [-0.20,  0.45]
-#> beta[6]           |      0.12 | [ 0.04,  0.20]
-#> beta[7]           |      0.11 | [ 0.03,  0.19]
-#> beta[8]           |     -0.22 | [-0.31, -0.13]
-#> beta[9]           |     -0.29 | [-0.40, -0.17]
-#> sigma             |      0.35 | [ 0.33,  0.38]
-#> sigma_c           |      0.10 | [ 0.00,  0.28]
-#> country_effect[1] |     -0.02 | [-0.21,  0.16]
-#> country_effect[2] |      0.10 | [-0.05,  0.37]
-#> country_effect[3] |     -0.08 | [-0.34,  0.06]
-#> country_effect[4] |  6.07e-03 | [-0.17,  0.19]
-#> country_effect[5] | -3.24e-03 | [-0.20,  0.18]
-#> sigma_f           |      0.41 | [ 0.35,  0.48]
-#> sigma_v           |      0.16 | [ 0.09,  0.28]
-#> output_effect[1]  |     -0.06 | [-0.30,  0.17]
-#> output_effect[2]  |     -0.21 | [-0.36, -0.07]
-#> output_effect[3]  |      0.20 | [ 0.08,  0.32]
-#> output_effect[4]  |      0.03 | [-0.24,  0.32]
-#> output_effect[5]  |      0.13 | [-0.01,  0.28]
-#> output_effect[6]  |      0.04 | [-0.07,  0.16]
-#> output_effect[7]  |      0.06 | [-0.18,  0.33]
-#> output_effect[8]  |     -0.02 | [-0.16,  0.12]
-#> output_effect[9]  | -4.16e-03 | [-0.14,  0.13]
-#> output_effect[10] |      0.08 | [-0.06,  0.22]
-#> output_effect[11] |      0.12 | [-0.11,  0.38]
-#> output_effect[12] |     -0.10 | [-0.22,  0.03]
-#> output_effect[13] |     -0.17 | [-0.45,  0.06]
-#> output_effect[14] |     -0.10 | [-0.31,  0.09]
+#> Parameter         |  Mean |         95% CI
+#> ------------------------------------------
+#> alpha             |  1.87 | [ 1.42,  2.32]
+#> beta[1]           | -0.39 | [-0.62, -0.16]
+#> beta[2]           |  0.26 | [ 0.02,  0.50]
+#> beta[3]           |  0.29 | [-0.06,  0.63]
+#> beta[4]           |  0.30 | [-0.06,  0.66]
+#> beta[5]           |  0.55 | [ 0.15,  0.97]
+#> beta[6]           |  0.38 | [-0.13,  0.88]
+#> beta[7]           | -0.20 | [-0.29, -0.12]
+#> sigma             |  0.35 | [ 0.33,  0.38]
+#> sigma_c           |  0.18 | [ 0.04,  0.38]
+#> country_effect[1] |  0.15 | [-0.08,  0.44]
+#> country_effect[2] |  0.13 | [-0.10,  0.41]
+#> country_effect[3] | -0.18 | [-0.49,  0.05]
+#> country_effect[4] |  0.04 | [-0.20,  0.29]
+#> country_effect[5] | -0.13 | [-0.41,  0.10]
+#> sigma_f           |  0.49 | [ 0.42,  0.58]
+#> sigma_v           |  0.16 | [ 0.09,  0.28]
+#> output_effect[1]  | -0.06 | [-0.30,  0.16]
+#> output_effect[2]  | -0.20 | [-0.35, -0.07]
+#> output_effect[3]  |  0.20 | [ 0.08,  0.32]
+#> output_effect[4]  |  0.02 | [-0.26,  0.30]
+#> output_effect[5]  |  0.13 | [-0.01,  0.28]
+#> output_effect[6]  |  0.04 | [-0.07,  0.16]
+#> output_effect[7]  |  0.07 | [-0.18,  0.34]
+#> output_effect[8]  | -0.02 | [-0.16,  0.12]
+#> output_effect[9]  | -0.02 | [-0.15,  0.12]
+#> output_effect[10] |  0.08 | [-0.06,  0.23]
+#> output_effect[11] |  0.12 | [-0.11,  0.37]
+#> output_effect[12] | -0.09 | [-0.22,  0.03]
+#> output_effect[13] | -0.16 | [-0.45,  0.07]
+#> output_effect[14] | -0.10 | [-0.30,  0.09]
 
 # 90% credible intervals
 params_90 <- model$fitted_parameters(ci = 0.9)
@@ -933,5 +942,5 @@ params_90 <- model$fitted_parameters(ci = 0.9)
 mod <- unitcost()
 #> Multiple outputs detected. Including output-level random effects in model.
 mod$mcmc_DIC()
-#> [1] 527.3794
+#> [1] 532.199
 ```

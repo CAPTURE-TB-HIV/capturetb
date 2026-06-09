@@ -7,8 +7,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Model fitting • capturetb</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><script src="03_model-fitting_files/libs/quarto-html/popper.min.js"></script><script src="03_model-fitting_files/libs/quarto-html/tippy.umd.min.js"></script><link href="03_model-fitting_files/libs/quarto-html/tippy.css" rel="stylesheet">
 <link href="03_model-fitting_files/libs/quarto-html/light-border.css" rel="stylesheet">
@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">capturetb</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -57,7 +57,7 @@
       <h1>Model fitting</h1>
 
 
-      <p class="date">2025-12-11</p>
+      <p class="date">2026-06-09</p>
 
 
       <div class="d-none name"><code></code></div>
@@ -162,36 +162,36 @@
 <span><span class="co">#&gt;    plus standard error of the mean:</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;                       Mean      SD  Naive SE Time-series SE</span></span>
-<span><span class="co">#&gt; alpha              3.68629 0.58188 0.0065057      0.0410492</span></span>
-<span><span class="co">#&gt; beta[1]           -0.08047 0.05099 0.0005701      0.0033888</span></span>
-<span><span class="co">#&gt; beta[2]            0.04320 0.05502 0.0006151      0.0007218</span></span>
-<span><span class="co">#&gt; beta[3]           -0.35695 0.09523 0.0010647      0.0022346</span></span>
-<span><span class="co">#&gt; beta[4]            0.39335 0.13803 0.0015432      0.0022879</span></span>
-<span><span class="co">#&gt; beta[5]           -0.31483 0.12787 0.0014296      0.0017749</span></span>
-<span><span class="co">#&gt; sigma              0.56500 0.04076 0.0004558      0.0004617</span></span>
-<span><span class="co">#&gt; sigma_c            0.56452 0.42017 0.0046977      0.0220015</span></span>
-<span><span class="co">#&gt; country_effect[1] -0.08318 0.34268 0.0038313      0.0185626</span></span>
-<span><span class="co">#&gt; country_effect[2] -0.02249 0.35282 0.0039446      0.0185414</span></span>
-<span><span class="co">#&gt; country_effect[3] -0.51342 0.35341 0.0039512      0.0183493</span></span>
-<span><span class="co">#&gt; country_effect[4]  0.42390 0.34093 0.0038117      0.0174279</span></span>
-<span><span class="co">#&gt; country_effect[5]  0.03346 0.35189 0.0039343      0.0211756</span></span>
+<span><span class="co">#&gt; alpha              3.66122 0.51834 0.0057952      0.0324659</span></span>
+<span><span class="co">#&gt; beta[1]           -0.08031 0.04753 0.0005314      0.0028856</span></span>
+<span><span class="co">#&gt; beta[2]            0.04327 0.05525 0.0006177      0.0007171</span></span>
+<span><span class="co">#&gt; beta[3]           -0.35737 0.09514 0.0010637      0.0020325</span></span>
+<span><span class="co">#&gt; beta[4]            0.39206 0.13846 0.0015481      0.0022289</span></span>
+<span><span class="co">#&gt; beta[5]           -0.31636 0.12801 0.0014312      0.0017650</span></span>
+<span><span class="co">#&gt; sigma              0.56504 0.04178 0.0004671      0.0004852</span></span>
+<span><span class="co">#&gt; sigma_c            0.55108 0.35397 0.0039575      0.0087861</span></span>
+<span><span class="co">#&gt; country_effect[1] -0.05773 0.28549 0.0031919      0.0101188</span></span>
+<span><span class="co">#&gt; country_effect[2] -0.00245 0.29653 0.0033154      0.0108189</span></span>
+<span><span class="co">#&gt; country_effect[3] -0.48679 0.29761 0.0033273      0.0102769</span></span>
+<span><span class="co">#&gt; country_effect[4]  0.44737 0.29119 0.0032556      0.0097088</span></span>
+<span><span class="co">#&gt; country_effect[5]  0.06113 0.29536 0.0033022      0.0104338</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; 2. Quantiles for each variable:</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;                       2.5%       25%        50%      75%    97.5%</span></span>
-<span><span class="co">#&gt; alpha              2.58601  3.299015  3.6837600  4.05291  4.84284</span></span>
-<span><span class="co">#&gt; beta[1]           -0.17788 -0.117171 -0.0796534 -0.04495  0.01802</span></span>
-<span><span class="co">#&gt; beta[2]           -0.06425  0.006034  0.0430269  0.08034  0.14979</span></span>
-<span><span class="co">#&gt; beta[3]           -0.54305 -0.419847 -0.3563490 -0.29284 -0.17202</span></span>
-<span><span class="co">#&gt; beta[4]            0.12401  0.303090  0.3923715  0.48653  0.67127</span></span>
-<span><span class="co">#&gt; beta[5]           -0.56765 -0.402291 -0.3129220 -0.23031 -0.06726</span></span>
-<span><span class="co">#&gt; sigma              0.49229  0.536634  0.5631550  0.59075  0.65104</span></span>
-<span><span class="co">#&gt; sigma_c            0.19775  0.335338  0.4513220  0.65862  1.61462</span></span>
-<span><span class="co">#&gt; country_effect[1] -0.78192 -0.224156 -0.0585229  0.10022  0.46912</span></span>
-<span><span class="co">#&gt; country_effect[2] -0.78336 -0.166740  0.0003765  0.16845  0.56450</span></span>
-<span><span class="co">#&gt; country_effect[3] -1.26855 -0.654528 -0.4778230 -0.31345  0.03308</span></span>
-<span><span class="co">#&gt; country_effect[4] -0.23707  0.270176  0.4351590  0.60398  1.03674</span></span>
-<span><span class="co">#&gt; country_effect[5] -0.69461 -0.120335  0.0499534  0.22187  0.64314</span></span></code></pre></div>
+<span><span class="co">#&gt;                       2.5%       25%       50%      75%    97.5%</span></span>
+<span><span class="co">#&gt; alpha              2.64635  3.312122  3.665665  4.01344  4.66009</span></span>
+<span><span class="co">#&gt; beta[1]           -0.17144 -0.112780 -0.081065 -0.04931  0.01552</span></span>
+<span><span class="co">#&gt; beta[2]           -0.06452  0.005774  0.042649  0.08086  0.14956</span></span>
+<span><span class="co">#&gt; beta[3]           -0.54785 -0.421301 -0.356301 -0.29217 -0.17162</span></span>
+<span><span class="co">#&gt; beta[4]            0.12307  0.299579  0.391506  0.48449  0.66130</span></span>
+<span><span class="co">#&gt; beta[5]           -0.56382 -0.402277 -0.316717 -0.23201 -0.06481</span></span>
+<span><span class="co">#&gt; sigma              0.49127  0.535930  0.562805  0.59141  0.65416</span></span>
+<span><span class="co">#&gt; sigma_c            0.19510  0.335454  0.459724  0.65519  1.46634</span></span>
+<span><span class="co">#&gt; country_effect[1] -0.65390 -0.218781 -0.047312  0.10735  0.48779</span></span>
+<span><span class="co">#&gt; country_effect[2] -0.62054 -0.169631  0.001671  0.16803  0.58855</span></span>
+<span><span class="co">#&gt; country_effect[3] -1.12398 -0.646593 -0.471724 -0.30699  0.07598</span></span>
+<span><span class="co">#&gt; country_effect[4] -0.10909  0.281176  0.436037  0.60803  1.07441</span></span>
+<span><span class="co">#&gt; country_effect[5] -0.54065 -0.105804  0.057916  0.23231  0.67291</span></span></code></pre></div>
 </div>
 <section class="level3"><h3 id="diagnostics">Diagnostics<a class="anchor" aria-label="anchor" href="#diagnostics"></a>
 </h3>
@@ -242,55 +242,55 @@
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">alpha</td>
-<td style="text-align: right;">203.7431</td>
+<td style="text-align: right;">254.8034</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">beta[1]</td>
-<td style="text-align: right;">226.3186</td>
+<td style="text-align: right;">273.2221</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">beta[2]</td>
-<td style="text-align: right;">5807.3056</td>
+<td style="text-align: right;">5947.3615</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">beta[3]</td>
-<td style="text-align: right;">1875.6292</td>
+<td style="text-align: right;">2200.2980</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">beta[4]</td>
-<td style="text-align: right;">3640.0941</td>
+<td style="text-align: right;">3864.5965</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">beta[5]</td>
-<td style="text-align: right;">5190.2854</td>
+<td style="text-align: right;">5264.0313</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">sigma</td>
-<td style="text-align: right;">7799.8889</td>
+<td style="text-align: right;">7460.9759</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">sigma_c</td>
-<td style="text-align: right;">790.7373</td>
+<td style="text-align: right;">1903.5757</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">country_effect[1]</td>
-<td style="text-align: right;">453.7134</td>
+<td style="text-align: right;">799.1325</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">country_effect[2]</td>
-<td style="text-align: right;">449.0084</td>
+<td style="text-align: right;">766.1315</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">country_effect[3]</td>
-<td style="text-align: right;">541.0023</td>
+<td style="text-align: right;">845.3216</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">country_effect[4]</td>
-<td style="text-align: right;">562.3751</td>
+<td style="text-align: right;">899.4759</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">country_effect[5]</td>
-<td style="text-align: right;">434.5328</td>
+<td style="text-align: right;">812.4838</td>
 </tr>
 </tbody>
 </table>
@@ -333,12 +333,12 @@
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Observation | Mean |       95% CI</span></span>
 <span><span class="co">#&gt; ---------------------------------</span></span>
-<span><span class="co">#&gt; 1           | 3.47 | [2.28, 4.65]</span></span>
-<span><span class="co">#&gt; 2           | 2.67 | [1.52, 3.84]</span></span>
-<span><span class="co">#&gt; 3           | 2.08 | [0.89, 3.23]</span></span>
-<span><span class="co">#&gt; 4           | 1.84 | [0.67, 3.02]</span></span>
-<span><span class="co">#&gt; 5           | 2.25 | [1.10, 3.39]</span></span>
-<span><span class="co">#&gt; 6           | 2.27 | [1.14, 3.40]</span></span>
+<span><span class="co">#&gt; 1           | 3.48 | [2.29, 4.69]</span></span>
+<span><span class="co">#&gt; 2           | 2.67 | [1.52, 3.83]</span></span>
+<span><span class="co">#&gt; 3           | 2.09 | [0.93, 3.25]</span></span>
+<span><span class="co">#&gt; 4           | 1.84 | [0.70, 3.02]</span></span>
+<span><span class="co">#&gt; 5           | 2.27 | [1.12, 3.41]</span></span>
+<span><span class="co">#&gt; 6           | 2.27 | [1.12, 3.44]</span></span>
 <span></span>
 <span><span class="co"># Various measures of fit</span></span>
 <span><span class="va">performance</span> <span class="op">&lt;-</span> <span class="va">model</span><span class="op">$</span><span class="fu">performance</span><span class="op">(</span>scale <span class="op">=</span> <span class="st">"log"</span><span class="op">)</span></span>
@@ -353,11 +353,11 @@
 <th style="text-align: right;">bayesian_r2</th>
 </tr></thead>
 <tbody><tr class="odd">
-<td style="text-align: right;">0.4324535</td>
-<td style="text-align: right;">0.53582</td>
+<td style="text-align: right;">0.4331135</td>
+<td style="text-align: right;">0.5368093</td>
 <td style="text-align: right;">0.9716981</td>
-<td style="text-align: right;">2.319828</td>
-<td style="text-align: right;">0.4984564</td>
+<td style="text-align: right;">2.317007</td>
+<td style="text-align: right;">0.4968616</td>
 </tr></tbody>
 </table>
 </div>
@@ -436,43 +436,43 @@
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">Ethiopia</td>
-<td style="text-align: right;">6.905357</td>
-<td style="text-align: right;">9.392090</td>
+<td style="text-align: right;">6.904000</td>
+<td style="text-align: right;">9.408526</td>
 <td style="text-align: right;">0.9200000</td>
-<td style="text-align: right;">33.95291</td>
-<td style="text-align: right;">0.3961824</td>
+<td style="text-align: right;">33.46044</td>
+<td style="text-align: right;">0.3933346</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Georgia</td>
-<td style="text-align: right;">6.810341</td>
-<td style="text-align: right;">8.027912</td>
+<td style="text-align: right;">6.815187</td>
+<td style="text-align: right;">7.958192</td>
 <td style="text-align: right;">1.0000000</td>
-<td style="text-align: right;">53.73618</td>
-<td style="text-align: right;">0.4403003</td>
+<td style="text-align: right;">53.21125</td>
+<td style="text-align: right;">0.4407609</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">India</td>
-<td style="text-align: right;">3.920241</td>
-<td style="text-align: right;">4.998105</td>
+<td style="text-align: right;">3.921693</td>
+<td style="text-align: right;">4.988430</td>
 <td style="text-align: right;">1.0000000</td>
-<td style="text-align: right;">20.81572</td>
-<td style="text-align: right;">0.3554724</td>
+<td style="text-align: right;">21.12323</td>
+<td style="text-align: right;">0.3574465</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Kenya</td>
-<td style="text-align: right;">7.021894</td>
-<td style="text-align: right;">9.399381</td>
+<td style="text-align: right;">7.100750</td>
+<td style="text-align: right;">9.461385</td>
 <td style="text-align: right;">1.0000000</td>
-<td style="text-align: right;">38.53299</td>
-<td style="text-align: right;">0.4302563</td>
+<td style="text-align: right;">36.21315</td>
+<td style="text-align: right;">0.4310687</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">Philippines</td>
-<td style="text-align: right;">4.542880</td>
-<td style="text-align: right;">5.554474</td>
+<td style="text-align: right;">4.511000</td>
+<td style="text-align: right;">5.528042</td>
 <td style="text-align: right;">0.9583333</td>
-<td style="text-align: right;">22.58788</td>
-<td style="text-align: right;">0.4842272</td>
+<td style="text-align: right;">22.57302</td>
+<td style="text-align: right;">0.4842072</td>
 </tr>
 </tbody>
 </table>
@@ -504,7 +504,7 @@
 <span><span class="co">#&gt; Calling 3 simulations using the parallel method...</span></span>
 <span><span class="co">#&gt; Following the progress of chain 1 (the program will wait for all chains</span></span>
 <span><span class="co">#&gt; to finish before continuing):</span></span>
-<span><span class="co">#&gt; Welcome to JAGS 4.3.2 on Thu Dec 11 11:19:52 2025</span></span>
+<span><span class="co">#&gt; Welcome to JAGS 4.3.2 on Tue Jun  9 11:43:11 2026</span></span>
 <span><span class="co">#&gt; JAGS is free software and comes with ABSOLUTELY NO WARRANTY</span></span>
 <span><span class="co">#&gt; Loading module: basemod: ok</span></span>
 <span><span class="co">#&gt; Loading module: bugs: ok</span></span>
@@ -537,13 +537,15 @@
 <span><span class="co">#&gt; Finished running the simulation</span></span>
 <span><span class="co">#&gt; Compiling rjags model and adapting for 1000 iterations...</span></span>
 <span><span class="co">#&gt; Obtaining DIC samples from 100 iterations...</span></span>
+<span><span class="co">#&gt; Warning in doTryCatch(return(expr), name, parentenv, handler): Model may not</span></span>
+<span><span class="co">#&gt; have converged. Max rhat is 1.13587284089841</span></span>
 <span><span class="co">#&gt; Model fitted successfully with 3 chains and 10000 iterations.</span></span>
 <span><span class="co">#&gt; Processing fold 2 of 3</span></span>
 <span><span class="co">#&gt; Single output type detected. Not including output-level random effects in model.</span></span>
 <span><span class="co">#&gt; Calling 3 simulations using the parallel method...</span></span>
 <span><span class="co">#&gt; Following the progress of chain 1 (the program will wait for all chains</span></span>
 <span><span class="co">#&gt; to finish before continuing):</span></span>
-<span><span class="co">#&gt; Welcome to JAGS 4.3.2 on Thu Dec 11 11:19:53 2025</span></span>
+<span><span class="co">#&gt; Welcome to JAGS 4.3.2 on Tue Jun  9 11:43:12 2026</span></span>
 <span><span class="co">#&gt; JAGS is free software and comes with ABSOLUTELY NO WARRANTY</span></span>
 <span><span class="co">#&gt; Loading module: basemod: ok</span></span>
 <span><span class="co">#&gt; Loading module: bugs: ok</span></span>
@@ -576,13 +578,15 @@
 <span><span class="co">#&gt; Finished running the simulation</span></span>
 <span><span class="co">#&gt; Compiling rjags model and adapting for 1000 iterations...</span></span>
 <span><span class="co">#&gt; Obtaining DIC samples from 100 iterations...</span></span>
+<span><span class="co">#&gt; Warning in doTryCatch(return(expr), name, parentenv, handler): Model may not</span></span>
+<span><span class="co">#&gt; have converged. Max rhat is 1.1421771221709</span></span>
 <span><span class="co">#&gt; Model fitted successfully with 3 chains and 10000 iterations.</span></span>
 <span><span class="co">#&gt; Processing fold 3 of 3</span></span>
 <span><span class="co">#&gt; Single output type detected. Not including output-level random effects in model.</span></span>
 <span><span class="co">#&gt; Calling 3 simulations using the parallel method...</span></span>
 <span><span class="co">#&gt; Following the progress of chain 1 (the program will wait for all chains</span></span>
 <span><span class="co">#&gt; to finish before continuing):</span></span>
-<span><span class="co">#&gt; Welcome to JAGS 4.3.2 on Thu Dec 11 11:19:54 2025</span></span>
+<span><span class="co">#&gt; Welcome to JAGS 4.3.2 on Tue Jun  9 11:43:13 2026</span></span>
 <span><span class="co">#&gt; JAGS is free software and comes with ABSOLUTELY NO WARRANTY</span></span>
 <span><span class="co">#&gt; Loading module: basemod: ok</span></span>
 <span><span class="co">#&gt; Loading module: bugs: ok</span></span>
@@ -633,18 +637,18 @@
 <tbody>
 <tr class="odd">
 <td style="text-align: right;">1</td>
-<td style="text-align: right;">0.6549080</td>
-<td style="text-align: right;">0.5502908</td>
+<td style="text-align: right;">0.5589529</td>
+<td style="text-align: right;">0.4650314</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">2</td>
-<td style="text-align: right;">0.5967717</td>
-<td style="text-align: right;">0.4598268</td>
+<td style="text-align: right;">0.6274520</td>
+<td style="text-align: right;">0.5105291</td>
 </tr>
 <tr class="odd">
 <td style="text-align: right;">3</td>
-<td style="text-align: right;">0.6183338</td>
-<td style="text-align: right;">0.5211409</td>
+<td style="text-align: right;">0.6042033</td>
+<td style="text-align: right;">0.4886062</td>
 </tr>
 </tbody>
 </table>
@@ -663,26 +667,28 @@
 </ul>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb20"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">mod_unit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/unitcost.html">unitcost</a></span><span class="op">(</span><span class="op">)</span></span>
+<code class="sourceCode R"><span></span>
+<span><span class="co"># economic cost models</span></span>
+<span><span class="va">mod_unit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/unitcost.html">unitcost</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">mod_unit</span><span class="op">$</span><span class="fu">fit</span><span class="op">(</span>seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">samples</span> <span class="op">&lt;-</span> <span class="va">mod_unit</span><span class="op">$</span><span class="fu">samples</span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">DIC</span> <span class="op">&lt;-</span> <span class="va">mod_unit</span><span class="op">$</span><span class="fu">mcmc_DIC</span><span class="op">(</span>summarised <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">saveRDS</a></span><span class="op">(</span><span class="va">samples</span>, <span class="st">"inst/posterior_samples.rds"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">saveRDS</a></span><span class="op">(</span><span class="va">DIC</span>, <span class="st">"inst/posterior_samples_dic.rds"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">saveRDS</a></span><span class="op">(</span><span class="va">samples</span>, <span class="st">"inst/econ/posterior_samples.rds"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">saveRDS</a></span><span class="op">(</span><span class="va">DIC</span>, <span class="st">"inst/econ/posterior_samples_dic.rds"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">mod_unit_fixed</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/unitcost_fixed.html">unitcost_fixed</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">mod_unit_fixed</span><span class="op">$</span><span class="fu">fit</span><span class="op">(</span>seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">samples_fixed</span> <span class="op">&lt;-</span> <span class="va">mod_unit_fixed</span><span class="op">$</span><span class="fu">samples</span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="va">DIC</span> <span class="op">&lt;-</span> <span class="va">mod_unit</span><span class="op">$</span><span class="fu">mcmc_DIC</span><span class="op">(</span>summarised <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">saveRDS</a></span><span class="op">(</span><span class="va">samples_fixed</span>, <span class="st">"inst/posterior_samples_fixed.rds"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">saveRDS</a></span><span class="op">(</span><span class="va">DIC_fixed</span>, <span class="st">"inst/posterior_samples_dic_fixed.rds"</span><span class="op">)</span></span>
+<span><span class="va">DIC_fixed</span> <span class="op">&lt;-</span> <span class="va">mod_unit_fixed</span><span class="op">$</span><span class="fu">mcmc_DIC</span><span class="op">(</span>summarised <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">saveRDS</a></span><span class="op">(</span><span class="va">samples_fixed</span>, <span class="st">"inst/econ/posterior_samples_fixed.rds"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">saveRDS</a></span><span class="op">(</span><span class="va">DIC_fixed</span>, <span class="st">"inst/econ/posterior_samples_dic_fixed.rds"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">mod_unit_ohd</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/unitcost_ohd.html">unitcost_ohd</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">mod_unit_ohd</span><span class="op">$</span><span class="fu">fit</span><span class="op">(</span>seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">samples_ohd</span> <span class="op">&lt;-</span> <span class="va">mod_unit_ohd</span><span class="op">$</span><span class="fu">samples</span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">DIC_ohd</span> <span class="op">&lt;-</span> <span class="va">mod_unit_ohd</span><span class="op">$</span><span class="fu">mcmc_DIC</span><span class="op">(</span>summarised <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">saveRDS</a></span><span class="op">(</span><span class="va">samples_ohd</span>, <span class="st">"inst/posterior_samples_ohd.rds"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">saveRDS</a></span><span class="op">(</span><span class="va">DIC_ohd</span>, <span class="st">"inst/posterior_samples_dic_ohd.rds"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">saveRDS</a></span><span class="op">(</span><span class="va">samples_ohd</span>, <span class="st">"inst/econ/posterior_samples_ohd.rds"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">saveRDS</a></span><span class="op">(</span><span class="va">DIC_ohd</span>, <span class="st">"inst/econ/posterior_samples_dic_ohd.rds"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <p>Executing the above code will reproduce exactly the posterior samples installed with this package. The functions <code><a href="../reference/unitcost.html">unitcost()</a></code>, <code><a href="../reference/unitcost_fixed.html">unitcost_fixed()</a></code> and <code><a href="../reference/unitcost_ohd.html">unitcost_ohd()</a></code> use the saved posteriors to load the models without requiring fitting at runtime.</p>
 </section><script id="quarto-html-after-body" type="application/javascript">

@@ -1,17 +1,13 @@
 # Using the Unit Cost Model
 
 ``` r
+
 library(ggplot2)
 library(gridExtra)
 library(dplyr)
 ```
 
-This package was developed for two reasons: firstly, to make the model
-development process transparent and reproducible, and secondly, to allow
-people to make use of the final models to predict TB outpatient visit
-costs. This vignette speaks to the second of these aims. If you want to
-use the models to predict costs, this vignette is the only documentation
-you need to read.
+This vignette describes use of the pre-fitted `unitcost` model.
 
 ## Model structure
 
@@ -20,37 +16,47 @@ visit type effects and covariate effects that are assumed shared across
 countries, facilities and visit types. Log costs are assumed to vary
 normally:
 
-$$\log\left( \text{USD\_unitcost\_total}_{i} \right) \sim N\left( \mu_{i},\sigma^{2} \right)$$
+``` math
+\log(\text{USD\_unitcost\_total}_i) \sim \mathrm{N}(\mu_i, \sigma^2)
+```
 
-where $\mu_{i}$ is given by:
+where $`\mu_i`$ is given by:
 
-$$\mu_{i} = \alpha + \sum\limits_{j = 1}^{J}{\beta_{j}x_{ji}} + \gamma_{c_{i}} + \delta_{f_{i}} + \zeta_{v_{i}}$$
+``` math
+\mu_i = \alpha + \sum_{j=1}^J{\beta_j x_{ji}} + \gamma_{c_i} +  \delta_{f_i} +  \zeta_{v_i}
+```
 
-where $x_{ji}$ represents the value of the jth covariate, $c_{i}$ the
-country, $f_{i}$ the facility, and $v_{i}$ the visit type of observation
-$i$. The variables $\gamma_{c_{i}}$, $\delta_{f_{i}}$ and
-$\zeta_{v_{i}}$ account for systematic differences across countries,
+where $`x_{ji}`$ represents the value of the jth covariate, $`c_i`$ the
+country, $`f_i`$ the facility, and $`v_i`$ the visit type of observation
+$`i`$. The variables $`\gamma_{c_i}`$, $`\delta_{f_i}`$ and
+$`\zeta_{v_i}`$ account for systematic differences across countries,
 facilities and visit types, respectively, and are assumed to vary
 normally about zero:
 
-$$\gamma_{c} \sim N\left( 0,\sigma_{c}^{2} \right)$$
+``` math
+\gamma_{c} \sim \mathrm{N}(0, \sigma_c^2)
+```
 
-$$\delta_{f} \sim N\left( 0,\sigma_{f}^{2} \right)$$
+``` math
+\delta_{f} \sim \mathrm{N}(0, \sigma_f^2)
+```
 
-$$\zeta_{o} \sim N\left( 0,\sigma_{v}^{2} \right)$$
+``` math
+\zeta_{o} \sim \mathrm{N}(0, \sigma_v^2)
+```
 
 Model instances are created via the `unitcost` function:
 
 ``` r
+
 model <- capturetb::unitcost()
 #> Multiple outputs detected. Including output-level random effects in model.
 
 # See model covariates
 covariates <- model$covariates()
 print(covariates)
-#> [1] "public"             "urban"              "primary"           
-#> [4] "secondary"          "tertiary"           "n_services"        
-#> [7] "log_ID_p_bldgspace" "logVisits"          "logVisitsPP_TB"
+#> [1] "public"       "urban"        "healthcentre" "primary"      "secondary"   
+#> [6] "tertiary"     "logVisits"
 
 # See priors used in the model
 priors <- model$priors()
@@ -74,12 +80,10 @@ print(priors)
 #> [1] 10
 #> 
 #> $prior.beta.mean
-#> [1] -0.3155360  0.3520000  0.2574328  0.3014328  0.3014328  0.0000000  0.0000000
-#> [8]  0.0000000  0.0000000
+#> [1] 0 0 0 0 0 0 0
 #> 
 #> $prior.beta.precision
-#> [1] 175.85254  55.09843  13.70479   7.84904   7.84904   0.01000   0.01000
-#> [8]   0.01000   0.01000
+#> [1] 0.01 0.01 0.01 0.01 0.01 0.01 0.01
 #> 
 #> attr(,"class")
 #> [1] "capturetbpriors" "list"
@@ -89,15 +93,17 @@ The prior distribution for each model parameter can be visualised by
 calling `plot(priors, parameter = "name_of_param")`:
 
 ``` r
+
 plots <- list()
-for(i in 1:9) {
+l <- length(covariates)
+for(i in 1:l) {
   plots[[i]] <- plot(priors, par = paste0("beta[", i, "]"))
 }
-plots[[10]] <- plot(priors, par = "alpha")
-plots[[11]] <- plot(priors, par = "sigma")
-plots[[12]] <- plot(priors, par = "sigma_c")
-plots[[13]] <- plot(priors, par = "sigma_f")
-plots[[14]] <- plot(priors, par = "sigma_v")
+plots[[l + 1]] <- plot(priors, par = "alpha")
+plots[[l + 2]] <- plot(priors, par = "sigma")
+plots[[l + 3]] <- plot(priors, par = "sigma_c")
+plots[[l + 4]] <- plot(priors, par = "sigma_f")
+plots[[l + 5]] <- plot(priors, par = "sigma_v")
 
 do.call(grid.arrange, c(plots, ncol = 3))
 #> Warning: Removed 3341 rows containing missing values or values outside the scale range
@@ -116,6 +122,7 @@ The posterior (fitted) distribution of each parameter can be generated
 by calling `model$plot_posteriors`:
 
 ``` r
+
 model$plot_posteriors(pars = paste0("beta[", 1:length(covariates), "]")) + 
   scale_y_discrete(labels = covariates)
 #> Scale for y is already present.
@@ -127,6 +134,7 @@ model$plot_posteriors(pars = paste0("beta[", 1:length(covariates), "]")) +
 Figure 1: Fitted beta cefficients
 
 ``` r
+
 model$plot_posteriors(pars = c("alpha", "sigma", "sigma_c", "sigma_f", "sigma_v"))
 ```
 
@@ -145,14 +153,15 @@ groups, and [`capturetb::outputs()`](../reference/outputs.md) to
 retrieve a complete list of available outputs:
 
 ``` r
+
 available_output_groups <- capturetb::output_groups()
 head(available_output_groups)
-#> [1] "OP"  "LAB" "RAD" "CS"  "IP"  "OT"
+#> [1] "OP"
 
 available_outputs <- capturetb::outputs()
 head(available_outputs)
-#> [1] "op_diagnosticvisit"     "lab_hivconftest"        "lab_esr"               
-#> [4] "lab_rbs"                "op_treatmentvisit_ltbi" "lab_cd4count"
+#> [1] "op_diagnosticvisit"     "op_treatmentvisit_ltbi" "op_treatmentvisit_dot" 
+#> [4] "op_screeningvisit"      "op_vaccinations"        "op_coughtriage"
 ```
 
 Subsets of the data can be retrieved using
@@ -160,6 +169,7 @@ Subsets of the data can be retrieved using
 group or output type as needed:
 
 ``` r
+
 data <- capturetb::get_data(output_group = "OP")
 summarised <- data |> 
   group_by(fc_country) |>
@@ -187,19 +197,19 @@ numeric covariates by their sample mean. The training data can be
 inspected by calling `model$training_data()`:
 
 ``` r
+
 dat <- model$training_data() |> 
     select(model$covariates())
 head(dat)
-#> # A tibble: 6 × 9
-#>   public urban primary secondary tertiary n_services[,1] log_ID_p_bldgspace[,1]
-#>   <lgl>  <lgl> <lgl>   <lgl>     <lgl>             <dbl>                  <dbl>
-#> 1 FALSE  TRUE  FALSE   FALSE     FALSE            -1.25                    1.31
-#> 2 FALSE  TRUE  FALSE   FALSE     FALSE            -1.25                    1.31
-#> 3 FALSE  TRUE  FALSE   FALSE     FALSE            -1.25                    1.31
-#> 4 FALSE  TRUE  FALSE   FALSE     FALSE            -1.25                    1.31
-#> 5 TRUE   TRUE  FALSE   FALSE     FALSE             0.745                   1.18
-#> 6 TRUE   TRUE  FALSE   FALSE     FALSE             0.745                   1.18
-#> # ℹ 2 more variables: logVisits <dbl[,1]>, logVisitsPP_TB <dbl[,1]>
+#> # A tibble: 6 × 7
+#>   public urban healthcentre primary secondary tertiary logVisits[,1]
+#>   <lgl>  <lgl> <lgl>        <lgl>   <lgl>     <lgl>            <dbl>
+#> 1 FALSE  TRUE  TRUE         FALSE   FALSE     FALSE           -0.622
+#> 2 FALSE  TRUE  TRUE         FALSE   FALSE     FALSE           -0.622
+#> 3 FALSE  TRUE  TRUE         FALSE   FALSE     FALSE           -0.622
+#> 4 FALSE  TRUE  TRUE         FALSE   FALSE     FALSE           -0.622
+#> 5 TRUE   TRUE  TRUE         FALSE   FALSE     FALSE           -0.528
+#> 6 TRUE   TRUE  TRUE         FALSE   FALSE     FALSE           -0.528
 ```
 
 ## Model accuracy
@@ -207,6 +217,7 @@ head(dat)
 To see how the model performs on the training data:
 
 ``` r
+
 # Various measures of fit
 performance <- model$performance(scale = "natural")
 colnames(performance) <- c("MAE",
@@ -216,11 +227,12 @@ knitr::kable(performance)
 
 |      MAE |     RMSE | 95% CI Coverage | Median CI width | Bayesian R-squ |
 |---------:|---------:|----------------:|----------------:|---------------:|
-| 4.782887 | 6.938667 |       0.9654545 |        23.27268 |      0.4919168 |
+| 5.448626 | 8.007255 |       0.9690909 |        26.98067 |      0.4284285 |
 
 and by country:
 
 ``` r
+
 # Performance by country
 country_performance <- model$performance(by_country = TRUE)
 colnames(country_performance) <- c("Country", "MAE",
@@ -231,17 +243,18 @@ knitr::kable(country_performance)
 
 | Country     |      MAE |      RMSE | 95% CI Coverage | Median CI width | Bayesian R-squ |
 |:------------|---------:|----------:|----------------:|----------------:|---------------:|
-| Ethiopia    | 5.034131 |  6.804835 |       1.0000000 |        26.30787 |      0.4869124 |
-| Georgia     | 7.254804 | 10.285288 |       0.9680851 |        40.91699 |      0.4216290 |
-| India       | 3.251613 |  4.368612 |       0.9459459 |        17.05032 |      0.4545939 |
-| Kenya       | 4.632344 |  6.944004 |       0.9459459 |        19.62977 |      0.3776126 |
-| Philippines | 3.626834 |  4.829250 |       0.9593496 |        19.30543 |      0.5436590 |
+| Ethiopia    | 6.122205 |  8.963193 |       0.9932432 |        27.73003 |      0.3574194 |
+| Georgia     | 7.762666 | 11.084837 |       0.9680851 |        45.72579 |      0.3860340 |
+| India       | 3.492455 |  4.745684 |       0.9459459 |        17.87366 |      0.4661548 |
+| Kenya       | 5.171295 |  7.552060 |       0.9459459 |        23.36456 |      0.3406264 |
+| Philippines | 4.308233 |  5.563931 |       0.9756098 |        20.92348 |      0.4990256 |
 
 By default, performance is reported after marginalising over facility
 effects. To see the performance of the full conditional model, including
 known facility effects:
 
 ``` r
+
 # Various measures of fit
 performance <- model$performance(scale = "natural", conditional = TRUE)
 colnames(performance) <- c("MAE",
@@ -251,12 +264,13 @@ knitr::kable(performance)
 
 |      MAE |     RMSE | 95% CI Coverage | Median CI width | Bayesian R-squ |
 |---------:|---------:|----------------:|----------------:|---------------:|
-| 2.632935 | 4.692119 |       0.9618182 |        14.12975 |      0.6593423 |
+| 2.610451 | 4.682627 |       0.9618182 |        14.43798 |      0.6553999 |
 
 Visualisiing predictions for inputs in the training data, including
 credible intervals, against observed costs:
 
 ``` r
+
 # Plot with prediction intervals
 do.call(grid.arrange, 
     c(model$plot_fit(include_ci = TRUE, scale = "log") + ggtitle("Marginal model"),
@@ -273,12 +287,12 @@ centered; to convert raw values to centered values, use the
 `prepare_covariates` utility:
 
 ``` r
+
 # Include all covariates plus facility country `fc_country` and visit type `output`
 new_inputs <- list(
-  log_ID_p_bldgspace = 1, 
   logVisits = 6.9, 
-  logVisitsPP_TB = -1.29, 
     n_services = 1,
+  healthcentre = FALSE,
     primary = FALSE,
   secondary = FALSE, 
     tertiary = FALSE,
@@ -289,11 +303,12 @@ new_inputs <- list(
 )
 
 # This will center covariates as required by the model
-covariates <- capturetb::prepare_covariates(raw = new_inputs, mod = model)
+prepared_inputs <- capturetb::prepare_covariates(raw = new_inputs, mod = model)
 ```
 
 ``` r
-pred <- model$predict(covariates,
+
+pred <- model$predict(prepared_inputs,
  scale = "natural",
  summarised = TRUE,
  centrality = c("mean", "median"),
@@ -302,16 +317,16 @@ pred <- model$predict(covariates,
 # Expected unit cost is mean prediction
 expected_unit_cost <- pred$Mean
 print(expected_unit_cost)
-#> [1] 13.85543 13.85543 13.85543
+#> [1] 13.12212 13.12212 13.12212
 
 knitr::kable(pred)
 ```
 
-| Observation |   Median |     Mean |   CI |   CI_low |  CI_high |
-|:------------|---------:|---------:|-----:|---------:|---------:|
-| 1           | 11.55728 | 13.85543 | 0.95 | 3.532986 | 37.64690 |
-| 1           | 11.55728 | 13.85543 | 0.90 | 4.267347 | 31.06315 |
-| 1           | 11.55728 | 13.85543 | 0.80 | 5.337592 | 25.00999 |
+| Observation |  Median |     Mean |   CI |   CI_low |  CI_high |
+|:------------|--------:|---------:|-----:|---------:|---------:|
+| 1           | 10.6324 | 13.12212 | 0.95 | 2.967803 | 38.53890 |
+| 1           | 10.6324 | 13.12212 | 0.90 | 3.637729 | 30.90759 |
+| 1           | 10.6324 | 13.12212 | 0.80 | 4.606602 | 24.33595 |
 
 Note that by default the 95% *predictive* interval is returned. If you
 instead want the 95% credible interval of the mean, pass
@@ -320,7 +335,8 @@ instead want the 95% credible interval of the mean, pass
 To see the full distribution of predicted costs:
 
 ``` r
-pred <- model$predict(covariates, scale = "natural", summarised = FALSE)
+
+pred <- model$predict(prepared_inputs, scale = "natural", summarised = FALSE)
 ggplot2::ggplot(data.frame(cost = pred), ggplot2::aes(x = cost)) + ggplot2::geom_density()
 ```
 

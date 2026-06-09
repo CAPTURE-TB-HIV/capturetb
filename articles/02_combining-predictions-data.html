@@ -7,8 +7,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Combining predictions with primary data • capturetb</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><script src="02_combining-predictions-data_files/libs/quarto-html/popper.min.js"></script><script src="02_combining-predictions-data_files/libs/quarto-html/tippy.umd.min.js"></script><link href="02_combining-predictions-data_files/libs/quarto-html/tippy.css" rel="stylesheet">
 <link href="02_combining-predictions-data_files/libs/quarto-html/light-border.css" rel="stylesheet">
@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">capturetb</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -57,7 +57,7 @@
       <h1>Combining predictions with primary data</h1>
 
 
-      <p class="date">2025-12-11</p>
+      <p class="date">2026-06-09</p>
 
 
       <div class="d-none name"><code></code></div>
@@ -84,7 +84,7 @@
 </h2>
 <p>Fixed costs vary very little by visit type, and overheads not at all by visit type, so the Fixed Unit Cost and Overhead Unit Cost model have a simpler structure than the Unit Cost Model.</p>
 <p>For both, log costs are assumed to vary normally:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>log</mo><mrow><mo stretchy="true" form="prefix">(</mo><msub><mtext mathvariant="normal">USD_unitcost_total</mtext><mi>i</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>∼</mo><mi mathvariant="normal">N</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>μ</mi><mi>i</mi></msub><mo>,</mo><msup><mi>σ</mi><mn>2</mn></msup><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><msub><mtext mathvariant="normal">USD_unitcost_total</mtext><mi>i</mi></msub><mo stretchy="false" form="postfix">)</mo><mo>∼</mo><mi mathvariant="normal">N</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>μ</mi><mi>i</mi></msub><mo>,</mo><msup><mi>σ</mi><mn>2</mn></msup><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">
 \log(\text{USD\_unitcost\_total}_i) \sim \mathrm{N}(\mu_i, \sigma^2)
 </annotation></semantics></math></p>
 <p>where <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>μ</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\mu_i</annotation></semantics></math> is given by:</p>
@@ -92,7 +92,7 @@
 \mu_i = \alpha + \sum_{j=1}^J{\beta_j x_{ji}} + \gamma_{c_i}
 </annotation></semantics></math></p>
 <p>where <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>x</mi><mrow><mi>j</mi><mi>i</mi></mrow></msub><annotation encoding="application/x-tex">x_{ji}</annotation></semantics></math> represents the value of the jth covariate and <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>c</mi><mi>i</mi></msub><annotation encoding="application/x-tex">c_i</annotation></semantics></math> the country of observation <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>. The variable <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>γ</mi><msub><mi>c</mi><mi>i</mi></msub></msub><annotation encoding="application/x-tex">\gamma_{c_i}</annotation></semantics></math> accounts for systematic differences across countries, and is assumed to vary normally about zero:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>γ</mi><mi>c</mi></msub><mo>∼</mo><mi mathvariant="normal">N</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>0</mn><mo>,</mo><msubsup><mi>σ</mi><mi>c</mi><mn>2</mn></msubsup><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>γ</mi><mi>c</mi></msub><mo>∼</mo><mi mathvariant="normal">N</mi><mo stretchy="false" form="prefix">(</mo><mn>0</mn><mo>,</mo><msubsup><mi>σ</mi><mi>c</mi><mn>2</mn></msubsup><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">
 \gamma_{c} \sim \mathrm{N}(0, \sigma_c^2)
 </annotation></semantics></math></p>
 </section><section class="level2"><h2 id="comparing-accuracy-of-each-model">Comparing accuracy of each model<a class="anchor" aria-label="anchor" href="#comparing-accuracy-of-each-model"></a>
@@ -257,27 +257,27 @@
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">unitcost</td>
-<td style="text-align: right;">4.783514</td>
-<td style="text-align: right;">6.939309</td>
-<td style="text-align: right;">0.9654545</td>
-<td style="text-align: right;">23.38496</td>
-<td style="text-align: right;">0.4918049</td>
+<td style="text-align: right;">5.448845</td>
+<td style="text-align: right;">8.006788</td>
+<td style="text-align: right;">0.9690909</td>
+<td style="text-align: right;">26.89377</td>
+<td style="text-align: right;">0.4283492</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">unitcost_fixed</td>
-<td style="text-align: right;">2.955233</td>
-<td style="text-align: right;">4.288818</td>
-<td style="text-align: right;">0.9652174</td>
-<td style="text-align: right;">14.58886</td>
-<td style="text-align: right;">0.5795069</td>
+<td style="text-align: right;">3.852353</td>
+<td style="text-align: right;">5.738340</td>
+<td style="text-align: right;">0.9739130</td>
+<td style="text-align: right;">22.11553</td>
+<td style="text-align: right;">0.4621652</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">unitcost_ohd</td>
-<td style="text-align: right;">2.898727</td>
-<td style="text-align: right;">4.075515</td>
+<td style="text-align: right;">3.102302</td>
+<td style="text-align: right;">4.661734</td>
 <td style="text-align: right;">0.9672131</td>
-<td style="text-align: right;">17.43262</td>
-<td style="text-align: right;">0.5127307</td>
+<td style="text-align: right;">20.75565</td>
+<td style="text-align: right;">0.4694320</td>
 </tr>
 </tbody>
 </table>

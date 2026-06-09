@@ -13,17 +13,16 @@
 <url><loc>/reference/get_data.html</loc></url>
 <url><loc>/reference/index.html</loc></url>
 <url><loc>/reference/opvisit_data.html</loc></url>
-<url><loc>/reference/opvisit_priors.html</loc></url>
 <url><loc>/reference/output_groups.html</loc></url>
 <url><loc>/reference/outputs.html</loc></url>
 <url><loc>/reference/plot.capturetbpriors.html</loc></url>
-<url><loc>/reference/power_prior.html</loc></url>
 <url><loc>/reference/prepare_covariates.html</loc></url>
-<url><loc>/reference/primary_prior.html</loc></url>
-<url><loc>/reference/prior_public_ownership.html</loc></url>
-<url><loc>/reference/secondary_prior.html</loc></url>
+<url><loc>/reference/uninformative_priors.html</loc></url>
 <url><loc>/reference/unitcost.html</loc></url>
+<url><loc>/reference/unitcost_extended.html</loc></url>
 <url><loc>/reference/unitcost_fixed.html</loc></url>
+<url><loc>/reference/unitcost_fixed_extended.html</loc></url>
 <url><loc>/reference/unitcost_ohd.html</loc></url>
+<url><loc>/reference/unitcost_ohd_extended.html</loc></url>
 </urlset>
 

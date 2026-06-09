@@ -7,12 +7,12 @@
 
 ## Citation
 
-Hill A (2025). *capturetb: Econometric cost functions for estimating TB
-outpatient visit unit costs*. R package version 1.0.0.
+Hill A (2026). *capturetb: Econometric cost functions for estimating TB
+outpatient visit unit costs*. R package version 2.0.0.
 
     @Manual{,
       title = {capturetb: Econometric cost functions for estimating TB outpatient visit unit costs},
       author = {Alex Hill},
-      year = {2025},
-      note = {R package version 1.0.0},
+      year = {2026},
+      note = {R package version 2.0.0},
     }

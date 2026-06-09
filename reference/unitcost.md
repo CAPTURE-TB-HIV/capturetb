@@ -32,15 +32,13 @@ JAGSModel
 mod <- unitcost()
 #> Multiple outputs detected. Including output-level random effects in model.
 new_data <- list(
-  log_ID_p_bldgspace = 1,
   logVisits = 6.9,
-  logVisitsPP_TB = -1.29,
+  healthcentre = FALSE,
   primary = TRUE,
   secondary = FALSE,
   tertiary = FALSE,
   urban = FALSE,
   public = TRUE,
-  n_services = 3,
   fc_country = "Ethiopia",
   output = "op_treatmentvisit"
 )
@@ -50,5 +48,5 @@ mod$predict(new_covariates, summarised = TRUE)
 #> 
 #> Observation | Mean |       95% CI
 #> ---------------------------------
-#> 1           | 2.86 | [1.68, 4.05]
+#> 1           | 2.66 | [1.36, 3.95]
 ```

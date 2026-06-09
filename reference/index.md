@@ -11,6 +11,12 @@ Functions needed to predict costs
   fixed costs model
 - [`unitcost_ohd()`](unitcost_ohd.md) : CaptureTB outpatient visit
   overhead costs model
+- [`unitcost_extended()`](unitcost_extended.md) : Extended CaptureTB
+  outpatient visit cost model with more covariates.
+- [`unitcost_fixed_extended()`](unitcost_fixed_extended.md) : Extended
+  CaptureTB outpatient visit fixed cost model with more covariates.
+- [`unitcost_ohd_extended()`](unitcost_ohd_extended.md) : Extended
+  CaptureTB outpatient visit overhead cost model with more covariates.
 
 ## Data
 

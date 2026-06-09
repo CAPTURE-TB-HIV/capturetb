@@ -33,24 +33,21 @@ mod <- unitcost()
 #> Multiple outputs detected. Including output-level random effects in model.
 prepare_covariates(
   raw = list(
-    n_services = 5,
     public = 1,
     urban = 0,
+    healthcentre = 0,
     primary = 0,
     secondary = 1,
     tertiary = 0,
-    log_ID_p_bldgspace = 1,
     logVisits = 6.9,
-    logVisitsPP_TB = -1.29,
     fc_country = "Ethiopia",
     output = "op_treatmentvisit"
   ),
   model = mod
 )
-#> # A tibble: 1 × 11
-#>   n_services[,1] public urban primary secondary tertiary log_ID_p_bldgspace[,1]
-#>            <dbl>  <dbl> <dbl>   <dbl>     <dbl>    <dbl>                  <dbl>
-#> 1         -0.255      1     0       0         1        0                  -3.25
-#> # ℹ 4 more variables: logVisits <dbl[,1]>, logVisitsPP_TB <dbl[,1]>,
-#> #   fc_country <chr>, output <chr>
+#> # A tibble: 1 × 9
+#>   public urban healthcentre primary secondary tertiary logVisits[,1] fc_country
+#>    <dbl> <dbl>        <dbl>   <dbl>     <dbl>    <dbl>         <dbl> <chr>     
+#> 1      1     0            0       0         1        0         -3.67 Ethiopia  
+#> # ℹ 1 more variable: output <chr>
 ```

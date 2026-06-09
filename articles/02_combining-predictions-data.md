@@ -1,6 +1,7 @@
 # Combining predictions with primary data
 
 ``` r
+
 library(ggplot2)
 library(dplyr)
 ```
@@ -23,18 +24,24 @@ simpler structure than the Unit Cost Model.
 
 For both, log costs are assumed to vary normally:
 
-$$\log\left( \text{USD\_unitcost\_total}_{i} \right) \sim N\left( \mu_{i},\sigma^{2} \right)$$
+``` math
+\log(\text{USD\_unitcost\_total}_i) \sim \mathrm{N}(\mu_i, \sigma^2)
+```
 
-where $\mu_{i}$ is given by:
+where $`\mu_i`$ is given by:
 
-$$\mu_{i} = \alpha + \sum\limits_{j = 1}^{J}{\beta_{j}x_{ji}} + \gamma_{c_{i}}$$
+``` math
+\mu_i = \alpha + \sum_{j=1}^J{\beta_j x_{ji}} + \gamma_{c_i}
+```
 
-where $x_{ji}$ represents the value of the jth covariate and $c_{i}$ the
-country of observation $i$. The variable $\gamma_{c_{i}}$ accounts for
-systematic differences across countries, and is assumed to vary normally
-about zero:
+where $`x_{ji}`$ represents the value of the jth covariate and $`c_i`$
+the country of observation $`i`$. The variable $`\gamma_{c_i}`$ accounts
+for systematic differences across countries, and is assumed to vary
+normally about zero:
 
-$$\gamma_{c} \sim N\left( 0,\sigma_{c}^{2} \right)$$
+``` math
+\gamma_{c} \sim \mathrm{N}(0, \sigma_c^2)
+```
 
 ## Comparing accuracy of each model
 
@@ -48,6 +55,7 @@ non-overhead costs in the raw data with the predictions for overhead
 costs made by the `unitcost_ohd` model.
 
 ``` r
+
 mod_uc <- capturetb::unitcost()
 #> Multiple outputs detected. Including output-level random effects in model.
 mod_uc_fixed <- capturetb::unitcost_fixed()
@@ -63,6 +71,7 @@ mod_uc$plot_fit(include_ci = TRUE, scale = "natural", conditional = FALSE)
 ![](02_combining-predictions-data_files/figure-html/mods-1.png)
 
 ``` r
+
 # get predictions of ohd costs
 pred_ohd <- mod_uc_ohd$predict(dat, scale = "natural", summarised = TRUE)
 #> Warning in private$.validate_data(dat): Unknown output types:
@@ -113,6 +122,7 @@ ggplot2::ggplot(results_df, ggplot2::aes(
 ![](02_combining-predictions-data_files/figure-html/preds-1.png)
 
 ``` r
+
 # get predictions of fixed costs
 pred_fixed <- mod_uc_fixed$predict(dat, scale = "natural", summarised = TRUE)
 #> Warning in private$.validate_data(dat): Unknown output types:
@@ -166,6 +176,7 @@ final estimates and somewhat reduces uncertainty, although uncertainty
 remains high.
 
 ``` r
+
 perf_total <- mod_uc$performance(scale = "natural")
 perf_ohd <- mod_uc_ohd$performance(scale = "natural")
 perf_fixed <- mod_uc_fixed$performance(scale = "natural")
@@ -176,10 +187,10 @@ colnames(performance) <- c("MAE",
 knitr::kable(performance)
 ```
 
-|                |      MAE |     RMSE | 95% CI Coverage | Median CI width | Bayesian R-squ |
-|:---------------|---------:|---------:|----------------:|----------------:|---------------:|
-| unitcost       | 4.783514 | 6.939309 |       0.9654545 |        23.38496 |      0.4918049 |
-| unitcost_fixed | 2.955233 | 4.288818 |       0.9652174 |        14.58886 |      0.5795069 |
-| unitcost_ohd   | 2.898727 | 4.075515 |       0.9672131 |        17.43262 |      0.5127307 |
+|  | MAE | RMSE | 95% CI Coverage | Median CI width | Bayesian R-squ |
+|:---|---:|---:|---:|---:|---:|
+| unitcost | 5.448845 | 8.006788 | 0.9690909 | 26.89377 | 0.4283492 |
+| unitcost_fixed | 3.852353 | 5.738340 | 0.9739130 | 22.11553 | 0.4621652 |
+| unitcost_ohd | 3.102302 | 4.661734 | 0.9672131 | 20.75565 | 0.4694320 |
 
-Performance metrics of each model
+Performance metrics of each model {.table .caption-top}
