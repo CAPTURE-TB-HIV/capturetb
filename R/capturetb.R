@@ -38,6 +38,10 @@ opvisit_data <- function(cost_type = "ECON") {
     training_data$logVisitsPP_TB,
     center = TRUE, scale = FALSE
   )
+  training_data$log_ID_p_bldgspace <- scale(
+    training_data$log_ID_p_bldgspace,
+    center = TRUE, scale = FALSE
+  )
 
   training_data
 }
@@ -143,7 +147,7 @@ unitcost_extended <- function(cost_type = "ECON") {
     "tertiary",
     "logVisits",
     "logVisitsPP_TB",
-    "log_p_bldgspace"
+    "log_ID_p_bldgspace"
   )
 
   data <- opvisit_data(cost_type)
@@ -221,6 +225,59 @@ unitcost_ohd <- function() {
   mod
 }
 
+#' Extended CaptureTB outpatient visit overhead cost model with more covariates.
+#'
+#' This function loads a [`JAGSModel`] model object
+#' using default covariates and priors. This can be used to
+#' predict the total cost of a single outpatient visit at
+#' a given facility or facilities via the predict method. This model
+#' is not pre-fitted, so requires JAGS to be installed to fit and use.
+#'
+#' Note that numerical covariates are centered. When making predictions 
+#' with the model, the function [prepare_covariates()] can be used 
+#' to transform raw variables using the correct centering values.
+#'
+#' @param cost_type One of "ECON" or "FIN". If "ECON", model for
+#' economic costs is returned. If "FIN", model for financial
+#' costs is returned. Default "ECON".
+#' @return An object of class [`JAGSModel`].
+#' @examples
+#' \dontrun{
+#' mod <- unitcost_extended()
+#' mod$fit()
+#' }
+#' @seealso JAGSModel
+#' @export
+unitcost_ohd_extended <- function(cost_type = "ECON") {
+  stopifnot(
+    "cost_type must be one of 'ECON' or 'FIN'" =
+      cost_type %in% c("ECON", "FIN")
+  )
+
+  covariates <- c(
+    "public",
+    "urban",
+    "healthcentre",
+    "primary",
+    "secondary",
+    "tertiary",
+    "logVisits",
+    "logVisitsPP_TB",
+    "log_ID_p_bldgspace"
+  )
+
+  data <- opvisit_data(cost_type) |>
+    dplyr::group_by(.data$fc_code) |>
+    dplyr::filter(!duplicated(.data$ID_unitcost_ohd)) |>
+    dplyr::mutate(output = "op_visit") |>
+    dplyr::ungroup()
+
+  JAGSModel$new(data,
+    target = "ID_unitcost_ohd",
+    covariates = covariates,
+    priors = uninformative_priors(length(covariates))
+  )
+}
 
 #' CaptureTB outpatient visit fixed costs model
 #'
@@ -262,7 +319,7 @@ unitcost_fixed <- function() {
     package = "capturetb"
   ))
 
-  data <- opvisit_data("ECON") |>
+  data <- opvisit_data() |>
     dplyr::group_by(.data$fc_code) |>
     dplyr::mutate(ID_unitcost_fixed = median(.data$ID_unitcost_fixed)) |>
     dplyr::filter(!duplicated(.data$ID_unitcost_fixed)) |>
@@ -328,7 +385,7 @@ unitcost_fixed_extended <- function(cost_type = "ECON") {
     "tertiary",
     "logVisits",
     "logVisitsPP_TB",
-    "log_p_bldgspace"
+    "log_ID_p_bldgspace"
   )
 
   data <- opvisit_data(cost_type) |>
@@ -339,7 +396,7 @@ unitcost_fixed_extended <- function(cost_type = "ECON") {
     dplyr::ungroup()
 
   JAGSModel$new(data,
-    target = "ID_unitcost_total",
+    target = "ID_unitcost_fixed",
     covariates = covariates,
     priors = uninformative_priors(length(covariates))
   )

@@ -11,6 +11,9 @@ reference:
     - unitcost
     - unitcost_fixed
     - unitcost_ohd
+    - unitcost_extended
+    - unitcost_fixed_extended
+    - unitcost_ohd_extended
 - title: "Data"
   desc: "Functions for interfacing with ValueTB data"
   contents:
