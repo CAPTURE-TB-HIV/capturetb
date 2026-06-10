@@ -69,7 +69,7 @@ print(priors)
 
 The prior distribution for each model parameter can be visualised by calling `plot(priors, parameter = "name_of_param")`:
 
-```{r beta-priors, fig.width=10, fig.height=6}
+```{r beta-priors, fig.width=10, fig.height=6, warning = FALSE}
 plots <- list()
 l <- length(covariates)
 for(i in 1:l) {
@@ -122,14 +122,6 @@ knitr::kable(summarised)
 
 The fitted model predicts the cost of a single outpatient visit, given key cost drivers. In the dataset outpatient visits of different types have output group "OP".
 
-The training data was processed from the raw data by adding one additional variable, `n_services`, which is the number of distinct TB outpatient services provided at each facility, and by centering all numeric covariates by their sample mean. The training data can be inspected by calling `model$training_data()`:
-
-```{r training-data}
-dat <- model$training_data() |> 
-	select(model$covariates())
-head(dat)
-```
-
 ## Model accuracy
 
 To see how the model performs on the training data:
@@ -167,40 +159,42 @@ Visualisiing predictions for inputs in the training data, including credible int
 
 ```{r prediction-intervals}
 # Plot with prediction intervals
-do.call(grid.arrange, 
+do.call(grid.arrange,
 	c(model$plot_fit(include_ci = TRUE, scale = "log") + ggtitle("Marginal model"),
   	model$plot_fit(include_ci = TRUE, scale = "log", conditional = TRUE) + ggtitle("Conditional model")))
 ```
 
 ## Generating predictions
 
-Predictions of unit cost for new inputs, not in the training set, are generated via the `predict` method. Note that numeric covariates must be centered; to convert raw values to centered values, use the `prepare_covariates` utility:
+Predictions of unit cost for new inputs, not in the training set, are generated via the `predict` method. Note that numeric covariates must be centered using the original training data's centering values; to convert raw values to centered values, use the `prepare_covariates` utility:
 
 ```{r, prepare}
 # Include all covariates plus facility country `fc_country` and visit type `output`
 new_inputs <- list(
-  logVisits = 6.9, 
-	n_services = 1,
+  logVisits = 6.9,
   healthcentre = FALSE,
-	primary = FALSE,
-  secondary = FALSE, 
-	tertiary = FALSE,
-  urban = FALSE, 
+  primary = FALSE,
+  secondary = FALSE,
+  tertiary = FALSE,
+  urban = FALSE,
   public = TRUE,
   fc_country = "Ethiopia",
-	output = "op_treatmentvisit"
+  output = "op_treatmentvisit"
 )
 
-# This will center covariates as required by the model
+# This will center numeric covariates as required by the model
 prepared_inputs <- capturetb::prepare_covariates(raw = new_inputs, mod = model)
+
+# Centering values can also be inspected
+model$centering_values()
 ```
 
 ```{r, pred}
 pred <- model$predict(prepared_inputs,
- scale = "natural",
- summarised = TRUE,
- centrality = c("mean", "median"),
- ci = c(0.95, 0.9, 0.8))
+  scale = "natural",
+  summarised = TRUE,
+  centrality = c("mean", "median"),
+  ci = c(0.95, 0.9, 0.8))
 
 # Expected unit cost is mean prediction
 expected_unit_cost <- pred$Mean
@@ -215,5 +209,7 @@ To see the full distribution of predicted costs:
 
 ```{r, plot-pred}
 pred <- model$predict(prepared_inputs, scale = "natural", summarised = FALSE)
-ggplot2::ggplot(data.frame(cost = pred), ggplot2::aes(x = cost)) + ggplot2::geom_density()
+ggplot2::ggplot(data.frame(cost = pred),
+ ggplot2::aes(x = cost)) + 
+ ggplot2::geom_density()
 ```

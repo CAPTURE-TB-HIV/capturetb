@@ -89,7 +89,7 @@ JAGSModel <- R6::R6Class("JAGSModel",
         warning(sprintf("Removed %d rows with missing data.", nrow(dat_missing)))
       }
 
-      centering_values <- sapply(dat, function(col) {
+      centering_values <- sapply(dat[, private$.covariates], function(col) {
         attr(col, "scaled:center")
       })
       private$.centering_values <- centering_values[!sapply(centering_values, is.null)]

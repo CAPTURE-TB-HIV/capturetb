@@ -63,7 +63,7 @@ model <- capturetb::JAGSModel$new(
 
 Priors can be visualised by calling `plot(priors, par = "name_of_param")`:
 
-```{r beta-priors, fig.width=10, fig.height=6}
+```{r beta-priors, fig.width=10, fig.height=6, warning = FALSE}
 priors <- model$priors()
 plots <- list()
 for(i in 1:3) {
@@ -208,6 +208,23 @@ fit <- res |>
 knitr::kable(fit)
 ```
 
+Leave-one-country-out cross-validaton can also be performed:
+
+```{r, loco}
+res <- model$leave_one_country_out(
+  n.iter = 10000,
+  n.burnin = 1000,
+  n.adapt = 1000, 
+  scale = "log")
+
+fit <- res |> 
+  group_by(country) |> 
+  summarise(rmse = sqrt(mean((observed-mean)^2)),
+            mae = mean(abs(observed-mean)))
+
+knitr::kable(fit)
+```
+
 ## Reproducing the fitted models installed with the package
 
 There are three pre-fitted models installed with the package:
@@ -244,3 +261,21 @@ saveRDS(DIC_ohd, "inst/econ/posterior_samples_dic_ohd.rds")
 Executing the above code will reproduce exactly the posterior samples installed with 
 this package. The functions `unitcost()`, `unitcost_fixed()` and `unitcost_ohd()` use 
 the saved posteriors to load the models without requiring fitting at runtime. 
+
+## Other models installed with the package
+
+There are three additional models installed with the package:
+
+* `unitcost_extended()`: predicts the cost of a single outpatient visit
+* `unitcost_fixed_extended()`: predicts the fixed costs associated with a single outpatient visit
+* `unitcost_ohd_extended()`: predicts the fixed costs associated with a single outpatient visit
+
+To avoid the size of the package becoming unwieldy, these models are not pre-fit. To use 
+them, you will need to have [JAGS](https://sourceforge.net/projects/mcmc-jags/) and the [runjags](https://cran.r-project.org/web/packages/runjags/index.html) package must be installed.
+
+They can be fit to economic or financial costs, by passing the `cost_type` parameter:
+
+```{r}
+mod_econ <- capturetb::unitcost_extended(cost_type = "ECON")
+mod_fin <- capturetb::unitcost_extended(cost_type = "FIN")
+```
