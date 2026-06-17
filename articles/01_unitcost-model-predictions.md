@@ -227,7 +227,7 @@ knitr::kable(performance)
 
 |      MAE |     RMSE | 95% CI Coverage | Median CI width | Bayesian R-squ |
 |---------:|---------:|----------------:|----------------:|---------------:|
-| 5.446965 | 8.005441 |       0.9690909 |        26.76786 |      0.4282578 |
+| 5.449557 | 8.005849 |       0.9690909 |         26.8406 |      0.4282977 |
 
 and by country:
 
@@ -243,11 +243,11 @@ knitr::kable(country_performance)
 
 | Country     |      MAE |      RMSE | 95% CI Coverage | Median CI width | Bayesian R-squ |
 |:------------|---------:|----------:|----------------:|----------------:|---------------:|
-| Ethiopia    | 6.117712 |  8.960522 |       0.9932432 |        27.75775 |      0.3574342 |
-| Georgia     | 7.750601 | 11.084338 |       0.9680851 |        46.03882 |      0.3857054 |
-| India       | 3.491859 |  4.741194 |       0.9459459 |        18.20923 |      0.4665504 |
-| Kenya       | 5.173695 |  7.561670 |       0.9459459 |        23.42218 |      0.3404426 |
-| Philippines | 4.302863 |  5.559759 |       0.9756098 |        21.13425 |      0.4991251 |
+| Ethiopia    | 6.111877 |  8.954435 |       0.9932432 |        28.06320 |      0.3580516 |
+| Georgia     | 7.763818 | 11.099153 |       0.9680851 |        45.64363 |      0.3857151 |
+| India       | 3.492286 |  4.745580 |       0.9459459 |        18.21812 |      0.4665977 |
+| Kenya       | 5.175605 |  7.559084 |       0.9459459 |        23.30778 |      0.3404449 |
+| Philippines | 4.300596 |  5.558778 |       0.9756098 |        20.93304 |      0.4991497 |
 
 By default, performance is reported after marginalising over facility
 effects. To see the performance of the full conditional model, including
@@ -264,7 +264,7 @@ knitr::kable(performance)
 
 |      MAE |     RMSE | 95% CI Coverage | Median CI width | Bayesian R-squ |
 |---------:|---------:|----------------:|----------------:|---------------:|
-| 2.611178 | 4.684735 |       0.9618182 |        14.35173 |       0.655661 |
+| 2.611743 | 4.683493 |       0.9618182 |        14.33467 |      0.6557325 |
 
 Visualisiing predictions for inputs in the training data, including
 credible intervals, against observed costs:
@@ -317,16 +317,16 @@ pred <- model$predict(prepared_inputs,
 # Expected unit cost is mean prediction
 expected_unit_cost <- pred$Mean
 print(expected_unit_cost)
-#> [1] 12.97494 12.97494 12.97494
+#> [1] 13.12561 13.12561 13.12561
 
 knitr::kable(pred)
 ```
 
 | Observation |   Median |     Mean |   CI |   CI_low |  CI_high |
 |:------------|---------:|---------:|-----:|---------:|---------:|
-| 1           | 10.52019 | 12.97494 | 0.95 | 2.932304 | 37.57334 |
-| 1           | 10.52019 | 12.97494 | 0.90 | 3.625480 | 30.40057 |
-| 1           | 10.52019 | 12.97494 | 0.80 | 4.601991 | 24.19737 |
+| 1           | 10.64765 | 13.12561 | 0.95 | 2.957713 | 38.02596 |
+| 1           | 10.64765 | 13.12561 | 0.90 | 3.599610 | 31.00335 |
+| 1           | 10.64765 | 13.12561 | 0.80 | 4.555433 | 24.31847 |
 
 Note that by default the 95% *predictive* interval is returned. If you
 instead want the 95% credible interval of the mean, pass
