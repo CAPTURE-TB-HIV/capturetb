@@ -57,7 +57,7 @@
       <h1>Using the Unit Cost Model</h1>
 
 
-      <p class="date">2026-06-09</p>
+      <p class="date">2026-06-17</p>
 
 
       <div class="d-none name"><code></code></div>
@@ -290,11 +290,11 @@ Figure 2: Fitted intercept and standard deviations of random effects
 <th style="text-align: right;">Bayesian R-squ</th>
 </tr></thead>
 <tbody><tr class="odd">
-<td style="text-align: right;">5.448626</td>
-<td style="text-align: right;">8.007255</td>
+<td style="text-align: right;">5.447708</td>
+<td style="text-align: right;">8.003852</td>
 <td style="text-align: right;">0.9690909</td>
-<td style="text-align: right;">26.98067</td>
-<td style="text-align: right;">0.4284285</td>
+<td style="text-align: right;">26.85501</td>
+<td style="text-align: right;">0.4284021</td>
 </tr></tbody>
 </table>
 </div>
@@ -329,43 +329,43 @@ Figure 2: Fitted intercept and standard deviations of random effects
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">Ethiopia</td>
-<td style="text-align: right;">6.122205</td>
-<td style="text-align: right;">8.963193</td>
+<td style="text-align: right;">6.116563</td>
+<td style="text-align: right;">8.957608</td>
 <td style="text-align: right;">0.9932432</td>
-<td style="text-align: right;">27.73003</td>
-<td style="text-align: right;">0.3574194</td>
+<td style="text-align: right;">27.81757</td>
+<td style="text-align: right;">0.3577579</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Georgia</td>
-<td style="text-align: right;">7.762666</td>
-<td style="text-align: right;">11.084837</td>
+<td style="text-align: right;">7.770926</td>
+<td style="text-align: right;">11.101363</td>
 <td style="text-align: right;">0.9680851</td>
-<td style="text-align: right;">45.72579</td>
-<td style="text-align: right;">0.3860340</td>
+<td style="text-align: right;">46.27188</td>
+<td style="text-align: right;">0.3856790</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">India</td>
-<td style="text-align: right;">3.492455</td>
-<td style="text-align: right;">4.745684</td>
+<td style="text-align: right;">3.489134</td>
+<td style="text-align: right;">4.733104</td>
 <td style="text-align: right;">0.9459459</td>
-<td style="text-align: right;">17.87366</td>
-<td style="text-align: right;">0.4661548</td>
+<td style="text-align: right;">18.09563</td>
+<td style="text-align: right;">0.4661286</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Kenya</td>
-<td style="text-align: right;">5.171295</td>
-<td style="text-align: right;">7.552060</td>
+<td style="text-align: right;">5.167891</td>
+<td style="text-align: right;">7.555343</td>
 <td style="text-align: right;">0.9459459</td>
-<td style="text-align: right;">23.36456</td>
-<td style="text-align: right;">0.3406264</td>
+<td style="text-align: right;">23.48654</td>
+<td style="text-align: right;">0.3407278</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">Philippines</td>
-<td style="text-align: right;">4.308233</td>
-<td style="text-align: right;">5.563931</td>
+<td style="text-align: right;">4.306325</td>
+<td style="text-align: right;">5.562950</td>
 <td style="text-align: right;">0.9756098</td>
-<td style="text-align: right;">20.92348</td>
-<td style="text-align: right;">0.4990256</td>
+<td style="text-align: right;">20.96850</td>
+<td style="text-align: right;">0.4992401</td>
 </tr>
 </tbody>
 </table>
@@ -389,11 +389,11 @@ Figure 2: Fitted intercept and standard deviations of random effects
 <th style="text-align: right;">Bayesian R-squ</th>
 </tr></thead>
 <tbody><tr class="odd">
-<td style="text-align: right;">2.610451</td>
-<td style="text-align: right;">4.682627</td>
-<td style="text-align: right;">0.9618182</td>
-<td style="text-align: right;">14.43798</td>
-<td style="text-align: right;">0.6553999</td>
+<td style="text-align: right;">2.612921</td>
+<td style="text-align: right;">4.685204</td>
+<td style="text-align: right;">0.9636364</td>
+<td style="text-align: right;">14.47679</td>
+<td style="text-align: right;">0.6555834</td>
 </tr></tbody>
 </table>
 </div>
@@ -445,7 +445,7 @@ Figure 2: Fitted intercept and standard deviations of random effects
 <span><span class="co"># Expected unit cost is mean prediction</span></span>
 <span><span class="va">expected_unit_cost</span> <span class="op">&lt;-</span> <span class="va">pred</span><span class="op">$</span><span class="va">Mean</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">expected_unit_cost</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 13.12212 13.12212 13.12212</span></span>
+<span><span class="co">#&gt; [1] 13.07666 13.07666 13.07666</span></span>
 <span></span>
 <span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">pred</span><span class="op">)</span></span></code></pre></div>
 <div class="cell-output-display">
@@ -461,27 +461,27 @@ Figure 2: Fitted intercept and standard deviations of random effects
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">1</td>
-<td style="text-align: right;">10.6324</td>
-<td style="text-align: right;">13.12212</td>
+<td style="text-align: right;">10.59076</td>
+<td style="text-align: right;">13.07666</td>
 <td style="text-align: right;">0.95</td>
-<td style="text-align: right;">2.967803</td>
-<td style="text-align: right;">38.53890</td>
+<td style="text-align: right;">2.926969</td>
+<td style="text-align: right;">37.59983</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">1</td>
-<td style="text-align: right;">10.6324</td>
-<td style="text-align: right;">13.12212</td>
+<td style="text-align: right;">10.59076</td>
+<td style="text-align: right;">13.07666</td>
 <td style="text-align: right;">0.90</td>
-<td style="text-align: right;">3.637729</td>
-<td style="text-align: right;">30.90759</td>
+<td style="text-align: right;">3.621075</td>
+<td style="text-align: right;">30.93409</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">1</td>
-<td style="text-align: right;">10.6324</td>
-<td style="text-align: right;">13.12212</td>
+<td style="text-align: right;">10.59076</td>
+<td style="text-align: right;">13.07666</td>
 <td style="text-align: right;">0.80</td>
-<td style="text-align: right;">4.606602</td>
-<td style="text-align: right;">24.33595</td>
+<td style="text-align: right;">4.602538</td>
+<td style="text-align: right;">24.42697</td>
 </tr>
 </tbody>
 </table>

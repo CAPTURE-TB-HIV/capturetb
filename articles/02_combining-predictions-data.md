@@ -189,8 +189,8 @@ knitr::kable(performance)
 
 |  | MAE | RMSE | 95% CI Coverage | Median CI width | Bayesian R-squ |
 |:---|---:|---:|---:|---:|---:|
-| unitcost | 5.448845 | 8.006788 | 0.9690909 | 26.89377 | 0.4283492 |
-| unitcost_fixed | 3.852353 | 5.738340 | 0.9739130 | 22.11553 | 0.4621652 |
-| unitcost_ohd | 3.102302 | 4.661734 | 0.9672131 | 20.75565 | 0.4694320 |
+| unitcost | 5.448473 | 8.008298 | 0.9690909 | 26.76053 | 0.4283979 |
+| unitcost_fixed | 3.854194 | 5.738674 | 0.9739130 | 22.30759 | 0.4623236 |
+| unitcost_ohd | 3.105803 | 4.659383 | 0.9754098 | 20.34419 | 0.4698256 |
 
 Performance metrics of each model {.table .caption-top}
