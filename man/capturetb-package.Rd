@@ -11,5 +11,16 @@ Econometric cost functions for estimating TB outpatient visit unit costs, develo
 \author{
 \strong{Maintainer}: Alex Hill \email{alex.hill@gmail.com} (\href{https://orcid.org/0009-0003-8104-1890}{ORCID})
 
+Authors:
+\itemize{
+  \item Alex Hill \email{alex.hill@gmail.com} (\href{https://orcid.org/0009-0003-8104-1890}{ORCID})
+}
+
+Other contributors:
+\itemize{
+  \item Lorna Guinness \email{lorna.guinness@lshtm.ac.uk} (\href{https://orcid.org/0000-0002-1013-4200}{ORCID}) [contributor]
+  \item Sedona Sweeney \email{sedona.sweeney@lshtm.ac.uk} (\href{https://orcid.org/0000-0003-4233-9080}{ORCID}) [contributor]
+}
+
 }
 \keyword{internal}
