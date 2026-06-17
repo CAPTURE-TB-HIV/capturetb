@@ -3,7 +3,11 @@ Title: Econometric cost functions for estimating TB outpatient visit unit costs
 Version: 2.0.0
 Authors@R:
   	person("Alex", "Hill", email = "alex.hill@gmail.com", role = c("aut", "cre"),
-			comment = c(ORCID = "0009-0003-8104-1890"))
+			comment = c(ORCID = "0009-0003-8104-1890")),
+	person("Lorna", "Guinness", email = "lorna.guinness@lshtm.ac.uk", role = c("ctb"),
+			comment = c(ORCID = "0000-0002-1013-4200")),
+	person("Sedona", "Sweeney", email = "sedona.sweeney@lshtm.ac.uk", role = c("ctb"),
+			comment = c(ORCID = "0000-0003-4233-9080"))
 Description: Econometric cost functions for estimating TB outpatient visit unit costs, 
 		developed at LSHTM for the CAPTURE (Cost Analysis for Prioritizing TB
 		and HIV Resources Efficiently) project.
