@@ -79,26 +79,26 @@ jobs:
         run: |
           install.packages(c("remotes", "runjags"), repos = "https://cran.r-project.org")
 
-      - name: Install rjags
+      - name: Install runjags
         if: runner.os != 'macOS'  
         shell: Rscript {0}
         run: |
-          install.packages(c("remotes", "rjags"), repos = "https://cran.r-project.org")
+          install.packages(c("remotes", "runjags"), repos = "https://cran.r-project.org")
 
-      - name: Install rjags on macOS
+      - name: Install runjags on macOS
         if: runner.os == 'macOS'  
         shell: Rscript {0}
         run: |
             J <- system("brew --prefix jags", intern = TRUE) 
-            install.packages("rjags",
+            install.packages("runjags",
              type = "source",
              configure.args = c(sprintf("--with-jags-prefix=%s", J), "--enable-rpath"))
-      - name: Check that rjags loads
+      - name: Check that runjags loads
         shell: Rscript {0}
         run: |
-          cat("rjags version:", as.character(packageVersion("rjags")), "\n")
-          library(rjags)
-          jags.version()            # prints the version string if everything linked correctly
+          cat("runjags version:", as.character(packageVersion("runjags")), "\n")
+          library(runjags)
+          findjags()            # prints the version string if everything linked correctly
 
       - name: "Check non-Windows"
         if: runner.os != 'windows'

@@ -29,8 +29,7 @@ Suggests:
 		gridExtra,
 		knitr,
 		scales,
-    testthat (>= 3.0.0),
-		rjags,
+    	testthat (>= 3.0.0),
 		runjags,
 		quarto,
 		vdiffr

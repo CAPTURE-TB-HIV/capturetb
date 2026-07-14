@@ -166,9 +166,6 @@ JAGSModel <- R6::R6Class("JAGSModel",
       if (!requireNamespace("runjags", quietly = TRUE)) {
         stop("Package 'runjags' is required but not installed.")
       }
-      if (!requireNamespace("rjags", quietly = TRUE)) {
-        stop("Package 'rjags' is required but not installed.")
-      }
 
       if (!is.null(seed)) {
         set.seed(seed)
@@ -918,7 +915,8 @@ JAGSModel <- R6::R6Class("JAGSModel",
           dat = train_data,
           covariates = private$.covariates,
           target = private$.target,
-          priors = private$.priors
+          priors = private$.priors,
+          country_random_effects = private$.country_random_effects
         )
 
         # Fit model on training fold
@@ -1018,7 +1016,8 @@ JAGSModel <- R6::R6Class("JAGSModel",
           dat = train_data,
           covariates = private$.covariates,
           target = private$.target,
-          priors = private$.priors
+          priors = private$.priors,
+          country_random_effects = private$.country_random_effects
         )
         # Filter test data to modelled output types
         test_data <- test_data |>
@@ -1138,7 +1137,7 @@ JAGSModel <- R6::R6Class("JAGSModel",
     #' total DIC as a single numeric value. If FALSE, return all
     #' DIC samples.
     #' @return If summarised = TRUE, a numeric scalar of the total DIC.
-    #' If summarised = FALSE, an object of class "dic"; see [rjags::dic.samples()].
+    #' If summarised = FALSE, the raw samples.
     #' @examples
     #' mod <- unitcost()
     #' mod$mcmc_DIC()
@@ -1238,7 +1237,6 @@ JAGSModel <- R6::R6Class("JAGSModel",
 
       # population standard deviations
       sig <- smat[, "sigma"]
-      sig_country <- smat[, "sigma_c"]
 
       if (output_effects) {
         # facility and output effect standard deviations
@@ -1297,6 +1295,7 @@ JAGSModel <- R6::R6Class("JAGSModel",
       pred_means <- alpha + betas %*% t(x)
 
       if (private$.country_random_effects) {
+        sig_country <- smat[, "sigma_c"]
         # country effects
         country_cols <- paste0("country_effect[", as.numeric(private$.countries), "]")
         countries <- smat[, country_cols, drop = FALSE]
