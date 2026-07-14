@@ -501,8 +501,7 @@ JAGSModel <- R6::R6Class("JAGSModel",
     #'
     #' @param par Optional character vector of parameter names to plot.
     #' @return A [ggplot2::ggplot] object showing R-hat diagnostics.
-    #' @importFrom ggplot2 ggplot geom_hline geom_point
-    #' labs theme_minimal aes
+    #' @importFrom ggplot2 ggplot geom_hline geom_point labs theme_minimal aes
     #' @importFrom coda gelman.diag
     mcmc_rhat = function(par = NULL) {
       private$.check_fitted()
@@ -696,8 +695,7 @@ JAGSModel <- R6::R6Class("JAGSModel",
     #' Default TRUE.
     #'
     #' @return A [ggplot2::ggplot] object showing residuals vs fitted values.
-    #' @importFrom ggplot2 ggplot aes geom_point geom_hline geom_smooth
-    #' labs theme_minimal theme
+    #' @importFrom ggplot2 ggplot aes geom_point geom_hline geom_smooth labs theme_minimal theme
     plot_residuals = function(add_smooth = TRUE,
                               color_by_country = TRUE) {
       stopifnot(
@@ -793,8 +791,7 @@ JAGSModel <- R6::R6Class("JAGSModel",
     #' print(p2)
     #' }
     #'
-    #' @importFrom ggplot2 ggplot aes geom_point geom_abline geom_errorbar
-    #' labs theme_minimal
+    #' @importFrom ggplot2 ggplot aes geom_point geom_abline geom_errorbar labs theme_minimal
     plot_fit = function(scale = "log",
                         conditional = FALSE,
                         include_ci = TRUE,
@@ -1140,7 +1137,7 @@ JAGSModel <- R6::R6Class("JAGSModel",
     #' total DIC as a single numeric value. If FALSE, return all
     #' DIC samples.
     #' @return If summarised = TRUE, a numeric scalar of the total DIC.
-    #' If summarised = FALSE, the raw samples.
+    #' If summarised = FALSE, an object of class "dic"; see [rjags::dic.samples()].
     #' @examples
     #' mod <- unitcost()
     #' mod$mcmc_DIC()
