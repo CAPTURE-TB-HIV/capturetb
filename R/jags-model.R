@@ -166,7 +166,7 @@ JAGSModel <- R6::R6Class("JAGSModel",
       if (!requireNamespace("runjags", quietly = TRUE)) {
         stop("Package 'runjags' is required but not installed.")
       }
-      if (!requireNamespace("rjags", quietly = TRUE)) {
+			if (!requireNamespace("rjags", quietly = TRUE)) {
         stop("Package 'rjags' is required but not installed.")
       }
 
@@ -501,8 +501,7 @@ JAGSModel <- R6::R6Class("JAGSModel",
     #'
     #' @param par Optional character vector of parameter names to plot.
     #' @return A [ggplot2::ggplot] object showing R-hat diagnostics.
-    #' @importFrom ggplot2 ggplot geom_hline geom_point
-    #' labs theme_minimal aes
+    #' @importFrom ggplot2 ggplot geom_hline geom_point labs theme_minimal aes
     #' @importFrom coda gelman.diag
     mcmc_rhat = function(par = NULL) {
       private$.check_fitted()
@@ -696,8 +695,7 @@ JAGSModel <- R6::R6Class("JAGSModel",
     #' Default TRUE.
     #'
     #' @return A [ggplot2::ggplot] object showing residuals vs fitted values.
-    #' @importFrom ggplot2 ggplot aes geom_point geom_hline geom_smooth
-    #' labs theme_minimal theme
+    #' @importFrom ggplot2 ggplot aes geom_point geom_hline geom_smooth labs theme_minimal theme
     plot_residuals = function(add_smooth = TRUE,
                               color_by_country = TRUE) {
       stopifnot(
@@ -793,8 +791,7 @@ JAGSModel <- R6::R6Class("JAGSModel",
     #' print(p2)
     #' }
     #'
-    #' @importFrom ggplot2 ggplot aes geom_point geom_abline geom_errorbar
-    #' labs theme_minimal
+    #' @importFrom ggplot2 ggplot aes geom_point geom_abline geom_errorbar labs theme_minimal
     plot_fit = function(scale = "log",
                         conditional = FALSE,
                         include_ci = TRUE,
@@ -918,7 +915,8 @@ JAGSModel <- R6::R6Class("JAGSModel",
           dat = train_data,
           covariates = private$.covariates,
           target = private$.target,
-          priors = private$.priors
+          priors = private$.priors,
+          country_random_effects = private$.country_random_effects
         )
 
         # Fit model on training fold
@@ -1018,7 +1016,8 @@ JAGSModel <- R6::R6Class("JAGSModel",
           dat = train_data,
           covariates = private$.covariates,
           target = private$.target,
-          priors = private$.priors
+          priors = private$.priors,
+          country_random_effects = private$.country_random_effects
         )
         # Filter test data to modelled output types
         test_data <- test_data |>
@@ -1238,7 +1237,6 @@ JAGSModel <- R6::R6Class("JAGSModel",
 
       # population standard deviations
       sig <- smat[, "sigma"]
-      sig_country <- smat[, "sigma_c"]
 
       if (output_effects) {
         # facility and output effect standard deviations
@@ -1297,6 +1295,7 @@ JAGSModel <- R6::R6Class("JAGSModel",
       pred_means <- alpha + betas %*% t(x)
 
       if (private$.country_random_effects) {
+        sig_country <- smat[, "sigma_c"]
         # country effects
         country_cols <- paste0("country_effect[", as.numeric(private$.countries), "]")
         countries <- smat[, country_cols, drop = FALSE]

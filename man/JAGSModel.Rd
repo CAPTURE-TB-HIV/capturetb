@@ -17,14 +17,14 @@ R6 class for fitting and predicting costs using a JAGS model.
 \examples{
 
 ## ------------------------------------------------
-## Method `JAGSModel$performance`
+## Method `JAGSModel$performance()`
 ## ------------------------------------------------
 
 model <- unitcost()
 model$performance()
 
 ## ------------------------------------------------
-## Method `JAGSModel$plot_fit`
+## Method `JAGSModel$plot_fit()`
 ## ------------------------------------------------
 
 \dontrun{
@@ -40,7 +40,7 @@ print(p2)
 
 
 ## ------------------------------------------------
-## Method `JAGSModel$fitted_parameters`
+## Method `JAGSModel$fitted_parameters()`
 ## ------------------------------------------------
 
 model <- unitcost()
@@ -51,7 +51,7 @@ print(params)
 params_90 <- model$fitted_parameters(ci = 0.9)
 
 ## ------------------------------------------------
-## Method `JAGSModel$mcmc_DIC`
+## Method `JAGSModel$mcmc_DIC()`
 ## ------------------------------------------------
 
 mod <- unitcost()
@@ -62,88 +62,85 @@ mod$mcmc_DIC()
 
 bayestestR describe_posterior
 
-\link[bayesplot:MCMC-traces]{bayesplot::mcmc_trace}
+\link[bayesplot:mcmc_trace]{bayesplot::mcmc_trace}
 
-\link[bayesplot:MCMC-diagnostics]{bayesplot::mcmc_acf}
+\link[bayesplot:mcmc_acf]{bayesplot::mcmc_acf}
 
 \link[coda:effectiveSize]{coda::effectiveSize}
 
-\link[bayesplot:MCMC-intervals]{bayesplot::mcmc_areas}
-
-bayestestR describe_posterior
+\link[bayesplot:mcmc_areas]{bayesplot::mcmc_areas}
 }
 \section{Methods}{
 \subsection{Public methods}{
-\itemize{
-\item \href{#method-JAGSModel-new}{\code{JAGSModel$new()}}
-\item \href{#method-JAGSModel-fit}{\code{JAGSModel$fit()}}
-\item \href{#method-JAGSModel-predict}{\code{JAGSModel$predict()}}
-\item \href{#method-JAGSModel-baselines}{\code{JAGSModel$baselines()}}
-\item \href{#method-JAGSModel-covariate_correlation}{\code{JAGSModel$covariate_correlation()}}
-\item \href{#method-JAGSModel-target}{\code{JAGSModel$target()}}
-\item \href{#method-JAGSModel-training_data}{\code{JAGSModel$training_data()}}
-\item \href{#method-JAGSModel-outputs}{\code{JAGSModel$outputs()}}
-\item \href{#method-JAGSModel-samples}{\code{JAGSModel$samples()}}
-\item \href{#method-JAGSModel-covariates}{\code{JAGSModel$covariates()}}
-\item \href{#method-JAGSModel-countries}{\code{JAGSModel$countries()}}
-\item \href{#method-JAGSModel-priors}{\code{JAGSModel$priors()}}
-\item \href{#method-JAGSModel-centering_values}{\code{JAGSModel$centering_values()}}
-\item \href{#method-JAGSModel-is_fitted}{\code{JAGSModel$is_fitted()}}
-\item \href{#method-JAGSModel-mcmc_trace}{\code{JAGSModel$mcmc_trace()}}
-\item \href{#method-JAGSModel-mcmc_rhat}{\code{JAGSModel$mcmc_rhat()}}
-\item \href{#method-JAGSModel-mcmc_acf}{\code{JAGSModel$mcmc_acf()}}
-\item \href{#method-JAGSModel-n_eff}{\code{JAGSModel$n_eff()}}
-\item \href{#method-JAGSModel-plot_posteriors}{\code{JAGSModel$plot_posteriors()}}
-\item \href{#method-JAGSModel-performance}{\code{JAGSModel$performance()}}
-\item \href{#method-JAGSModel-plot_residuals}{\code{JAGSModel$plot_residuals()}}
-\item \href{#method-JAGSModel-plot_fit}{\code{JAGSModel$plot_fit()}}
-\item \href{#method-JAGSModel-k_fold_cv}{\code{JAGSModel$k_fold_cv()}}
-\item \href{#method-JAGSModel-leave_one_country_out}{\code{JAGSModel$leave_one_country_out()}}
-\item \href{#method-JAGSModel-fitted_parameters}{\code{JAGSModel$fitted_parameters()}}
-\item \href{#method-JAGSModel-mcmc_DIC}{\code{JAGSModel$mcmc_DIC()}}
-\item \href{#method-JAGSModel-clone}{\code{JAGSModel$clone()}}
-}
+  \itemize{
+    \item \href{#method-JAGSModel-initialize}{\code{JAGSModel$new()}}
+    \item \href{#method-JAGSModel-fit}{\code{JAGSModel$fit()}}
+    \item \href{#method-JAGSModel-predict}{\code{JAGSModel$predict()}}
+    \item \href{#method-JAGSModel-baselines}{\code{JAGSModel$baselines()}}
+    \item \href{#method-JAGSModel-covariate_correlation}{\code{JAGSModel$covariate_correlation()}}
+    \item \href{#method-JAGSModel-target}{\code{JAGSModel$target()}}
+    \item \href{#method-JAGSModel-training_data}{\code{JAGSModel$training_data()}}
+    \item \href{#method-JAGSModel-outputs}{\code{JAGSModel$outputs()}}
+    \item \href{#method-JAGSModel-samples}{\code{JAGSModel$samples()}}
+    \item \href{#method-JAGSModel-covariates}{\code{JAGSModel$covariates()}}
+    \item \href{#method-JAGSModel-countries}{\code{JAGSModel$countries()}}
+    \item \href{#method-JAGSModel-priors}{\code{JAGSModel$priors()}}
+    \item \href{#method-JAGSModel-centering_values}{\code{JAGSModel$centering_values()}}
+    \item \href{#method-JAGSModel-is_fitted}{\code{JAGSModel$is_fitted()}}
+    \item \href{#method-JAGSModel-mcmc_trace}{\code{JAGSModel$mcmc_trace()}}
+    \item \href{#method-JAGSModel-mcmc_rhat}{\code{JAGSModel$mcmc_rhat()}}
+    \item \href{#method-JAGSModel-mcmc_acf}{\code{JAGSModel$mcmc_acf()}}
+    \item \href{#method-JAGSModel-n_eff}{\code{JAGSModel$n_eff()}}
+    \item \href{#method-JAGSModel-plot_posteriors}{\code{JAGSModel$plot_posteriors()}}
+    \item \href{#method-JAGSModel-performance}{\code{JAGSModel$performance()}}
+    \item \href{#method-JAGSModel-plot_residuals}{\code{JAGSModel$plot_residuals()}}
+    \item \href{#method-JAGSModel-plot_fit}{\code{JAGSModel$plot_fit()}}
+    \item \href{#method-JAGSModel-k_fold_cv}{\code{JAGSModel$k_fold_cv()}}
+    \item \href{#method-JAGSModel-leave_one_country_out}{\code{JAGSModel$leave_one_country_out()}}
+    \item \href{#method-JAGSModel-fitted_parameters}{\code{JAGSModel$fitted_parameters()}}
+    \item \href{#method-JAGSModel-mcmc_DIC}{\code{JAGSModel$mcmc_DIC()}}
+    \item \href{#method-JAGSModel-clone}{\code{JAGSModel$clone()}}
+  }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-JAGSModel-new"></a>}}
-\if{latex}{\out{\hypertarget{method-JAGSModel-new}{}}}
-\subsection{Method \code{new()}}{
-Initialize a new model instance.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{JAGSModel$new(
+\if{html}{\out{<a id="method-JAGSModel-initialize"></a>}}
+\if{latex}{\out{\hypertarget{method-JAGSModel-initialize}{}}}
+\subsection{\code{JAGSModel$new()}}{
+  Initialize a new model instance.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{JAGSModel$new(
   dat,
   covariates,
   target,
   priors = NULL,
   country_random_effects = TRUE
-)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{dat}}{Data.frame. Training data}
-
-\item{\code{covariates}}{Character vector. Names of covariate columns.}
-
-\item{\code{target}}{Character. Name of the target variable.}
-
-\item{\code{priors}}{List of class "capturetbpriors". Should be created using
+)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{dat}}{Data.frame. Training data}
+      \item{\code{covariates}}{Character vector. Names of covariate columns.}
+      \item{\code{target}}{Character. Name of the target variable.}
+      \item{\code{priors}}{List of class "capturetbpriors". Should be created using
 \code{\link{capturetb_priors}}. If NULL, non-informative priors will be used.}
-
-\item{\code{country_random_effects}}{Logical. Whether to include country random effects.
+      \item{\code{country_random_effects}}{Logical. Whether to include country random effects.
 Default TRUE.}
+    }
+    \if{html}{\out{</div>}}
+  }
 }
-\if{html}{\out{</div>}}
-}
-}
+
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-JAGSModel-fit"></a>}}
 \if{latex}{\out{\hypertarget{method-JAGSModel-fit}{}}}
-\subsection{Method \code{fit()}}{
-Fit the model using JAGS. Requires JAGS and runjags to be installed.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{JAGSModel$fit(
+\subsection{\code{JAGSModel$fit()}}{
+  Fit the model using JAGS. Requires JAGS and runjags to be installed.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{JAGSModel$fit(
   n.chains = 3,
   n.iter = 1e+06,
   n.burnin = 5000,
@@ -151,41 +148,37 @@ Fit the model using JAGS. Requires JAGS and runjags to be installed.
   n.thin = 100,
   seed = NULL,
   ...
-)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{n.chains}}{Integer. Number of MCMC chains. Default is 3.}
-
-\item{\code{n.iter}}{Integer. Number of total iterations per chain.
+)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{n.chains}}{Integer. Number of MCMC chains. Default is 3.}
+      \item{\code{n.iter}}{Integer. Number of total iterations per chain.
 Default is 1000000.}
-
-\item{\code{n.burnin}}{Integer. Number of burn-in iterations. Default is 5000.}
-
-\item{\code{n.adapt}}{Integer. Number of adaptation iterations. Default is 5000.}
-
-\item{\code{n.thin}}{Integer. Thinning interval. Default is 100.}
-
-\item{\code{seed}}{Optonal integer. Used to seed both the R and JAGS random
+      \item{\code{n.burnin}}{Integer. Number of burn-in iterations. Default is 5000.}
+      \item{\code{n.adapt}}{Integer. Number of adaptation iterations. Default is 5000.}
+      \item{\code{n.thin}}{Integer. Thinning interval. Default is 100.}
+      \item{\code{seed}}{Optonal integer. Used to seed both the R and JAGS random
 generators for reproducible results.}
+      \item{\code{...}}{Additional arguments passed to \link[runjags:run.jags]{runjags::run.jags}.}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    Self (invisibly) for method chaining.
+  }
+}
 
-\item{\code{...}}{Additional arguments passed to \link[runjags:run.jags]{runjags::run.jags}.}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-Self (invisibly) for method chaining.
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-JAGSModel-predict"></a>}}
 \if{latex}{\out{\hypertarget{method-JAGSModel-predict}{}}}
-\subsection{Method \code{predict()}}{
-Generate predictions from the fitted model.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{JAGSModel$predict(
+\subsection{\code{JAGSModel$predict()}}{
+  Generate predictions from the fitted model.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{JAGSModel$predict(
   dat,
   scale = "log",
   summarised = FALSE,
@@ -194,337 +187,359 @@ Generate predictions from the fitted model.
   ci_type = "predictive",
   test = NULL,
   ...
-)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{dat}}{New input data for predictions. This should be prepared
+)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{dat}}{New input data for predictions. This should be prepared
 for the model using \link{prepare_covariates}.}
-
-\item{\code{scale}}{One of "log" or "natural". Default "log".}
-
-\item{\code{summarised}}{Logical. If TRUE, summarises predictions using
+      \item{\code{scale}}{One of "log" or "natural". Default "log".}
+      \item{\code{summarised}}{Logical. If TRUE, summarises predictions using
 \link[bayestestR:describe_posterior]{bayestestR::describe_posterior}. See \link[bayestestR:describe_posterior]{bayestestR::describe_posterior}
 for full documentation of available arguments. Default FALSE.}
-
-\item{\code{centrality}}{The point-estimates (centrality indices) to compute.
+      \item{\code{centrality}}{The point-estimates (centrality indices) to compute.
 Default "mean".}
-
-\item{\code{ci}}{Value or vector of probability of the credible interval (between 0 and 1)
+      \item{\code{ci}}{Value or vector of probability of the credible interval (between 0 and 1)
 to be estimated. Default \code{0.95} (\verb{95\%}).}
-
-\item{\code{ci_type}}{One of "mean" or "predictive". Specify whether you want the credible interval
+      \item{\code{ci_type}}{One of "mean" or "predictive". Specify whether you want the credible interval
 around the mean prediction, or the predictive interval. Default "predictive".}
-
-\item{\code{test}}{The indices of effect existence to compute. Default NULL.
+      \item{\code{test}}{The indices of effect existence to compute. Default NULL.
 See \link[bayestestR:describe_posterior]{bayestestR::describe_posterior} for options.}
-
-\item{\code{...}}{Other arguments that will be passed to
+      \item{\code{...}}{Other arguments that will be passed to
 \link[bayestestR:describe_posterior]{bayestestR::describe_posterior}.}
-
-\item{\code{ci_method}}{The type of index used for the Credible Interval.
+      \item{\code{ci_method}}{The type of index used for the Credible Interval.
 You probably want either ETI (Equal Tailed Interval) or HDI (Highest Density Interval).
 Default ETI. See \link[bayestestR:describe_posterior]{bayestestR::describe_posterior} for all options.}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-If summarised=FALSE, matrix of predicted costs with
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    If summarised=FALSE, matrix of predicted costs with
 rows = simulations, columns = input rows. If summarised=TRUE,
 data.frame with central point estimates and credible intervals.
+  }
 }
-}
+
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-JAGSModel-baselines"></a>}}
 \if{latex}{\out{\hypertarget{method-JAGSModel-baselines}{}}}
-\subsection{Method \code{baselines()}}{
-View distribution of binary characteristics across countries
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{JAGSModel$baselines()}\if{html}{\out{</div>}}
-}
-
-\subsection{Returns}{
-A data frame with one row per country (\code{fc_country}), including
+\subsection{\code{JAGSModel$baselines()}}{
+  View distribution of binary characteristics across countries
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{JAGSModel$baselines()}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    A data frame with one row per country (\code{fc_country}), including
 the total number of records for that country (\code{n_total}) and the count of
 \code{TRUE} values for each logical covariate.
+  }
 }
-}
+
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-JAGSModel-covariate_correlation"></a>}}
 \if{latex}{\out{\hypertarget{method-JAGSModel-covariate_correlation}{}}}
-\subsection{Method \code{covariate_correlation()}}{
-View correlations between covariates in the training data
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{JAGSModel$covariate_correlation(plot = TRUE)}\if{html}{\out{</div>}}
+\subsection{\code{JAGSModel$covariate_correlation()}}{
+  View correlations between covariates in the training data
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{JAGSModel$covariate_correlation(plot = TRUE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{plot}}{Logical. If TRUE, return a \link[ggplot2:ggplot]{ggplot2::ggplot}
+object. If FALSE return a correlation matrix. Default TRUE.}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    \link[ggplot2:ggplot]{ggplot2::ggplot} object or correlation matrix
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{plot}}{Logical. If TRUE, return a \link[ggplot2:ggplot]{ggplot2::ggplot}
-object. If FALSE return a correlation matrix. Default TRUE.}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-\link[ggplot2:ggplot]{ggplot2::ggplot} object or correlation matrix
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-JAGSModel-target"></a>}}
 \if{latex}{\out{\hypertarget{method-JAGSModel-target}{}}}
-\subsection{Method \code{target()}}{
-Get the name of the target variable.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{JAGSModel$target()}\if{html}{\out{</div>}}
+\subsection{\code{JAGSModel$target()}}{
+  Get the name of the target variable.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{JAGSModel$target()}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    character scalar.
+  }
 }
 
-\subsection{Returns}{
-character scalar.
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-JAGSModel-training_data"></a>}}
 \if{latex}{\out{\hypertarget{method-JAGSModel-training_data}{}}}
-\subsection{Method \code{training_data()}}{
-Get the data used to fit the model.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{JAGSModel$training_data()}\if{html}{\out{</div>}}
+\subsection{\code{JAGSModel$training_data()}}{
+  Get the data used to fit the model.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{JAGSModel$training_data()}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    data.frame.
+  }
 }
 
-\subsection{Returns}{
-data.frame.
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-JAGSModel-outputs"></a>}}
 \if{latex}{\out{\hypertarget{method-JAGSModel-outputs}{}}}
-\subsection{Method \code{outputs()}}{
-Get the outputs used for random effects.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{JAGSModel$outputs()}\if{html}{\out{</div>}}
+\subsection{\code{JAGSModel$outputs()}}{
+  Get the outputs used for random effects.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{JAGSModel$outputs()}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    factor.
+  }
 }
 
-\subsection{Returns}{
-factor.
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-JAGSModel-samples"></a>}}
 \if{latex}{\out{\hypertarget{method-JAGSModel-samples}{}}}
-\subsection{Method \code{samples()}}{
-Get the fitted MCMC samples.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{JAGSModel$samples()}\if{html}{\out{</div>}}
+\subsection{\code{JAGSModel$samples()}}{
+  Get the fitted MCMC samples.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{JAGSModel$samples()}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    \link[coda:mcmc.list]{coda::mcmc.list} object or NULL if not fitted.
+  }
 }
 
-\subsection{Returns}{
-\link[coda:mcmc.list]{coda::mcmc.list} object or NULL if not fitted.
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-JAGSModel-covariates"></a>}}
 \if{latex}{\out{\hypertarget{method-JAGSModel-covariates}{}}}
-\subsection{Method \code{covariates()}}{
-Get the covariates used in the model.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{JAGSModel$covariates()}\if{html}{\out{</div>}}
+\subsection{\code{JAGSModel$covariates()}}{
+  Get the covariates used in the model.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{JAGSModel$covariates()}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    Character vector of covariate names.
+  }
 }
 
-\subsection{Returns}{
-Character vector of covariate names.
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-JAGSModel-countries"></a>}}
 \if{latex}{\out{\hypertarget{method-JAGSModel-countries}{}}}
-\subsection{Method \code{countries()}}{
-Get the countries from the training data.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{JAGSModel$countries()}\if{html}{\out{</div>}}
+\subsection{\code{JAGSModel$countries()}}{
+  Get the countries from the training data.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{JAGSModel$countries()}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    Character vector of country names.
+  }
 }
 
-\subsection{Returns}{
-Character vector of country names.
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-JAGSModel-priors"></a>}}
 \if{latex}{\out{\hypertarget{method-JAGSModel-priors}{}}}
-\subsection{Method \code{priors()}}{
-Get the priors used in the model.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{JAGSModel$priors()}\if{html}{\out{</div>}}
+\subsection{\code{JAGSModel$priors()}}{
+  Get the priors used in the model.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{JAGSModel$priors()}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    List of prior parameters of class 'capturetbpriors'.
+  }
 }
 
-\subsection{Returns}{
-List of prior parameters of class 'capturetbpriors'.
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-JAGSModel-centering_values"></a>}}
 \if{latex}{\out{\hypertarget{method-JAGSModel-centering_values}{}}}
-\subsection{Method \code{centering_values()}}{
-Get any centering values used to center covariates in the training data.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{JAGSModel$centering_values()}\if{html}{\out{</div>}}
+\subsection{\code{JAGSModel$centering_values()}}{
+  Get any centering values used to center covariates in the training data.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{JAGSModel$centering_values()}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    List of centering values.
+  }
 }
 
-\subsection{Returns}{
-List of centering values.
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-JAGSModel-is_fitted"></a>}}
 \if{latex}{\out{\hypertarget{method-JAGSModel-is_fitted}{}}}
-\subsection{Method \code{is_fitted()}}{
-Check if the model has been fitted.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{JAGSModel$is_fitted()}\if{html}{\out{</div>}}
+\subsection{\code{JAGSModel$is_fitted()}}{
+  Check if the model has been fitted.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{JAGSModel$is_fitted()}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    Logical indicating if model is fitted.
+  }
 }
 
-\subsection{Returns}{
-Logical indicating if model is fitted.
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-JAGSModel-mcmc_trace"></a>}}
 \if{latex}{\out{\hypertarget{method-JAGSModel-mcmc_trace}{}}}
-\subsection{Method \code{mcmc_trace()}}{
-Create trace plots for MCMC chains using \link[bayesplot:MCMC-traces]{bayesplot::mcmc_trace}.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{JAGSModel$mcmc_trace(...)}\if{html}{\out{</div>}}
+\subsection{\code{JAGSModel$mcmc_trace()}}{
+  Create trace plots for MCMC chains using \link[bayesplot:mcmc_trace]{bayesplot::mcmc_trace}.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{JAGSModel$mcmc_trace(...)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{...}}{Additional arguments passed to \link[bayesplot:mcmc_trace]{bayesplot::mcmc_trace}.}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    A \link[ggplot2:ggplot]{ggplot2::ggplot} object showing trace plots.
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{...}}{Additional arguments passed to \link[bayesplot:MCMC-traces]{bayesplot::mcmc_trace}.}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-A \link[ggplot2:ggplot]{ggplot2::ggplot} object showing trace plots.
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-JAGSModel-mcmc_rhat"></a>}}
 \if{latex}{\out{\hypertarget{method-JAGSModel-mcmc_rhat}{}}}
-\subsection{Method \code{mcmc_rhat()}}{
-Compute and plot R-hat convergence diagnostics.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{JAGSModel$mcmc_rhat(par = NULL)}\if{html}{\out{</div>}}
+\subsection{\code{JAGSModel$mcmc_rhat()}}{
+  Compute and plot R-hat convergence diagnostics.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{JAGSModel$mcmc_rhat(par = NULL)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{par}}{Optional character vector of parameter names to plot.}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    A \link[ggplot2:ggplot]{ggplot2::ggplot} object showing R-hat diagnostics.
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{par}}{Optional character vector of parameter names to plot.}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-A \link[ggplot2:ggplot]{ggplot2::ggplot} object showing R-hat diagnostics.
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-JAGSModel-mcmc_acf"></a>}}
 \if{latex}{\out{\hypertarget{method-JAGSModel-mcmc_acf}{}}}
-\subsection{Method \code{mcmc_acf()}}{
-Create autocorrelation plots for MCMC chains using \link[bayesplot:MCMC-diagnostics]{bayesplot::mcmc_acf}.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{JAGSModel$mcmc_acf(...)}\if{html}{\out{</div>}}
+\subsection{\code{JAGSModel$mcmc_acf()}}{
+  Create autocorrelation plots for MCMC chains using \link[bayesplot:mcmc_acf]{bayesplot::mcmc_acf}.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{JAGSModel$mcmc_acf(...)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{...}}{Additional arguments passed to \link[bayesplot:mcmc_acf]{bayesplot::mcmc_acf}.}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    A \link[ggplot2:ggplot]{ggplot2::ggplot} object showing autocorrelation plots.
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{...}}{Additional arguments passed to \link[bayesplot:MCMC-diagnostics]{bayesplot::mcmc_acf}.}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-A \link[ggplot2:ggplot]{ggplot2::ggplot} object showing autocorrelation plots.
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-JAGSModel-n_eff"></a>}}
 \if{latex}{\out{\hypertarget{method-JAGSModel-n_eff}{}}}
-\subsection{Method \code{n_eff()}}{
-Computes the effective sample size of the posterior
+\subsection{\code{JAGSModel$n_eff()}}{
+  Computes the effective sample size of the posterior
 samples using the \link[coda:effectiveSize]{coda::effectiveSize} function.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{JAGSModel$n_eff()}\if{html}{\out{</div>}}
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{JAGSModel$n_eff()}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    A named numeric vector.
+  }
 }
 
-\subsection{Returns}{
-A named numeric vector.
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-JAGSModel-plot_posteriors"></a>}}
 \if{latex}{\out{\hypertarget{method-JAGSModel-plot_posteriors}{}}}
-\subsection{Method \code{plot_posteriors()}}{
-Plot posterior distributions using \link[bayesplot:MCMC-intervals]{bayesplot::mcmc_areas}.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{JAGSModel$plot_posteriors(prob = 0.9, ...)}\if{html}{\out{</div>}}
+\subsection{\code{JAGSModel$plot_posteriors()}}{
+  Plot posterior distributions using \link[bayesplot:mcmc_areas]{bayesplot::mcmc_areas}.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{JAGSModel$plot_posteriors(prob = 0.9, ...)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{prob}}{Numeric. Density to highlight. Default 0.9.}
+      \item{\code{...}}{Additional arguments passed to \link[bayesplot:mcmc_areas]{bayesplot::mcmc_areas}.}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    A \link[ggplot2:ggplot]{ggplot2::ggplot} object showing posterior distributions.
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{prob}}{Numeric. Density to highlight. Default 0.9.}
-
-\item{\code{...}}{Additional arguments passed to \link[bayesplot:MCMC-intervals]{bayesplot::mcmc_areas}.}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-A \link[ggplot2:ggplot]{ggplot2::ggplot} object showing posterior distributions.
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-JAGSModel-performance"></a>}}
 \if{latex}{\out{\hypertarget{method-JAGSModel-performance}{}}}
-\subsection{Method \code{performance()}}{
-Calculate model performance metrics on known data
+\subsection{\code{JAGSModel$performance()}}{
+  Calculate model performance metrics on known data
 
 This method evaluates the fitted model's performance by comparing
 predictions to known costs and computing mean absolute error (MAE),
 root mean square error (RMSE), Bayesian R2, credible interval coverage and
 median credible interval width. By default the model training
 data is used, but a different dataset can also be provided.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{JAGSModel$performance(
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{JAGSModel$performance(
   scale = "natural",
   conditional = FALSE,
   by_country = FALSE,
   dat = NULL
-)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{scale}}{One of "log" or "natural". Default "log".}
-
-\item{\code{conditional}}{Logical. If TRUE, returns conditional performance.
+)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{scale}}{One of "log" or "natural". Default "log".}
+      \item{\code{conditional}}{Logical. If TRUE, returns conditional performance.
 If FALSE, returns performance marginalised over facility random effects.
 Default FALSE.}
-
-\item{\code{by_country}}{Logical. If TRUE, returns metrics calculated
+      \item{\code{by_country}}{Logical. If TRUE, returns metrics calculated
 on country sub-groups. Default FALSE.}
-
-\item{\code{dat}}{Optional data prepared using \code{\link[=prepare_covariates]{prepare_covariates()}}.
+      \item{\code{dat}}{Optional data prepared using \code{\link[=prepare_covariates]{prepare_covariates()}}.
 If provided, uses this data for performance calculation instead of
 the training data.}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-A data.frame with performance metrics:
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    A data.frame with performance metrics:
 \itemize{
 \item country: Only present if by_country = TRUE
 \item mae: Mean Absolute Error between observed and predicted values
@@ -533,88 +548,85 @@ A data.frame with performance metrics:
 \item ci_coverage: Proportion of observations within 95\% credible intervals
 \item median_ci: The median width of 95\% credible intervals
 }
-}
-\subsection{Examples}{
-\if{html}{\out{<div class="r example copy">}}
-\preformatted{model <- unitcost()
+  }
+  \subsection{Examples}{
+    \if{html}{\out{<div class="r example copy">}}
+    \preformatted{model <- unitcost()
 model$performance()
 }
-\if{html}{\out{</div>}}
-
+    \if{html}{\out{</div>}}
+  }
 }
 
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-JAGSModel-plot_residuals"></a>}}
 \if{latex}{\out{\hypertarget{method-JAGSModel-plot_residuals}{}}}
-\subsection{Method \code{plot_residuals()}}{
-Create a residual plot for for diagnosing model fit.
+\subsection{\code{JAGSModel$plot_residuals()}}{
+  Create a residual plot for for diagnosing model fit.
 
 This method generates a diagnostic plot showing residuals (observed minus
 predicted values) against fitted values. Residuals are on the log scale
 as the model is fitted on a log scale. The plot includes a reference line
 at zero, a LOESS smooth curve to identify patterns, and points colored by
 country.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{JAGSModel$plot_residuals(add_smooth = TRUE, color_by_country = TRUE)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{add_smooth}}{Logical. Whether to add a LOESS smooth curve to
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{JAGSModel$plot_residuals(add_smooth = TRUE, color_by_country = TRUE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{add_smooth}}{Logical. Whether to add a LOESS smooth curve to
 identify patterns in residuals. Default TRUE.}
-
-\item{\code{color_by_country}}{Logical. Whether to color points by country.
+      \item{\code{color_by_country}}{Logical. Whether to color points by country.
 Default TRUE.}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    A \link[ggplot2:ggplot]{ggplot2::ggplot} object showing residuals vs fitted values.
+  }
 }
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-A \link[ggplot2:ggplot]{ggplot2::ggplot} object showing residuals vs fitted values.
-}
-}
+
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-JAGSModel-plot_fit"></a>}}
 \if{latex}{\out{\hypertarget{method-JAGSModel-plot_fit}{}}}
-\subsection{Method \code{plot_fit()}}{
-Create a scatter plot of observed vs predicted values to assess fit.
+\subsection{\code{JAGSModel$plot_fit()}}{
+  Create a scatter plot of observed vs predicted values to assess fit.
 
 This method generates a diagnostic plot showing the relationship between
 observed and predicted values on the training data, with a reference line
 for perfect predictions and optional confidence intervals.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{JAGSModel$plot_fit(
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{JAGSModel$plot_fit(
   scale = "log",
   conditional = FALSE,
   include_ci = TRUE,
   color_by_country = TRUE
-)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{scale}}{One of "log" or "natural". Default "log".}
-
-\item{\code{conditional}}{Logical. If TRUE, shows full conditional fit. If FALSE,
+)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{scale}}{One of "log" or "natural". Default "log".}
+      \item{\code{conditional}}{Logical. If TRUE, shows full conditional fit. If FALSE,
 shows marginal fit. Default FALSE.}
-
-\item{\code{include_ci}}{Logical. Whether to show predictive intervals as
+      \item{\code{include_ci}}{Logical. Whether to show predictive intervals as
 error bars. Default TRUE.}
-
-\item{\code{color_by_country}}{Logical. Whether to color points by country.
+      \item{\code{color_by_country}}{Logical. Whether to color points by country.
 Default TRUE.}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-A \link[ggplot2:ggplot]{ggplot2::ggplot} object showing observed vs predicted values.
-}
-\subsection{Examples}{
-\if{html}{\out{<div class="r example copy">}}
-\preformatted{\dontrun{
-model <- JAGSModel$new()
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    A \link[ggplot2:ggplot]{ggplot2::ggplot} object showing observed vs predicted values.
+  }
+  \subsection{Examples}{
+    \if{html}{\out{<div class="r example copy">}}
+    \preformatted{model <- JAGSModel$new()
 model$fit()
 p <- model$plot_fit()
 print(p)
@@ -623,172 +635,166 @@ print(p)
 p2 <- model$plot_fit(scale = "natural", include_ci = FALSE)
 print(p2)
 }
-
-}
-\if{html}{\out{</div>}}
-
+    \if{html}{\out{</div>}}
+  }
 }
 
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-JAGSModel-k_fold_cv"></a>}}
 \if{latex}{\out{\hypertarget{method-JAGSModel-k_fold_cv}{}}}
-\subsection{Method \code{k_fold_cv()}}{
-Perform k-fold cross-validation.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{JAGSModel$k_fold_cv(k_folds = 5, scale = "log", seed = NULL, ...)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{k_folds}}{Integer. Number of folds for cross-validation.
+\subsection{\code{JAGSModel$k_fold_cv()}}{
+  Perform k-fold cross-validation.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{JAGSModel$k_fold_cv(k_folds = 5, scale = "log", seed = NULL, ...)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{k_folds}}{Integer. Number of folds for cross-validation.
 Default is 5.}
-
-\item{\code{scale}}{One of "log" or "natural". Default "log".}
-
-\item{\code{seed}}{Integer. Optional random seed for reproducible fold
+      \item{\code{scale}}{One of "log" or "natural". Default "log".}
+      \item{\code{seed}}{Integer. Optional random seed for reproducible fold
 assignment and model runs. Default NULL.}
-
-\item{\code{...}}{Additional arguments passed to the fit() method.}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-Data.frame with predictions from cross-validation, including
+      \item{\code{...}}{Additional arguments passed to the fit() method.}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    Data.frame with predictions from cross-validation, including
 fold assignments and observed values.
+  }
 }
-}
+
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-JAGSModel-leave_one_country_out"></a>}}
 \if{latex}{\out{\hypertarget{method-JAGSModel-leave_one_country_out}{}}}
-\subsection{Method \code{leave_one_country_out()}}{
-Perform leave-one-country-out cross-validation.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{JAGSModel$leave_one_country_out(scale = "log", seed = NULL, ...)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{scale}}{One of "log" or "natural". Default "log".}
-
-\item{\code{seed}}{Integer. Optional random seed for reproducible fold
+\subsection{\code{JAGSModel$leave_one_country_out()}}{
+  Perform leave-one-country-out cross-validation.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{JAGSModel$leave_one_country_out(scale = "log", seed = NULL, ...)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{scale}}{One of "log" or "natural". Default "log".}
+      \item{\code{seed}}{Integer. Optional random seed for reproducible fold
 assignment and model runs. Default NULL.}
-
-\item{\code{...}}{Additional arguments passed to the fit() method.}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-Data.frame with predictions from cross-validation, including
+      \item{\code{...}}{Additional arguments passed to the fit() method.}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    Data.frame with predictions from cross-validation, including
 country and observed values.
+  }
 }
-}
+
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-JAGSModel-fitted_parameters"></a>}}
 \if{latex}{\out{\hypertarget{method-JAGSModel-fitted_parameters}{}}}
-\subsection{Method \code{fitted_parameters()}}{
-Extract fitted model parameters with credible intervals.
+\subsection{\code{JAGSModel$fitted_parameters()}}{
+  Extract fitted model parameters with credible intervals.
 
 This method summarises fitted parameters using
 \link[bayestestR:describe_posterior]{bayestestR::describe_posterior}. See \link[bayestestR:describe_posterior]{bayestestR::describe_posterior}
 for full documentation of available argument.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{JAGSModel$fitted_parameters(
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{JAGSModel$fitted_parameters(
   centrality = "mean",
   ci = 0.95,
   ci_method = "eti",
   test = NULL,
   ...
-)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{centrality}}{The point-estimates (centrality indices) to compute.
+)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{centrality}}{The point-estimates (centrality indices) to compute.
 Default "mean".}
-
-\item{\code{ci}}{Value or vector of probability of the CI (between 0 and 1)
+      \item{\code{ci}}{Value or vector of probability of the CI (between 0 and 1)
 to be estimated. Default \code{0.95} (\verb{95\%}).}
-
-\item{\code{ci_method}}{The type of index used for Credible Interval.
+      \item{\code{ci_method}}{The type of index used for Credible Interval.
 Default ETI.}
-
-\item{\code{test}}{The indices of effect existence to compute. Default NULL.}
-
-\item{\code{...}}{Other arguments that will be passed to \link[bayestestR:describe_posterior]{bayestestR::describe_posterior}.}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-A data.frame of parameter summaries
-}
-\subsection{Examples}{
-\if{html}{\out{<div class="r example copy">}}
-\preformatted{model <- unitcost()
+      \item{\code{test}}{The indices of effect existence to compute. Default NULL.}
+      \item{\code{...}}{Other arguments that will be passed to \link[bayestestR:describe_posterior]{bayestestR::describe_posterior}.}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    A data.frame of parameter summaries
+  }
+  \subsection{Examples}{
+    \if{html}{\out{<div class="r example copy">}}
+    \preformatted{model <- unitcost()
 params <- model$fitted_parameters()
 print(params)
 
 # 90\% credible intervals
 params_90 <- model$fitted_parameters(ci = 0.9)
 }
-\if{html}{\out{</div>}}
-
+    \if{html}{\out{</div>}}
+  }
 }
 
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-JAGSModel-mcmc_DIC"></a>}}
 \if{latex}{\out{\hypertarget{method-JAGSModel-mcmc_DIC}{}}}
-\subsection{Method \code{mcmc_DIC()}}{
-Retrieve penalized deviance statistics.
+\subsection{\code{JAGSModel$mcmc_DIC()}}{
+  Retrieve penalized deviance statistics.
 
 This method returns cached penalized deviance statistics created
 at the time of model fitting using.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{JAGSModel$mcmc_DIC(summarised = TRUE)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{summarised}}{Logical. If TRUE (default) return the
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{JAGSModel$mcmc_DIC(summarised = TRUE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{summarised}}{Logical. If TRUE (default) return the
 total DIC as a single numeric value. If FALSE, return all
 DIC samples.}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-If summarised = TRUE, a numeric scalar of the total DIC.
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    If summarised = TRUE, a numeric scalar of the total DIC.
 If summarised = FALSE, an object of class "dic"; see \code{\link[rjags:dic.samples]{rjags::dic.samples()}}.
-}
-\subsection{Examples}{
-\if{html}{\out{<div class="r example copy">}}
-\preformatted{mod <- unitcost()
+  }
+  \subsection{Examples}{
+    \if{html}{\out{<div class="r example copy">}}
+    \preformatted{mod <- unitcost()
 mod$mcmc_DIC()
 }
-\if{html}{\out{</div>}}
-
+    \if{html}{\out{</div>}}
+  }
 }
 
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-JAGSModel-clone"></a>}}
 \if{latex}{\out{\hypertarget{method-JAGSModel-clone}{}}}
-\subsection{Method \code{clone()}}{
-The objects of this class are cloneable with this method.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{JAGSModel$clone(deep = FALSE)}\if{html}{\out{</div>}}
+\subsection{\code{JAGSModel$clone()}}{
+  The objects of this class are cloneable with this method.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{JAGSModel$clone(deep = FALSE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{deep}}{Whether to make a deep clone.}
+    }
+    \if{html}{\out{</div>}}
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{deep}}{Whether to make a deep clone.}
-}
-\if{html}{\out{</div>}}
-}
-}
 }
