@@ -166,6 +166,9 @@ JAGSModel <- R6::R6Class("JAGSModel",
       if (!requireNamespace("runjags", quietly = TRUE)) {
         stop("Package 'runjags' is required but not installed.")
       }
+			if (!requireNamespace("rjags", quietly = TRUE)) {
+        stop("Package 'rjags' is required but not installed.")
+      }
 
       if (!is.null(seed)) {
         set.seed(seed)
